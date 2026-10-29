@@ -1,24 +1,28 @@
 import { ArrowRight, Clock, Sparkles, UserRound } from 'lucide-react'
 import { Link } from 'react-router'
+import { spotsStatus } from '../../../components/schedule/labels.ts'
 import { Badge, ButtonLink, buttonClasses, Skeleton } from '../../../components/ui/index.ts'
 import { formatTime } from '../../../lib/dates.ts'
 import { SLOGAN } from '../../../lib/site.ts'
-import { spotsStatus } from './labels.ts'
+import { useNow } from '../../../lib/useNow.ts'
+import { scheduleLink } from '../schedule/useScheduleParams.ts'
 import { dayHeading } from './upcoming.ts'
 import type { HomeState } from './useHomeData.ts'
 
 const HIGHLIGHTS = ['Grupos reducidos de 8 a 12', 'Reserva sin crear cuenta', 'Lista de espera automática']
 
 function NextClassCard({ state }: { state: HomeState }) {
+  const now = useNow()
   if (state.status === 'error') return null
 
   const firstDay = state.status === 'ready' ? state.data.upcoming[0] : undefined
   const next = firstDay?.sessions[0]
   if (state.status === 'ready' && !next) return null
+  const spots = next ? spotsStatus(next, now) : undefined
 
   return (
     <div className="relative mx-auto -mt-16 w-[calc(100%-2rem)] max-w-xs rounded-lg border border-arena-200 bg-white/95 p-5 shadow-lg backdrop-blur lg:absolute lg:-bottom-8 lg:left-0 lg:mt-0 lg:w-80 lg:max-w-none animate-rise [animation-delay:200ms]">
-      {firstDay && next ? (
+      {firstDay && next && spots ? (
         <>
           <p className="flex items-center gap-1.5 text-xs font-semibold tracking-wide text-terracota-700 uppercase">
             <Sparkles aria-hidden="true" strokeWidth={1.75} className="size-4 shrink-0" />
@@ -39,9 +43,9 @@ function NextClassCard({ state }: { state: HomeState }) {
             </span>
           </p>
           <div className="mt-4 flex flex-wrap items-center justify-between gap-2">
-            <Badge tone={spotsStatus(next).tone}>{spotsStatus(next).label}</Badge>
+            <Badge tone={spots.tone}>{spots.label}</Badge>
             <Link
-              to="/clases"
+              to={scheduleLink(next)}
               className="inline-flex min-h-11 items-center gap-1 text-sm font-semibold text-terracota-600 underline-offset-4 hover:underline"
             >
               Reservar

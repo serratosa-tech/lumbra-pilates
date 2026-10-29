@@ -84,6 +84,7 @@
   --animate-rise: rise var(--duration-slow) var(--ease-out-soft) both;
   --animate-spin: spin 0.9s linear infinite;
   --animate-sheet-in: sheet-in var(--duration-base) var(--ease-out-soft) both;
+  --animate-sheet-up: sheet-up var(--duration-base) var(--ease-out-soft) both;
   --animate-fade-in: fade-in var(--duration-base) var(--ease-out-soft) both;
   --animate-toast-in: toast-in var(--duration-base) var(--ease-out-soft) both;
 
@@ -127,6 +128,14 @@
     }
     to {
       transform: translateX(0);
+    }
+  }
+  @keyframes sheet-up {
+    from {
+      transform: translateY(100%);
+    }
+    to {
+      transform: translateY(0);
     }
   }
   @keyframes fade-in {

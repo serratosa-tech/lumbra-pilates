@@ -75,6 +75,11 @@ export function SiteFooter() {
                 Sistema de diseño
               </Link>
             </li>
+            <li>
+              <Link to="/privacidad" className={LINK_CLASSES}>
+                Privacidad
+              </Link>
+            </li>
           </ul>
         </FooterColumn>
       </div>

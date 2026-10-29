@@ -1,11 +1,10 @@
 import { describe, expect, it } from 'vitest'
 import { createDemoDataSource } from '../../../data/demo/demoDataSource.ts'
-import { buildSeedSessions } from '../../../data/demo/seed/weeklySchedule.ts'
 import { dayHeading, loadUpcoming } from './upcoming.ts'
 
 // Plantilla de demo: el jueves hay clases a las 7:30, 9:30, 13:30, 18:00, 19:15 y 20:30;
 // el viernes, a las 8:00, 10:00, 14:00 y 18:00; el domingo el estudio cierra.
-const ds = createDemoDataSource({ sessions: buildSeedSessions(new Date('2026-10-29T10:00:00.000Z')) })
+const ds = createDemoDataSource({ now: () => new Date('2026-10-29T10:00:00.000Z') })
 const times = (iso: string[]) => iso.map((s) => new Date(s).toISOString().slice(11, 16))
 
 describe('loadUpcoming', () => {
@@ -41,6 +40,7 @@ describe('loadUpcoming', () => {
   })
 
   it('sin clases en el horizonte devuelve una lista vacía', async () => {
-    expect(await loadUpcoming(createDemoDataSource(), new Date('2026-10-29T10:00:00.000Z'))).toEqual([])
+    const empty = createDemoDataSource({ seed: () => ({ sessions: [], bookings: [] }) })
+    expect(await loadUpcoming(empty, new Date('2026-10-29T10:00:00.000Z'))).toEqual([])
   })
 })

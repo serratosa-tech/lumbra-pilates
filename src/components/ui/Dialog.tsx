@@ -19,6 +19,10 @@ const VARIANTS = {
   modal:
     'm-auto w-[min(32rem,calc(100%-2rem))] max-h-[calc(100dvh-2rem)] rounded-lg open:animate-rise',
   sheet: 'my-0 mr-0 ml-auto h-dvh max-h-none w-[min(22rem,100%)] rounded-l-lg open:animate-sheet-in',
+  adaptive: [
+    'mx-0 mt-auto mb-0 w-full max-h-[92dvh] rounded-t-lg open:animate-sheet-up',
+    'sm:m-auto sm:w-[min(36rem,calc(100%-2rem))] sm:max-h-[calc(100dvh-2rem)] sm:rounded-lg sm:open:animate-rise',
+  ].join(' '),
 }
 
 /**
@@ -129,4 +133,9 @@ export function Modal(props: DialogProps) {
 /** Panel lateral (menú móvil, filtros). */
 export function Sheet(props: DialogProps) {
   return <Dialog variant="sheet" {...props} />
+}
+
+/** Hoja que sube desde abajo en móvil y ventana centrada desde 640 px (detalle y reserva). */
+export function ResponsiveModal(props: DialogProps) {
+  return <Dialog variant="adaptive" {...props} />
 }

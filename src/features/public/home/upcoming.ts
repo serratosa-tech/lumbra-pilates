@@ -29,14 +29,16 @@ export async function loadUpcoming(ds: DataSource, now: Date, limit = UPCOMING_L
   const today = studioDate(now)
   const tomorrow = addDays(today, 1)
   const days: UpcomingDay[] = []
+  const scheduled = async (from: string, to: string) =>
+    (await ds.listSessions(from, to)).filter((s) => s.status === 'scheduled')
 
-  const todaySessions = (await ds.listSessions(now.toISOString(), dayRange(today).to)).slice(0, limit)
+  const todaySessions = (await scheduled(now.toISOString(), dayRange(today).to)).slice(0, limit)
   if (todaySessions.length > 0) days.push({ relation: 'hoy', sessions: todaySessions })
 
   const missing = limit - todaySessions.length
   if (missing === 0) return days
 
-  const ahead = await ds.listSessions(
+  const ahead = await scheduled(
     studioDateTime(tomorrow).toISOString(),
     studioDateTime(addDays(tomorrow, LOOKAHEAD_DAYS)).toISOString(),
   )

@@ -2,7 +2,7 @@ import { Clock } from 'lucide-react'
 import { Badge, Card, Skeleton } from '../../../components/ui/index.ts'
 import type { ClassIntensity, ClassType } from '../../../data/index.ts'
 import { cn } from '../../../lib/cn.ts'
-import { INTENSITY_LABELS, LEVEL_LABELS } from './labels.ts'
+import { INTENSITY_LABELS, LEVEL_LABELS } from '../../../components/schedule/labels.ts'
 import { SectionHeading } from './SectionHeading.tsx'
 import type { HomeState } from './useHomeData.ts'
 

@@ -1,16 +1,16 @@
 import { addDays, startOfWeek, studioDate, studioDateTime } from '../../../lib/dates.ts'
-import type { ClassSession } from '../../types.ts'
+import type { SessionRecord } from '../../types.ts'
 import { CLASS_TYPES } from './classTypes.ts'
 import { INSTRUCTORS } from './instructors.ts'
 
-interface ScheduleSlot {
+export interface ScheduleSlot {
   /** 1 = lunes … 6 = sábado (el domingo el estudio cierra). */
   weekday: number
   time: string
   classTypeId: string
   instructorId: string
   capacity: number
-  /** Plazas ocupadas en la semana actual; la siguiente semana va algo más libre. */
+  /** Plazas ocupadas en una semana normal. */
   booked: number
 }
 
@@ -50,14 +50,25 @@ const SLOTS: ScheduleSlot[] = [
   { weekday: 6, time: '12:15', classTypeId: 'respira-y-estira', instructorId: 'nerea-soler', capacity: 10, booked: 6 },
 ]
 
-const WEEKS = 2
+/** Semanas que se siembran, relativas a la actual: la pasada, esta y las dos siguientes. */
+export const SEED_WEEKS = [-1, 0, 1, 2] as const
+export type SeedWeek = (typeof SEED_WEEKS)[number]
 
-/** Genera las clases de esta semana y la siguiente a partir de la plantilla semanal. */
-export function buildSeedSessions(now: Date): ClassSession[] {
+export interface SeedSession {
+  record: SessionRecord
+  slot: ScheduleSlot
+  week: SeedWeek
+}
+
+/** Clave estable de una franja de la plantilla, como «4 18:00» (jueves a las 18:00). */
+export const slotKey = (slot: ScheduleSlot) => `${slot.weekday} ${slot.time}`
+
+/** Genera las clases de las semanas sembradas a partir de la plantilla semanal. */
+export function buildSeedSessions(now: Date): SeedSession[] {
   const monday = startOfWeek(studioDate(now))
-  const sessions: ClassSession[] = []
+  const sessions: SeedSession[] = []
 
-  for (let week = 0; week < WEEKS; week++) {
+  for (const week of SEED_WEEKS) {
     for (const slot of SLOTS) {
       const classType = CLASS_TYPES.find((t) => t.id === slot.classTypeId)
       const instructor = INSTRUCTORS.find((i) => i.id === slot.instructorId)
@@ -68,14 +79,17 @@ export function buildSeedSessions(now: Date): ClassSession[] {
       const startsAt = studioDateTime(date, hour, minute).toISOString()
 
       sessions.push({
-        id: `${slot.classTypeId}-${startsAt.slice(0, 16)}`,
-        classTypeId: classType.id,
-        name: classType.name,
-        instructor: instructor.name,
-        startsAt,
-        durationMinutes: classType.durationMinutes,
-        capacity: slot.capacity,
-        bookedCount: week === 0 ? slot.booked : Math.max(0, slot.booked - 3),
+        week,
+        slot,
+        record: {
+          id: `${slot.classTypeId}-${startsAt.slice(0, 16)}`,
+          classTypeId: classType.id,
+          instructorId: instructor.id,
+          startsAt,
+          durationMinutes: classType.durationMinutes,
+          capacity: slot.capacity,
+          status: 'scheduled',
+        },
       })
     }
   }

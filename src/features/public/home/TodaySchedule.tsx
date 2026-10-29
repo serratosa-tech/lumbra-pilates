@@ -1,71 +1,26 @@
-import { CalendarX2, Clock, RotateCcw, UserRound } from 'lucide-react'
+import { CalendarX2, RotateCcw } from 'lucide-react'
 import { useId } from 'react'
-import { Alert, Badge, Button, ButtonLink, EmptyState, Skeleton } from '../../../components/ui/index.ts'
-import type { ClassSession } from '../../../data/index.ts'
-import { cn } from '../../../lib/cn.ts'
-import { formatTime } from '../../../lib/dates.ts'
-import { spotsStatus } from './labels.ts'
+import { SessionCard } from '../../../components/schedule/SessionCard.tsx'
+import { SessionCardSkeleton } from '../../../components/schedule/SessionCardSkeleton.tsx'
+import { Alert, Button, ButtonLink, EmptyState } from '../../../components/ui/index.ts'
+import { useNow } from '../../../lib/useNow.ts'
+import { scheduleLink } from '../schedule/useScheduleParams.ts'
 import { SectionHeading } from './SectionHeading.tsx'
 import { dayHeading, UPCOMING_LIMIT, type UpcomingDay } from './upcoming.ts'
 import type { HomeState } from './useHomeData.ts'
 
-function SessionRow({ session }: { session: ClassSession }) {
-  const spots = spotsStatus(session)
-  const occupancy = Math.min(100, Math.round((session.bookedCount / session.capacity) * 100))
-  const time = formatTime(session.startsAt)
-
-  return (
-    <li className="grid grid-cols-1 items-center gap-x-5 gap-y-3 border-b border-arena-200 py-5 last:border-b-0 min-[20rem]:grid-cols-[auto_minmax(0,1fr)] sm:grid-cols-[auto_minmax(0,1fr)_auto] sm:px-2">
-      <p className="font-display text-2xl leading-none whitespace-nowrap sm:min-w-24 sm:text-3xl">
-        <time dateTime={session.startsAt}>{time}</time>
-      </p>
-      <div className="min-w-0">
-        <h4 className="font-sans text-lg font-semibold tracking-normal">{session.name}</h4>
-        <p className="mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-piedra">
-          <span className="inline-flex items-center gap-1.5">
-            <UserRound aria-hidden="true" strokeWidth={1.75} className="size-4" />
-            {session.instructor}
-          </span>
-          <span className="inline-flex items-center gap-1.5">
-            <Clock aria-hidden="true" strokeWidth={1.75} className="size-4" />
-            {session.durationMinutes} min
-          </span>
-        </p>
-        <div className="mt-2.5 flex flex-wrap items-center gap-3">
-          <Badge tone={spots.tone}>{spots.label}</Badge>
-          <span aria-hidden="true" className="h-1.5 w-20 overflow-hidden rounded-full bg-arena-200">
-            <span
-              className={cn('block h-full rounded-full', spots.full ? 'bg-error' : 'bg-terracota-500')}
-              style={{ width: `${occupancy}%` }}
-            />
-          </span>
-        </div>
-      </div>
-      <ButtonLink
-        to="/clases"
-        variant={spots.full ? 'ghost' : 'secondary'}
-        className="min-[20rem]:col-span-2 sm:col-span-1"
-        aria-label={`${spots.full ? 'Apuntarme a la lista de espera de' : 'Reservar'} ${session.name}, ${time}`}
-      >
-        {spots.full ? 'Apuntarme a la lista' : 'Reservar'}
-      </ButtonLink>
-    </li>
-  )
-}
-
-function DayGroup({ day }: { day: UpcomingDay }) {
+function DayGroup({ day, now }: { day: UpcomingDay; now: Date }) {
   const headingId = useId()
   return (
-    <div className="border-b border-arena-200 last:border-b-0">
-      <h3
-        id={headingId}
-        className="border-b border-arena-200 pt-5 pb-3 font-sans text-sm font-semibold tracking-normal text-piedra sm:px-2"
-      >
+    <div className="pt-5 pb-1">
+      <h3 id={headingId} className="pb-3 font-sans text-sm font-semibold tracking-normal text-piedra">
         {dayHeading(day)}
       </h3>
-      <ul aria-labelledby={headingId}>
+      <ul aria-labelledby={headingId} className="flex flex-col gap-3">
         {day.sessions.map((session) => (
-          <SessionRow key={session.id} session={session} />
+          <li key={session.id}>
+            <SessionCard session={session} now={now} to={scheduleLink(session)} headingLevel="h4" />
+          </li>
         ))}
       </ul>
     </div>
@@ -74,16 +29,10 @@ function DayGroup({ day }: { day: UpcomingDay }) {
 
 function LoadingList() {
   return (
-    <div role="status" className="divide-y divide-arena-200">
+    <div role="status" className="flex flex-col gap-3 py-5">
       <span className="sr-only">Cargando el horario…</span>
       {Array.from({ length: UPCOMING_LIMIT }, (_, i) => (
-        <div key={i} className="flex items-center gap-5 py-5 sm:px-2">
-          <Skeleton className="h-8 w-16" />
-          <div className="flex flex-1 flex-col gap-2">
-            <Skeleton className="h-5 w-40 max-w-full" />
-            <Skeleton className="h-4 w-56 max-w-full" />
-          </div>
-        </div>
+        <SessionCardSkeleton key={i} />
       ))}
     </div>
   )
@@ -98,6 +47,7 @@ function subtitleFor(days: UpcomingDay[] | undefined): string {
 }
 
 export function TodaySchedule({ state, onRetry }: { state: HomeState; onRetry: () => void }) {
+  const now = useNow()
   const days = state.status === 'ready' ? state.data.upcoming : undefined
   const title = days && days.length > 0 && days[0].relation !== 'hoy' ? 'Próximas clases' : 'Hoy en Lumbra'
 
@@ -113,7 +63,7 @@ export function TodaySchedule({ state, onRetry }: { state: HomeState; onRetry: (
           </ButtonLink>
         </div>
 
-        <div className="rounded-lg border border-arena-200 bg-crema px-4 shadow-sm sm:px-6">
+        <div className="rounded-lg border border-arena-200 bg-crema px-3 pb-4 shadow-sm sm:px-5">
           {state.status === 'loading' && <LoadingList />}
           {state.status === 'error' && (
             <div className="py-6">
@@ -138,7 +88,7 @@ export function TodaySchedule({ state, onRetry }: { state: HomeState; onRetry: (
             </div>
           )}
           {days?.map((day) => (
-            <DayGroup key={day.relation} day={day} />
+            <DayGroup key={day.relation} day={day} now={now} />
           ))}
         </div>
       </div>

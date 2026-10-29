@@ -22,7 +22,7 @@ export function DemoBanner() {
   }
 
   return (
-    <aside aria-label="Aviso de demostración" className="bg-arena-200 text-tinta-700">
+    <aside aria-label="Aviso de demostración" className="overflow-x-clip bg-arena-200 text-tinta-700">
       <div className="container-page flex flex-wrap items-center justify-center gap-x-3 gap-y-0 py-1.5 text-center text-xs">
         <p className="flex items-center gap-2">
           <FlaskConical aria-hidden="true" strokeWidth={1.75} className="size-4 shrink-0" />

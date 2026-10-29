@@ -27,6 +27,7 @@ describe('spotsStatus', () => {
   })
 
   it('marca las clases pasadas y las canceladas', () => {
+    expect(spotsStatus(base, new Date('2026-10-29T17:30:00.000Z')).label).toBe('En curso')
     expect(spotsStatus(base, new Date('2026-10-29T18:00:00.000Z')).label).toBe('Finalizada')
     expect(spotsStatus({ ...base, status: 'cancelled' }, NOW).label).toBe('Cancelada')
   })

@@ -7,7 +7,8 @@ interface EmptyStateProps {
   title: string
   children?: ReactNode
   action?: ReactNode
-  headingLevel?: 'h2' | 'h3'
+  /** h1 cuando el estado vacío ocupa toda la página. */
+  headingLevel?: 'h1' | 'h2' | 'h3'
   className?: string
 }
 

@@ -4,6 +4,7 @@ import { Link, NavLink } from 'react-router'
 import { cn } from '../../lib/cn.ts'
 import { LogoFull } from '../brand/Logo.tsx'
 import { ButtonLink, Sheet } from '../ui/index.ts'
+import { MenuBrand } from './MenuBrand.tsx'
 import { PRIMARY_NAV } from './navigation.ts'
 
 const MOBILE_MENU_ID = 'menu-movil'
@@ -56,30 +57,36 @@ export function SiteHeader() {
       </div>
 
       <Sheet open={menuOpen} onClose={closeMenu} title="Menú">
-        <nav id={MOBILE_MENU_ID} aria-label="Principal (móvil)">
-          <ul className="flex flex-col gap-1">
-            {PRIMARY_NAV.map(({ to, label, icon: Icon }) => (
-              <li key={to}>
-                <NavLink
-                  to={to}
-                  onClick={closeMenu}
-                  className={({ isActive }) =>
-                    cn(
-                      'flex min-h-12 items-center gap-3 rounded-md px-3 text-base font-semibold transition-colors hover:bg-arena-100',
-                      isActive ? 'bg-arena-100 text-terracota-700' : 'text-tinta',
-                    )
-                  }
-                >
-                  <Icon aria-hidden="true" strokeWidth={1.75} className="size-5 text-terracota-600" />
-                  {label}
-                </NavLink>
-              </li>
-            ))}
-          </ul>
-          <ButtonLink to="/clases" onClick={closeMenu} size="lg" className="mt-6 w-full">
-            Reservar clase
-          </ButtonLink>
-        </nav>
+        {/* Ocupa todo el alto del panel para llevar la marca abajo; si no cabe, el panel hace scroll. */}
+        <div className="flex min-h-full flex-col gap-10">
+          <nav id={MOBILE_MENU_ID} aria-label="Principal (móvil)">
+            <ul className="flex flex-col gap-1">
+              {PRIMARY_NAV.map(({ to, label, icon: Icon }) => (
+                <li key={to}>
+                  <NavLink
+                    to={to}
+                    onClick={closeMenu}
+                    className={({ isActive }) =>
+                      cn(
+                        'flex min-h-12 items-center gap-3 rounded-md px-3 text-base font-semibold transition-colors hover:bg-arena-100',
+                        isActive ? 'bg-arena-100 text-terracota-700' : 'text-tinta',
+                      )
+                    }
+                  >
+                    <Icon aria-hidden="true" strokeWidth={1.75} className="size-5 text-terracota-600" />
+                    {label}
+                  </NavLink>
+                </li>
+              ))}
+            </ul>
+            <ButtonLink to="/clases" onClick={closeMenu} size="lg" className="mt-6 w-full">
+              Reservar clase
+            </ButtonLink>
+          </nav>
+          <div className="mt-auto">
+            <MenuBrand />
+          </div>
+        </div>
       </Sheet>
     </header>
   )

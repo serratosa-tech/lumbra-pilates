@@ -1,4 +1,150 @@
-/* Tokens de diseño de Lumbra Pilates (colores, tipografía, espaciado).
-   Se definen en la fase de diseño. */
+/* Tokens de diseño de Lumbra Pilates.
+   Paleta cálida (crema, arena, terracota, tinta), tipografía, espaciado, radios,
+   sombras y movimiento. Los componentes solo usan estas variables. */
 @theme {
+  /* Solo la paleta de la marca: se descartan los colores por defecto de Tailwind. */
+  --color-*: initial;
+  --color-white: #ffffff;
+  --color-crema: #fbf6ee;
+  --color-arena-100: #f3e9db;
+  --color-arena-200: #e8d8c3;
+  --color-arena-400: #c9ae8c;
+  --color-terracota-300: #e3a285;
+  --color-terracota-500: #c2643f;
+  --color-terracota-600: #a84f2e;
+  --color-terracota-700: #8a3f24;
+  --color-tinta: #2a201b;
+  --color-tinta-700: #4a3b32;
+  --color-piedra: #6e5b4e;
+  --color-exito: #3d6b4f;
+  --color-exito-50: #e7efe8;
+  --color-aviso: #8a5a12;
+  --color-aviso-50: #f7ecd6;
+  --color-error: #a3342b;
+  --color-error-50: #f7e3df;
+  --color-info: #3f5e7a;
+  --color-info-50: #e4ebf1;
+
+  /* Tipografía */
+  --font-*: initial;
+  --font-display: 'Fraunces', 'Fraunces Fallback', Georgia, 'Times New Roman', serif;
+  --font-sans: 'Figtree', 'Figtree Fallback', system-ui, -apple-system, 'Segoe UI', sans-serif;
+
+  --text-*: initial;
+  --text-xs: 0.8125rem;
+  --text-xs--line-height: 1.35;
+  --text-sm: 0.9375rem;
+  --text-sm--line-height: 1.5;
+  --text-base: 1.0625rem;
+  --text-base--line-height: 1.6;
+  --text-lg: 1.1875rem;
+  --text-lg--line-height: 1.55;
+  --text-xl: 1.375rem;
+  --text-xl--line-height: 1.35;
+  --text-2xl: clamp(1.5rem, 1.3rem + 0.9vw, 1.875rem);
+  --text-2xl--line-height: 1.25;
+  --text-3xl: clamp(1.875rem, 1.5rem + 1.8vw, 2.75rem);
+  --text-3xl--line-height: 1.15;
+  /* El mínimo se limita por el ancho para que una palabra no desborde a 320 px con texto grande. */
+  --text-display: clamp(min(2.5rem, 12vw), 1rem + 6vw, 4.75rem);
+  --text-display--line-height: 1.04;
+
+  --tracking-tight: -0.02em;
+  --tracking-wide: 0.08em;
+  --tracking-widest: 0.18em;
+
+  /* Espaciado (múltiplos de 0.25rem) y anchos */
+  --spacing: 0.25rem;
+  --container-page: 72rem;
+
+  /* Radios */
+  --radius-*: initial;
+  --radius-sm: 0.375rem;
+  --radius-md: 0.75rem;
+  --radius-lg: 1.25rem;
+  --radius-xl: 2rem;
+  --radius-arch: 999rem 999rem 1.25rem 1.25rem;
+  --radius-full: 9999px;
+
+  /* Sombras cálidas (tinta con alfa baja) */
+  --shadow-*: initial;
+  --shadow-sm: 0 1px 2px rgb(42 32 27 / 0.06), 0 1px 1px rgb(42 32 27 / 0.04);
+  --shadow-md: 0 6px 16px -6px rgb(42 32 27 / 0.14), 0 2px 4px rgb(42 32 27 / 0.05);
+  --shadow-lg: 0 24px 48px -20px rgb(42 32 27 / 0.24), 0 6px 12px -6px rgb(42 32 27 / 0.08);
+
+  /* Movimiento */
+  --ease-out-soft: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in-out-soft: cubic-bezier(0.65, 0, 0.35, 1);
+  --duration-fast: 150ms;
+  --duration-base: 240ms;
+  --duration-slow: 480ms;
+
+  --animate-breathe: breathe 7s var(--ease-in-out-soft) infinite;
+  --animate-shimmer: shimmer 1.6s linear infinite;
+  --animate-rise: rise var(--duration-slow) var(--ease-out-soft) both;
+  --animate-spin: spin 0.9s linear infinite;
+  --animate-sheet-in: sheet-in var(--duration-base) var(--ease-out-soft) both;
+  --animate-fade-in: fade-in var(--duration-base) var(--ease-out-soft) both;
+  --animate-toast-in: toast-in var(--duration-base) var(--ease-out-soft) both;
+
+  @keyframes breathe {
+    0%,
+    100% {
+      opacity: 0.75;
+      transform: scale(1);
+    }
+    50% {
+      opacity: 1;
+      transform: scale(1.06);
+    }
+  }
+  @keyframes shimmer {
+    from {
+      background-position: 100% 0;
+    }
+    to {
+      background-position: -100% 0;
+    }
+  }
+  @keyframes rise {
+    from {
+      opacity: 0;
+      transform: translateY(0.75rem);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+  @keyframes sheet-in {
+    from {
+      transform: translateX(100%);
+    }
+    to {
+      transform: translateX(0);
+    }
+  }
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+  @keyframes toast-in {
+    from {
+      opacity: 0;
+      transform: translateY(0.5rem) scale(0.98);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
 }

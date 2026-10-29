@@ -4,6 +4,7 @@ import { createDemoDataSource } from './demoDataSource.ts'
 
 const session: ClassSession = {
   id: 'reformer-lunes',
+  classTypeId: 'reformer-esencial',
   name: 'Reformer',
   instructor: 'Lucía',
   startsAt: '2026-11-02T09:00:00.000Z',
@@ -21,7 +22,7 @@ const person = (name: string) => ({
 
 describe('demoDataSource', () => {
   it('confirma mientras haya plazas y después pone en lista de espera', async () => {
-    const ds = createDemoDataSource([session])
+    const ds = createDemoDataSource({ sessions: [session] })
     const first = await ds.createBooking(person('Ana'))
     const second = await ds.createBooking(person('Bea'))
 
@@ -31,7 +32,7 @@ describe('demoDataSource', () => {
   })
 
   it('encuentra reservas por email y código sin distinguir mayúsculas', async () => {
-    const ds = createDemoDataSource([session])
+    const ds = createDemoDataSource({ sessions: [session] })
     const booking = await ds.createBooking(person('Ana'))
 
     const found = await ds.findBookings(' ANA@ejemplo.es ', booking.code.toLowerCase())
@@ -40,7 +41,7 @@ describe('demoDataSource', () => {
   })
 
   it('al cancelar promociona a la primera persona en lista de espera', async () => {
-    const ds = createDemoDataSource([session])
+    const ds = createDemoDataSource({ sessions: [session] })
     const first = await ds.createBooking(person('Ana'))
     const second = await ds.createBooking(person('Bea'))
 
@@ -53,7 +54,7 @@ describe('demoDataSource', () => {
   })
 
   it('libera la plaza si no hay lista de espera', async () => {
-    const ds = createDemoDataSource([session])
+    const ds = createDemoDataSource({ sessions: [session] })
     const booking = await ds.createBooking(person('Ana'))
 
     await ds.cancelBooking(booking.email, booking.code)

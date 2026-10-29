@@ -1,10 +1,21 @@
-import type { Booking, BookingInput, ClassSession, IsoDateTime } from './types.ts'
+import type {
+  Booking,
+  BookingInput,
+  ClassSession,
+  ClassType,
+  Instructor,
+  IsoDateTime,
+} from './types.ts'
 
 /**
  * Contrato de acceso a datos. La app solo depende de esta interfaz;
  * la implementación concreta (demo en memoria o Supabase) se elige en `src/data/index.ts`.
  */
 export interface DataSource {
+  /** Tipos de clase que ofrece el estudio. */
+  listClassTypes(): Promise<ClassType[]>
+  /** Equipo de instructoras. */
+  listInstructors(): Promise<Instructor[]>
   /** Clases que empiezan dentro de [from, to). */
   listSessions(from: IsoDateTime, to: IsoDateTime): Promise<ClassSession[]>
   /** Reserva una plaza; si la clase está llena, la reserva entra en lista de espera. */

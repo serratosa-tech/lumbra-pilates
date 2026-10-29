@@ -1,9 +1,17 @@
 import { generateBookingCode, normalizeEmail } from '../../lib/bookingCode.ts'
 import type { DataSource } from '../DataSource.ts'
-import type { Booking, ClassSession } from '../types.ts'
+import type { Booking, ClassSession, ClassType, Instructor } from '../types.ts'
 
-export function createDemoDataSource(seedSessions: ClassSession[] = []): DataSource {
-  const sessions = new Map(seedSessions.map((s) => [s.id, { ...s }]))
+export interface DemoSeed {
+  classTypes: ClassType[]
+  instructors: Instructor[]
+  sessions: ClassSession[]
+}
+
+export function createDemoDataSource(seed: Partial<DemoSeed> = {}): DataSource {
+  const classTypes = seed.classTypes ?? []
+  const instructors = seed.instructors ?? []
+  const sessions = new Map((seed.sessions ?? []).map((s) => [s.id, { ...s }]))
   const bookings: Booking[] = []
 
   function getSession(id: string): ClassSession {
@@ -19,6 +27,14 @@ export function createDemoDataSource(seedSessions: ClassSession[] = []): DataSou
   }
 
   return {
+    async listClassTypes() {
+      return classTypes.map((t) => ({ ...t }))
+    },
+
+    async listInstructors() {
+      return instructors.map((i) => ({ ...i, specialties: [...i.specialties] }))
+    },
+
     async listSessions(from, to) {
       return [...sessions.values()]
         .filter((s) => s.startsAt >= from && s.startsAt < to)

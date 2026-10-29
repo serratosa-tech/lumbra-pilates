@@ -4,25 +4,7 @@ import { Button, ButtonLink, useToast } from '../../../../components/ui/index.ts
 import { CANCELLATION_LIMIT_HOURS, type BookingDetails } from '../../../../data/index.ts'
 import { cn } from '../../../../lib/cn.ts'
 import { formatDay, formatTime, formatTimeRange } from '../../../../lib/dates.ts'
-import { buildIcs, downloadFile } from '../../../../lib/ics.ts'
-import { SITE_URL, STUDIO } from '../../../../lib/site.ts'
-
-function downloadCalendar({ booking, session }: BookingDetails) {
-  const ics = buildIcs({
-    uid: `${booking.code}@lumbra-pilates`,
-    title: `${session.name} · Lumbra Pilates`,
-    description: [
-      `Código de reserva: ${booking.code}`,
-      `Instructora: ${session.instructor}`,
-      `Consulta o cancela hasta ${CANCELLATION_LIMIT_HOURS} horas antes en ${SITE_URL}/mis-reservas`,
-    ].join('\n'),
-    location: `Lumbra Pilates, ${STUDIO.street}, ${STUDIO.postalCode} ${STUDIO.city}`,
-    start: session.startsAt,
-    durationMinutes: session.durationMinutes,
-    stamp: new Date(),
-  })
-  downloadFile(`lumbra-${booking.code}.ics`, ics, 'text/calendar;charset=utf-8')
-}
+import { downloadBookingCalendar } from '../../bookingCalendar.ts'
 
 /** Resultado de la reserva: código, resumen y siguientes pasos. */
 export function BookingConfirmation({ details }: { details: BookingDetails }) {
@@ -105,7 +87,7 @@ export function BookingConfirmation({ details }: { details: BookingDetails }) {
           <Button
             variant="secondary"
             onClick={() => {
-              downloadCalendar(details)
+              downloadBookingCalendar(details)
               toast({ title: 'Evento descargado', description: 'Ábrelo para añadir la clase a tu calendario.' })
             }}
             icon={<CalendarPlus aria-hidden="true" strokeWidth={1.75} className="size-4" />}

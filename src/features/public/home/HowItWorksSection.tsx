@@ -21,17 +21,18 @@ const STEPS = [
 
 export function HowItWorksSection() {
   return (
-    <section aria-labelledby="como-titulo" className="py-20 sm:py-24">
+    <section aria-labelledby="como-titulo" className="py-12 sm:py-20 lg:py-24">
       <div className="container-page">
         <SectionHeading id="como-titulo" kicker="Cómo funciona" title="Reservar es tan sencillo como respirar" />
-        <ol className="mt-12 grid grid-cols-1 gap-10 md:grid-cols-3 md:gap-8">
+        <ol className="mt-8 grid grid-cols-1 gap-8 sm:mt-12 sm:gap-10 md:grid-cols-3 md:gap-8">
           {STEPS.map(({ icon: Icon, title, text }, i) => (
             <li key={title} className="relative">
               <div className="flex items-center gap-4">
                 <span className="grid size-16 shrink-0 place-items-center rounded-arch bg-arena-200 text-terracota-700">
                   <Icon aria-hidden="true" strokeWidth={1.75} className="size-6" />
                 </span>
-                <span aria-hidden="true" className="font-display text-3xl text-arena-400">
+                {/* Decorativo: el orden ya lo da la lista. terracota-500 sobre crema: 3,76:1. */}
+                <span aria-hidden="true" className="font-display text-3xl text-terracota-500">
                   {i + 1}
                 </span>
               </div>

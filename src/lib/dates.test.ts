@@ -1,5 +1,14 @@
 import { describe, expect, it } from 'vitest'
-import { addDays, dayRange, formatDay, formatTime, startOfWeek, studioDate, studioDateTime } from './dates.ts'
+import {
+  addDays,
+  dayRange,
+  formatDay,
+  formatTime,
+  formatWeekdayDay,
+  startOfWeek,
+  studioDate,
+  studioDateTime,
+} from './dates.ts'
 
 describe('dates', () => {
   it('convierte hora del estudio a UTC respetando el horario de verano', () => {
@@ -28,5 +37,6 @@ describe('dates', () => {
   it('formatea en español de España', () => {
     expect(formatTime('2026-10-29T17:00:00.000Z')).toBe('18:00')
     expect(formatDay('2026-10-29T17:00:00.000Z')).toBe('jueves, 29 de octubre')
+    expect(formatWeekdayDay('2026-10-30T07:00:00.000Z')).toBe('viernes 30')
   })
 })

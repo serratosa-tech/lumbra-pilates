@@ -85,9 +85,24 @@ const dayFormatter = new Intl.DateTimeFormat(LOCALE, {
   month: 'long',
 })
 
+const weekdayDayFormatter = new Intl.DateTimeFormat(LOCALE, {
+  timeZone: STUDIO_TIME_ZONE,
+  weekday: 'long',
+  day: 'numeric',
+})
+
+export function isSameDate(a: CalendarDate, b: CalendarDate): boolean {
+  return a.year === b.year && a.month === b.month && a.day === b.day
+}
+
 /** «09:30» */
 export function formatTime(iso: IsoDateTime): string {
   return timeFormatter.format(new Date(iso))
+}
+
+/** «viernes 30» */
+export function formatWeekdayDay(iso: IsoDateTime): string {
+  return weekdayDayFormatter.format(new Date(iso))
 }
 
 /** «jueves, 29 de octubre» */

@@ -48,21 +48,21 @@ function ClassTypeCard({ classType, index }: { classType: ClassType; index: numb
 
 export function ClassTypesSection({ state }: { state: HomeState }) {
   return (
-    <section aria-labelledby="clases-titulo" className="py-20 sm:py-24">
+    <section aria-labelledby="clases-titulo" className="py-12 sm:py-20 lg:py-24">
       <div className="container-page">
         <SectionHeading id="clases-titulo" kicker="Clases" title="Cuatro maneras de encontrar tu centro">
           <p>Del primer contacto con el reformer a sesiones que te pondrán a prueba. Elige por nivel e intensidad.</p>
         </SectionHeading>
 
         {state.status === 'ready' ? (
-          <ul className="mt-12 grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-4">
+          <ul className="mt-8 grid sm:mt-12 grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-4">
             {state.data.classTypes.map((classType, i) => (
               <ClassTypeCard key={classType.id} classType={classType} index={i} />
             ))}
           </ul>
         ) : (
           state.status === 'loading' && (
-            <div role="status" className="mt-12 grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-4">
+            <div role="status" className="mt-8 grid sm:mt-12 grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-4">
               <span className="sr-only">Cargando las clases…</span>
               {[0, 1, 2, 3].map((i) => (
                 <Skeleton key={i} className="h-64 rounded-lg" />

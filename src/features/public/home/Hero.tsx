@@ -1,9 +1,10 @@
 import { ArrowRight, Clock, Sparkles, UserRound } from 'lucide-react'
 import { Link } from 'react-router'
 import { Badge, ButtonLink, buttonClasses, Skeleton } from '../../../components/ui/index.ts'
-import { formatDay, formatTime } from '../../../lib/dates.ts'
+import { formatTime } from '../../../lib/dates.ts'
 import { SLOGAN } from '../../../lib/site.ts'
 import { spotsStatus } from './labels.ts'
+import { dayHeading } from './upcoming.ts'
 import type { HomeState } from './useHomeData.ts'
 
 const HIGHLIGHTS = ['Grupos reducidos de 8 a 12', 'Reserva sin crear cuenta', 'Lista de espera automática']
@@ -11,18 +12,17 @@ const HIGHLIGHTS = ['Grupos reducidos de 8 a 12', 'Reserva sin crear cuenta', 'L
 function NextClassCard({ state }: { state: HomeState }) {
   if (state.status === 'error') return null
 
-  const next = state.status === 'ready' ? state.data.upcoming.sessions[0] : undefined
+  const firstDay = state.status === 'ready' ? state.data.upcoming[0] : undefined
+  const next = firstDay?.sessions[0]
   if (state.status === 'ready' && !next) return null
 
   return (
-    <div className="relative mx-auto -mt-20 w-[calc(100%-2rem)] max-w-xs rounded-lg border border-arena-200 bg-white/95 p-5 shadow-lg backdrop-blur lg:absolute lg:-bottom-8 lg:left-0 lg:mt-0 lg:w-80 lg:max-w-none animate-rise [animation-delay:200ms]">
-      {next ? (
+    <div className="relative mx-auto -mt-16 w-[calc(100%-2rem)] max-w-xs rounded-lg border border-arena-200 bg-white/95 p-5 shadow-lg backdrop-blur lg:absolute lg:-bottom-8 lg:left-0 lg:mt-0 lg:w-80 lg:max-w-none animate-rise [animation-delay:200ms]">
+      {firstDay && next ? (
         <>
           <p className="flex items-center gap-1.5 text-xs font-semibold tracking-wide text-terracota-700 uppercase">
-            <Sparkles aria-hidden="true" strokeWidth={1.75} className="size-4" />
-            {state.status === 'ready' && state.data.upcoming.isToday
-              ? 'Próxima clase hoy'
-              : `Próxima clase · ${formatDay(next.startsAt)}`}
+            <Sparkles aria-hidden="true" strokeWidth={1.75} className="size-4 shrink-0" />
+            {firstDay.relation === 'hoy' ? 'Próxima clase hoy' : `Próxima clase · ${dayHeading(firstDay)}`}
           </p>
           <p className="mt-3 flex flex-wrap items-baseline gap-x-3">
             <span className="font-display text-3xl">{formatTime(next.startsAt)}</span>
@@ -67,14 +67,16 @@ function NextClassCard({ state }: { state: HomeState }) {
 
 function ArchArt() {
   return (
-    <div aria-hidden="true" className="relative mx-auto aspect-[4/5] w-full max-w-[22rem] lg:max-w-md">
+    <div
+      aria-hidden="true"
+      className="relative mx-auto aspect-[4/5] w-full max-w-[12rem] sm:max-w-[18rem] lg:max-w-md"
+    >
       <div className="arch-fill absolute inset-0 overflow-hidden rounded-arch shadow-lg">
-        <div className="ember-glow absolute top-[60%] left-1/2 aspect-square w-[95%] -translate-1/2 animate-breathe" />
-        <div className="absolute top-[60%] left-1/2 aspect-square w-[18%] -translate-1/2 rounded-full bg-terracota-500 shadow-[0_0_3rem_0.75rem_var(--color-terracota-300)]" />
+        <div className="ember-glow absolute top-[52%] left-1/2 aspect-square w-[95%] -translate-1/2 animate-breathe" />
+        <div className="absolute top-[52%] left-1/2 aspect-square w-[18%] -translate-1/2 rounded-full bg-terracota-500 shadow-[0_0_3rem_0.75rem_var(--color-terracota-300)]" />
         <div className="absolute inset-x-0 bottom-0 h-[22%] bg-linear-to-t from-terracota-300/45 to-transparent" />
       </div>
       <div className="absolute inset-[6%] rounded-arch border-2 border-crema/70" />
-      <div className="absolute -bottom-3 left-[-6%] h-1 w-[112%] rounded-full bg-tinta" />
     </div>
   )
 }
@@ -82,12 +84,19 @@ function ArchArt() {
 export function Hero({ state }: { state: HomeState }) {
   return (
     <section aria-labelledby="hero-titulo" className="hero-backdrop overflow-hidden">
-      <div className="container-page grid grid-cols-1 items-center gap-14 pt-12 pb-20 sm:pt-16 lg:grid-cols-[1.1fr_0.9fr] lg:gap-10 lg:pt-20 lg:pb-28">
+      <div className="container-page grid grid-cols-1 items-center gap-8 pt-8 pb-12 sm:gap-14 sm:pt-16 sm:pb-20 lg:grid-cols-[1.1fr_0.9fr] lg:gap-10 lg:pt-20 lg:pb-28">
         <div className="animate-rise">
+          {/* En pantallas estrechas «Valencia» va en su propia línea: ninguna empieza por «·». */}
           <p className="text-xs font-semibold tracking-widest text-terracota-700 uppercase">
-            Estudio boutique de pilates · Valencia
+            <span>Estudio boutique de pilates</span>
+            <span aria-hidden="true" className="hidden sm:inline">
+              {' '}
+              ·{' '}
+            </span>
+            <span className="sr-only sm:hidden">, </span>
+            <span className="block sm:inline">Valencia</span>
           </p>
-          <h1 id="hero-titulo" className="mt-5 text-display">
+          <h1 id="hero-titulo" className="mt-4 text-display sm:mt-5">
             Muévete despacio.{' '}
             <em className="font-display text-terracota-600">Hazte</em> fuerte.
           </h1>
@@ -105,7 +114,7 @@ export function Hero({ state }: { state: HomeState }) {
               Ver horario
             </a>
           </div>
-          <ul className="mt-10 flex flex-wrap gap-x-6 gap-y-2 text-sm text-piedra">
+          <ul className="mt-6 flex flex-wrap sm:mt-10 gap-x-6 gap-y-2 text-sm text-piedra">
             {HIGHLIGHTS.map((item) => (
               <li key={item} className="flex items-center gap-2">
                 <span aria-hidden="true" className="size-1.5 rounded-full bg-terracota-500" />

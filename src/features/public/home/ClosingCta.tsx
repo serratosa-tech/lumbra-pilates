@@ -4,9 +4,9 @@ import { ButtonLink } from '../../../components/ui/index.ts'
 
 export function ClosingCta() {
   return (
-    <section aria-labelledby="cta-titulo" className="py-20 sm:py-24">
+    <section aria-labelledby="cta-titulo" className="py-12 sm:py-20 lg:py-24">
       <div className="container-page">
-        <div className="on-dark relative overflow-hidden rounded-xl bg-tinta px-6 py-14 text-center text-crema sm:px-12">
+        <div className="on-dark relative overflow-hidden rounded-xl bg-tinta px-6 py-10 text-center text-crema sm:px-12 sm:py-14">
           <div aria-hidden="true" className="ember-glow absolute -top-1/2 left-1/2 size-[36rem] max-w-none -translate-x-1/2 opacity-40" />
           <div className="relative">
             <LogoMark surface="dark" className="mx-auto size-14 text-crema" />

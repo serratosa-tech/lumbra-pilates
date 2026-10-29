@@ -45,21 +45,21 @@ function InstructorCard({ instructor, index }: { instructor: Instructor; index: 
 
 export function TeamSection({ state }: { state: HomeState }) {
   return (
-    <section aria-labelledby="equipo-titulo" className="bg-arena-100 py-20 sm:py-24">
+    <section aria-labelledby="equipo-titulo" className="bg-arena-100 py-12 sm:py-20 lg:py-24">
       <div className="container-page">
         <SectionHeading id="equipo-titulo" kicker="Equipo" title="Manos expertas, ritmo tranquilo">
           <p>Tres instructoras certificadas que conocen tu nombre y cómo se mueve tu cuerpo.</p>
         </SectionHeading>
 
         {state.status === 'ready' ? (
-          <ul className="mt-12 grid grid-cols-1 gap-5 lg:grid-cols-3">
+          <ul className="mt-8 grid sm:mt-12 grid-cols-1 gap-5 lg:grid-cols-3">
             {state.data.instructors.map((instructor, i) => (
               <InstructorCard key={instructor.id} instructor={instructor} index={i} />
             ))}
           </ul>
         ) : (
           state.status === 'loading' && (
-            <div role="status" className="mt-12 grid grid-cols-1 gap-5 lg:grid-cols-3">
+            <div role="status" className="mt-8 grid sm:mt-12 grid-cols-1 gap-5 lg:grid-cols-3">
               <span className="sr-only">Cargando el equipo…</span>
               {[0, 1, 2].map((i) => (
                 <Skeleton key={i} className="h-72 rounded-lg" />

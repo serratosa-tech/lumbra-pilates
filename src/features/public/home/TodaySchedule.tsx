@@ -1,10 +1,12 @@
 import { CalendarX2, Clock, RotateCcw, UserRound } from 'lucide-react'
+import { useId } from 'react'
 import { Alert, Badge, Button, ButtonLink, EmptyState, Skeleton } from '../../../components/ui/index.ts'
 import type { ClassSession } from '../../../data/index.ts'
 import { cn } from '../../../lib/cn.ts'
-import { formatDay, formatTime } from '../../../lib/dates.ts'
+import { formatTime } from '../../../lib/dates.ts'
 import { spotsStatus } from './labels.ts'
 import { SectionHeading } from './SectionHeading.tsx'
+import { dayHeading, UPCOMING_LIMIT, type UpcomingDay } from './upcoming.ts'
 import type { HomeState } from './useHomeData.ts'
 
 function SessionRow({ session }: { session: ClassSession }) {
@@ -18,7 +20,7 @@ function SessionRow({ session }: { session: ClassSession }) {
         <time dateTime={session.startsAt}>{time}</time>
       </p>
       <div className="min-w-0">
-        <h3 className="font-sans text-lg font-semibold tracking-normal">{session.name}</h3>
+        <h4 className="font-sans text-lg font-semibold tracking-normal">{session.name}</h4>
         <p className="mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-piedra">
           <span className="inline-flex items-center gap-1.5">
             <UserRound aria-hidden="true" strokeWidth={1.75} className="size-4" />
@@ -51,11 +53,30 @@ function SessionRow({ session }: { session: ClassSession }) {
   )
 }
 
+function DayGroup({ day }: { day: UpcomingDay }) {
+  const headingId = useId()
+  return (
+    <div className="border-b border-arena-200 last:border-b-0">
+      <h3
+        id={headingId}
+        className="border-b border-arena-200 pt-5 pb-3 font-sans text-sm font-semibold tracking-normal text-piedra sm:px-2"
+      >
+        {dayHeading(day)}
+      </h3>
+      <ul aria-labelledby={headingId}>
+        {day.sessions.map((session) => (
+          <SessionRow key={session.id} session={session} />
+        ))}
+      </ul>
+    </div>
+  )
+}
+
 function LoadingList() {
   return (
     <div role="status" className="divide-y divide-arena-200">
       <span className="sr-only">Cargando el horario…</span>
-      {[0, 1, 2].map((i) => (
+      {Array.from({ length: UPCOMING_LIMIT }, (_, i) => (
         <div key={i} className="flex items-center gap-5 py-5 sm:px-2">
           <Skeleton className="h-8 w-16" />
           <div className="flex flex-1 flex-col gap-2">
@@ -68,22 +89,26 @@ function LoadingList() {
   )
 }
 
+function subtitleFor(days: UpcomingDay[] | undefined): string {
+  if (!days || days.length === 0) return 'Las próximas clases, con las plazas libres en tiempo real.'
+  if (days[0].relation !== 'hoy')
+    return 'Hoy ya no quedan clases. Estas son las siguientes, con las plazas libres en tiempo real.'
+  if (days.length > 1) return 'Lo que queda de hoy y lo siguiente en el calendario, con las plazas libres en tiempo real.'
+  return 'Las clases que quedan hoy, con las plazas libres en tiempo real.'
+}
+
 export function TodaySchedule({ state, onRetry }: { state: HomeState; onRetry: () => void }) {
-  const upcoming = state.status === 'ready' ? state.data.upcoming : undefined
-  const firstSession = upcoming?.sessions[0]
-  const subtitle =
-    upcoming && firstSession && !upcoming.isToday
-      ? `Hoy ya no quedan clases. Estas son las del ${formatDay(firstSession.startsAt)}.`
-      : 'Las clases que quedan hoy, con las plazas libres en tiempo real.'
+  const days = state.status === 'ready' ? state.data.upcoming : undefined
+  const title = days && days.length > 0 && days[0].relation !== 'hoy' ? 'Próximas clases' : 'Hoy en Lumbra'
 
   return (
-    <section aria-labelledby="horario-titulo" id="horario-hoy" className="bg-white/60 py-20 sm:py-24">
-      <div className="container-page grid grid-cols-1 gap-10 lg:grid-cols-[0.8fr_1.2fr] lg:gap-16">
+    <section aria-labelledby="horario-titulo" id="horario-hoy" className="bg-white/60 py-12 sm:py-20 lg:py-24">
+      <div className="container-page grid grid-cols-1 gap-8 lg:grid-cols-[0.8fr_1.2fr] lg:gap-16">
         <div>
-          <SectionHeading id="horario-titulo" kicker="Horario" title={upcoming?.isToday === false ? 'Próximas clases' : 'Hoy en Lumbra'}>
-            <p>{subtitle}</p>
+          <SectionHeading id="horario-titulo" kicker="Horario" title={title}>
+            <p>{subtitleFor(days)}</p>
           </SectionHeading>
-          <ButtonLink to="/clases" variant="secondary" className="mt-8">
+          <ButtonLink to="/clases" variant="secondary" className="mt-6 sm:mt-8">
             Ver la semana completa
           </ButtonLink>
         </div>
@@ -105,27 +130,16 @@ export function TodaySchedule({ state, onRetry }: { state: HomeState; onRetry: (
               </Alert>
             </div>
           )}
-          {upcoming && upcoming.sessions.length === 0 && (
+          {days && days.length === 0 && (
             <div className="py-6">
               <EmptyState icon={CalendarX2} title="No hay clases programadas">
                 Esta semana el estudio descansa. Consulta el calendario para ver las próximas fechas.
               </EmptyState>
             </div>
           )}
-          {upcoming && upcoming.sessions.length > 0 && (
-            <>
-              {firstSession && (
-                <p className="border-b border-arena-200 pt-5 pb-3 text-sm font-semibold text-piedra first-letter:uppercase sm:px-2">
-                  {formatDay(firstSession.startsAt)}
-                </p>
-              )}
-              <ul>
-                {upcoming.sessions.map((session) => (
-                  <SessionRow key={session.id} session={session} />
-                ))}
-              </ul>
-            </>
-          )}
+          {days?.map((day) => (
+            <DayGroup key={day.relation} day={day} />
+          ))}
         </div>
       </div>
     </section>

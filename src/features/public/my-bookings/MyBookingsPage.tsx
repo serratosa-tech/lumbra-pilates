@@ -88,7 +88,7 @@ export function MyBookingsPage() {
           {query && state.status === 'ready' && !state.data && (
             <EmptyState icon={SearchX} headingLevel="h2" title="No encontramos ninguna reserva">
               Revisa que el email sea el mismo que usaste al reservar y que el código esté bien escrito (por ejemplo,{' '}
-              <span className="whitespace-nowrap">LUM-7K3Q</span>).
+              <span className="whitespace-nowrap">LUM-XXXX</span>).
             </EmptyState>
           )}
           {state.status === 'ready' && state.data && <BookingResult details={state.data} now={now} />}

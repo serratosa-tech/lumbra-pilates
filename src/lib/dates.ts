@@ -124,17 +124,11 @@ const timeFormatter = new Intl.DateTimeFormat(LOCALE, {
   minute: '2-digit',
 })
 
-const dayFormatter = new Intl.DateTimeFormat(LOCALE, {
+const dateFormatter = new Intl.DateTimeFormat(LOCALE, {
   timeZone: STUDIO_TIME_ZONE,
   weekday: 'long',
   day: 'numeric',
   month: 'long',
-})
-
-const weekdayDayFormatter = new Intl.DateTimeFormat(LOCALE, {
-  timeZone: STUDIO_TIME_ZONE,
-  weekday: 'long',
-  day: 'numeric',
 })
 
 export function isSameDate(a: CalendarDate, b: CalendarDate): boolean {
@@ -146,21 +140,29 @@ export function formatTime(iso: IsoDateTime): string {
   return timeFormatter.format(new Date(iso))
 }
 
-/** «viernes 30» */
-export function formatWeekdayDay(iso: IsoDateTime): string {
-  return weekdayDayFormatter.format(new Date(iso))
+const middayOf = (date: CalendarDate) => studioDateTime(date, 12)
+
+interface DateFormatOptions {
+  /** Con el día de la semana (por defecto). */
+  weekday?: boolean
+  /** Con el mes (por defecto). */
+  month?: boolean
 }
 
-/** «jueves, 29 de octubre» */
-export function formatDay(iso: IsoDateTime): string {
-  return dayFormatter.format(new Date(iso))
+/**
+ * El formato de fecha de toda la app: «viernes 30 de octubre», sin coma tras el día de la semana.
+ * Sin día de la semana, «30 de octubre»; sin mes, «viernes 30». Siempre en minúscula:
+ * al principio de frase o en un encabezado se pasa por `capitalize`.
+ */
+export function formatDate(date: IsoDateTime | CalendarDate, { weekday = true, month = true }: DateFormatOptions = {}): string {
+  const instant = typeof date === 'string' ? new Date(date) : middayOf(date)
+  const parts = Object.fromEntries(dateFormatter.formatToParts(instant).map((p) => [p.type, p.value]))
+  return [weekday && parts.weekday, month ? `${parts.day} de ${parts.month}` : parts.day].filter(Boolean).join(' ')
 }
 
-const capitalize = (text: string) => text.charAt(0).toUpperCase() + text.slice(1)
-
-/** «Jueves, 29 de octubre · 18:30» */
+/** «jueves 29 de octubre · 18:30» */
 export function formatDateTime(iso: IsoDateTime): string {
-  return `${capitalize(formatDay(iso))}${SEP}${formatTime(iso)}`
+  return `${formatDate(iso)}${SEP}${formatTime(iso)}`
 }
 
 /** «18:30–19:20» */
@@ -168,33 +170,21 @@ export function formatTimeRange(iso: IsoDateTime, minutes: number): string {
   return `${formatTime(iso)}–${formatTime(addMinutes(iso, minutes))}`
 }
 
-const middayOf = (date: CalendarDate) => studioDateTime(date, 12)
+/** «jueves 29 de octubre · 18:30–19:20» */
+export function formatDateTimeRange(iso: IsoDateTime, minutes: number): string {
+  return `${formatDate(iso)}${SEP}${formatTimeRange(iso, minutes)}`
+}
 
 const shortWeekdayFormatter = new Intl.DateTimeFormat(LOCALE, { timeZone: STUDIO_TIME_ZONE, weekday: 'short' })
-const longWeekdayFormatter = new Intl.DateTimeFormat(LOCALE, { timeZone: STUDIO_TIME_ZONE, weekday: 'long' })
-const dayMonthFormatter = new Intl.DateTimeFormat(LOCALE, { timeZone: STUDIO_TIME_ZONE, day: 'numeric', month: 'long' })
-const monthFormatter = new Intl.DateTimeFormat(LOCALE, { timeZone: STUDIO_TIME_ZONE, month: 'long' })
 
 /** «lun» */
 export function formatShortWeekday(date: CalendarDate): string {
   return shortWeekdayFormatter.format(middayOf(date)).replace('.', '')
 }
 
-/** «Lunes» */
-export function formatLongWeekday(date: CalendarDate): string {
-  return capitalize(longWeekdayFormatter.format(middayOf(date)))
-}
-
-/** «2 de noviembre» */
-export function formatDayMonth(date: CalendarDate): string {
-  return dayMonthFormatter.format(middayOf(date))
-}
-
 /** «2 al 7 de noviembre» o «30 de noviembre al 5 de diciembre» (de lunes a sábado). */
 export function formatWeekRange(monday: CalendarDate): string {
   const saturday = addDays(monday, 5)
-  if (monday.month === saturday.month) {
-    return `${monday.day} al ${saturday.day} de ${monthFormatter.format(middayOf(monday))}`
-  }
-  return `${formatDayMonth(monday)} al ${formatDayMonth(saturday)}`
+  const end = formatDate(saturday, { weekday: false })
+  return monday.month === saturday.month ? `${monday.day} al ${end}` : `${formatDate(monday, { weekday: false })} al ${end}`
 }

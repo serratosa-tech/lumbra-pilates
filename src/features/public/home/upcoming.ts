@@ -2,12 +2,12 @@ import type { ClassSession, DataSource } from '../../../data/index.ts'
 import {
   addDays,
   dayRange,
-  formatDay,
-  formatWeekdayDay,
+  formatDate,
   isSameDate,
   studioDate,
   studioDateTime,
 } from '../../../lib/dates.ts'
+import { capitalize } from '../../../lib/text.ts'
 
 /** Clases que muestra la portada como máximo. */
 export const UPCOMING_LIMIT = 4
@@ -53,12 +53,10 @@ export async function loadUpcoming(ds: DataSource, now: Date, limit = UPCOMING_L
   return days
 }
 
-const capitalize = (text: string) => text.charAt(0).toUpperCase() + text.slice(1)
-
-/** «Hoy, jueves 29», «Mañana, viernes 30» o «Lunes, 2 de noviembre». */
+/** «Hoy, jueves 29», «Mañana, viernes 30» o «Lunes 2 de noviembre». */
 export function dayHeading(day: UpcomingDay): string {
   const iso = day.sessions[0].startsAt
-  if (day.relation === 'hoy') return `Hoy, ${formatWeekdayDay(iso)}`
-  if (day.relation === 'manana') return `Mañana, ${formatWeekdayDay(iso)}`
-  return capitalize(formatDay(iso))
+  if (day.relation === 'hoy') return `Hoy, ${formatDate(iso, { month: false })}`
+  if (day.relation === 'manana') return `Mañana, ${formatDate(iso, { month: false })}`
+  return capitalize(formatDate(iso))
 }

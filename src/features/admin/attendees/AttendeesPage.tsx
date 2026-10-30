@@ -4,8 +4,8 @@ import { spotsStatus } from '../../../components/schedule/labels.ts'
 import { Seo } from '../../../components/Seo.tsx'
 import { Alert, Badge, Button, EmptyState, Skeleton } from '../../../components/ui/index.ts'
 import { cn } from '../../../lib/cn.ts'
-import { formatDayMonth, formatLongWeekday, formatTime, isSameDate, studioDate } from '../../../lib/dates.ts'
-import { SEP } from '../../../lib/text.ts'
+import { formatDate, formatTime, isSameDate, studioDate } from '../../../lib/dates.ts'
+import { capitalize, SEP } from '../../../lib/text.ts'
 import { useAsyncData } from '../../../lib/useAsyncData.ts'
 import { useNow } from '../../../lib/useNow.ts'
 import { PanelHeader } from '../PanelHeader.tsx'
@@ -68,7 +68,7 @@ function SessionPicker({ now }: { now: Date }) {
                   id={`asist-${day.date.day}`}
                   className="flex items-center gap-2 border-b border-arena-200 py-3 font-sans text-base font-semibold tracking-normal"
                 >
-                  {formatLongWeekday(day.date)}, {formatDayMonth(day.date)}
+                  {capitalize(formatDate(day.date))}
                   {isSameDate(day.date, today) && <Badge tone="terracota">Hoy</Badge>}
                 </h2>
                 <ul className="divide-y divide-arena-200">

@@ -19,6 +19,7 @@ import {
   Textarea,
   useToast,
 } from '../../../components/ui/index.ts'
+import { CANCELLATION_LIMIT_HOURS } from '../../../data/index.ts'
 import { SEP } from '../../../lib/text.ts'
 import { SWATCHES } from './swatches.ts'
 
@@ -73,8 +74,12 @@ function DemoForm() {
         {(props) => <Textarea {...props} rows={3} />}
       </Field>
       <Field label="Campo deshabilitado">{(props) => <Input {...props} disabled value="No editable" readOnly />}</Field>
-      <Checkbox label="Acepto que esto es una demo y no introduzco datos reales" defaultChecked />
-      <Checkbox label="Opción deshabilitada" disabled />
+      {/* La etiqueta de la casilla ya lleva relleno vertical (objetivo de 44 px): sin separación extra
+          el espacio visible entre las dos casillas queda igual que entre los demás campos. */}
+      <div className="flex flex-col">
+        <Checkbox label="Acepto que esto es una demo y no introduzco datos reales" defaultChecked />
+        <Checkbox label="Opción deshabilitada" disabled />
+      </div>
       <div>
         <Button type="submit" loading={sending} icon={<Send aria-hidden="true" strokeWidth={1.75} className="size-4" />}>
           Enviar
@@ -98,7 +103,7 @@ export function DesignSystemPage() {
       />
       <p className="text-xs font-semibold tracking-widest text-terracota-700 uppercase">Lumbra Pilates</p>
       <h1 className="mt-3 text-3xl">Sistema de diseño</h1>
-      <p className="mt-4 max-w-2xl text-lg text-tinta-700">
+      <p className="mt-4 mb-10 max-w-2xl text-lg text-tinta-700">
         Marca, tokens y componentes base con sus estados. Todo lo que ves aquí es lo que usa la app.
       </p>
 
@@ -111,7 +116,8 @@ export function DesignSystemPage() {
             <LogoFull surface="dark" className="h-14 w-auto text-crema" />
           </div>
           <Card className="flex items-center justify-center gap-8 py-10">
-            <LogoMark title="Símbolo de Lumbra" className="size-16 text-tinta" />
+            {/* El dibujo del símbolo está algo bajo dentro de su caja: se sube un poco para centrarlo a la vista. */}
+            <LogoMark title="Símbolo de Lumbra" className="size-16 -translate-y-0.5 text-tinta" />
             <img src="/favicon.svg" alt="Favicon de Lumbra" width="48" height="48" className="size-12" />
           </Card>
           <Card className="flex flex-col justify-center gap-2 py-8">
@@ -161,8 +167,10 @@ export function DesignSystemPage() {
           <Badge tone="error">Completa</Badge>
         </div>
         <div className="mt-6 grid grid-cols-1 gap-4 lg:grid-cols-2">
-          <Alert tone="info" title="Información">Las clases se pueden cancelar hasta 12 horas antes.</Alert>
-          <Alert tone="exito" title="Reserva confirmada">Te esperamos el jueves a las 19:15.</Alert>
+          <Alert tone="info" title="Información">
+            Las clases se pueden cancelar hasta {CANCELLATION_LIMIT_HOURS} horas antes.
+          </Alert>
+          <Alert tone="exito" title="Reserva confirmada">Te esperamos el jueves a las 18:00.</Alert>
           <Alert tone="aviso" title="Lista de espera">Te avisaremos si se libera una plaza.</Alert>
           <Alert tone="error" title="No se ha podido reservar">Inténtalo de nuevo en unos segundos.</Alert>
         </div>

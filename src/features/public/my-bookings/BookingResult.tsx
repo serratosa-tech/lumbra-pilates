@@ -4,13 +4,15 @@ import { BOOKING_STATUS_LABELS, LEVEL_LABELS } from '../../../components/schedul
 import { Alert, Badge, Button, ButtonLink, Card, Modal, useToast } from '../../../components/ui/index.ts'
 import {
   CANCELLATION_LIMIT_HOURS,
+  canCancelOnline,
   cancellationDeadline,
   errorMessage,
   getDataSource,
   type BookingDetails,
 } from '../../../data/index.ts'
-import { formatDateTime, formatDay, formatTime, formatTimeRange } from '../../../lib/dates.ts'
+import { formatDate, formatDateTime, formatDateTimeRange, formatTime } from '../../../lib/dates.ts'
 import { STUDIO } from '../../../lib/site.ts'
+import { capitalize } from '../../../lib/text.ts'
 import { downloadBookingCalendar } from '../bookingCalendar.ts'
 
 type ResultView =
@@ -29,11 +31,11 @@ function viewOf({ booking, session }: BookingDetails, now: Date): ResultView {
   if (booking.status === 'cancelled') return 'cancelled'
   if (booking.status === 'waitlisted') return started ? 'missed_waitlist' : 'waitlisted'
   if (started) return 'attended'
-  if (now > cancellationDeadline(session)) return 'too_late'
+  if (!canCancelOnline(session, now)) return 'too_late'
   return booking.promotedAt ? 'promoted' : 'confirmed'
 }
 
-const at = (iso: string) => `${formatDay(iso)} a las ${formatTime(iso)}`
+const at = (iso: string) => `${formatDate(iso)} a las ${formatTime(iso)}`
 
 function statusMessage(view: ResultView, details: BookingDetails): ReactNode {
   const { booking, session, waitlistPosition } = details
@@ -136,7 +138,7 @@ export function BookingResult({ details, now }: { details: BookingDetails; now: 
   }
 
   const facts: Array<{ key: string; icon: LucideIcon; text: ReactNode }> = [
-    { key: 'when', icon: Clock, text: `${formatDateTime(session.startsAt)} (${formatTimeRange(session.startsAt, session.durationMinutes)})` },
+    { key: 'when', icon: Clock, text: capitalize(formatDateTimeRange(session.startsAt, session.durationMinutes)) },
     { key: 'instructor', icon: UserRound, text: `Con ${session.instructor}` },
     { key: 'level', icon: Gauge, text: LEVEL_LABELS[session.level] },
     { key: 'name', icon: Contact, text: `A nombre de ${booking.name}` },
@@ -167,7 +169,7 @@ export function BookingResult({ details, now }: { details: BookingDetails; now: 
         {(view === 'confirmed' || view === 'promoted' || view === 'too_late') && (
           <Button
             variant="secondary"
-            onClick={() => downloadBookingCalendar(details)}
+            onClick={() => downloadBookingCalendar(details, now)}
             icon={<CalendarPlus aria-hidden="true" strokeWidth={1.75} className="size-4" />}
           >
             Añadir al calendario

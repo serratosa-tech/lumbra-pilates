@@ -5,7 +5,8 @@ import { SessionCardSkeleton } from '../../../components/schedule/SessionCardSke
 import { Button, EmptyState } from '../../../components/ui/index.ts'
 import type { ClassSession } from '../../../data/index.ts'
 import { cn } from '../../../lib/cn.ts'
-import { formatDayMonth, formatLongWeekday, formatShortWeekday, type CalendarDate } from '../../../lib/dates.ts'
+import { formatDate, formatShortWeekday, type CalendarDate } from '../../../lib/dates.ts'
+import { capitalize } from '../../../lib/text.ts'
 
 export interface ScheduleDay {
   weekday: number
@@ -45,7 +46,7 @@ export function DayList({ day, now, onOpen, onClearFilters, panelId, labelledBy 
   return (
     <div id={panelId} role="tabpanel" aria-labelledby={labelledBy} className="mt-5">
       <h2 className="mb-4 font-sans text-base font-semibold tracking-normal text-tinta-700">
-        {formatLongWeekday(day.date)}, {formatDayMonth(day.date)}
+        {capitalize(formatDate(day.date))}
       </h2>
       {day.sessions.length > 0 ? (
         <ul className="flex flex-col gap-3">
@@ -93,7 +94,7 @@ function DayColumn({ day, now, onOpen, onClearFilters }: ViewProps & { day: Sche
           <span className="font-display text-lg tabular-nums">{day.date.day}</span>
         </span>
         <span className="sr-only">
-          {formatLongWeekday(day.date)} {formatDayMonth(day.date)}
+          {capitalize(formatDate(day.date))}
           {day.isToday && ', hoy'}
         </span>
         {day.isToday && (

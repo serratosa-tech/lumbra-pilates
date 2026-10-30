@@ -44,8 +44,12 @@ const state: StudioState = {
   ],
 }
 
+const WEEK = ['2026-11-01T23:00:00.000Z', '2026-11-08T23:00:00.000Z'] as const
+/** Domingo anterior: ninguna clase de la semana ha empezado. */
+const BEFORE_WEEK = new Date('2026-11-01T12:00:00.000Z')
+
 describe('métricas de la semana', () => {
-  const metrics = computeMetrics(state, '2026-11-01T23:00:00.000Z', '2026-11-08T23:00:00.000Z')
+  const metrics = computeMetrics(state, ...WEEK, BEFORE_WEEK)
 
   it('calcula ocupación, completas, lista de espera y cancelaciones sin contar las clases canceladas', () => {
     expect(metrics.sessions).toBe(3)
@@ -65,8 +69,18 @@ describe('métricas de la semana', () => {
     ])
   })
 
+  it('la lista de espera solo cuenta en las clases que aún no han empezado', () => {
+    // La clase de las 8:00 del lunes (con 2 en espera) ya ha empezado: nadie puede conseguir plaza.
+    const started = computeMetrics(state, ...WEEK, new Date('2026-11-02T07:10:00.000Z'))
+    expect(started.waitlisted).toBe(0)
+    // El resto de métricas no depende de la hora.
+    expect(started).toMatchObject({ sessions: 3, fullSessions: 1, cancellations: 2 })
+    // Justo antes de empezar todavía cuenta.
+    expect(computeMetrics(state, ...WEEK, new Date('2026-11-02T06:59:00.000Z')).waitlisted).toBe(2)
+  })
+
   it('una semana sin clases da ceros, no divisiones entre cero', () => {
-    const empty = computeMetrics(state, '2026-12-01T00:00:00.000Z', '2026-12-08T00:00:00.000Z')
+    const empty = computeMetrics(state, '2026-12-01T00:00:00.000Z', '2026-12-08T00:00:00.000Z', BEFORE_WEEK)
     expect(empty).toMatchObject({ sessions: 0, occupancy: 0, cancellationRate: 0, slots: [] })
   })
 })

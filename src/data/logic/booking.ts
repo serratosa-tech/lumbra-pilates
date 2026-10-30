@@ -76,6 +76,11 @@ export function cancellationDeadline(session: Pick<SessionRecord, 'startsAt'>): 
   return new Date(startMs(session) - CANCELLATION_LIMIT_HOURS * 60 * 60_000)
 }
 
+/** Si una plaza confirmada en esta clase aún se puede cancelar online (también vale antes de reservar). */
+export function canCancelOnline(session: Pick<SessionRecord, 'startsAt'>, now: Date): boolean {
+  return now <= cancellationDeadline(session)
+}
+
 /**
  * Sube de la lista de espera, por orden de llegada, tantas personas como plazas libres haya.
  */
@@ -120,7 +125,7 @@ export function cancelByClient(
 
   const session = getSessionRecord(state, booking.sessionId)
   if (now.getTime() >= startMs(session)) throw new DataError('past')
-  if (booking.status === 'confirmed' && now > cancellationDeadline(session)) throw new DataError('too_late')
+  if (booking.status === 'confirmed' && !canCancelOnline(session, now)) throw new DataError('too_late')
   return cancel(state, booking, now)
 }
 

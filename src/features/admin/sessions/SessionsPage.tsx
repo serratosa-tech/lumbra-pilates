@@ -17,15 +17,14 @@ import {
 import { errorMessage, getDataSource, type ClassSession } from '../../../data/index.ts'
 import {
   addDays,
+  formatDate,
   formatDateTime,
-  formatDayMonth,
-  formatLongWeekday,
   formatTime,
   formatTimeRange,
   isSameDate,
   studioDate,
 } from '../../../lib/dates.ts'
-import { SEP } from '../../../lib/text.ts'
+import { capitalize, SEP } from '../../../lib/text.ts'
 import { useAsyncData } from '../../../lib/useAsyncData.ts'
 import { useNow } from '../../../lib/useNow.ts'
 import { PanelHeader } from '../PanelHeader.tsx'
@@ -226,7 +225,7 @@ export function SessionsPage() {
                   id={`dia-${day.date.day}`}
                   className="flex flex-wrap items-center gap-x-2 gap-y-1 border-b border-arena-200 py-3 font-sans text-base font-semibold tracking-normal"
                 >
-                  {formatLongWeekday(day.date)}, {formatDayMonth(day.date)}
+                  {capitalize(formatDate(day.date))}
                   {isSameDate(day.date, today) && <Badge tone="terracota">Hoy</Badge>}
                   <span className="ml-auto text-sm font-normal whitespace-nowrap text-piedra">
                     <span className="sr-only">, </span>

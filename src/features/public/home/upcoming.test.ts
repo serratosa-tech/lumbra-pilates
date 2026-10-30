@@ -36,7 +36,7 @@ describe('loadUpcoming', () => {
   it('el sábado por la tarde salta el domingo y titula con la fecha completa', async () => {
     const days = await loadUpcoming(ds, new Date('2026-10-31T15:00:00.000Z'))
     expect(days[0].relation).toBe('otro')
-    expect(dayHeading(days[0])).toBe('Lunes, 2 de noviembre')
+    expect(dayHeading(days[0])).toBe('Lunes 2 de noviembre')
   })
 
   it('sin clases en el horizonte devuelve una lista vacía', async () => {

@@ -25,7 +25,7 @@ export function WeekNav({ canGoBack, canGoForward, isDefaultWeek, onChange, onTo
       >
         <span className="hidden sm:inline">Anterior</span>
       </Button>
-      <Button variant="ghost" onClick={onToday} disabled={isDefaultWeek}>
+      <Button variant="secondary" onClick={onToday} disabled={isDefaultWeek}>
         Hoy
       </Button>
       <Button

@@ -1,7 +1,14 @@
 import { describe, expect, it } from 'vitest'
 import { errorCodeOf as codeOf, meta, minutesFromNow, NOW, person, session, stateWith } from '../../test/fixtures.ts'
 import type { StudioState } from '../types.ts'
-import { cancelBookingById, cancelByClient, cancellationDeadline, placeBooking, waitlistPosition } from './booking.ts'
+import {
+  canCancelOnline,
+  cancelBookingById,
+  cancelByClient,
+  cancellationDeadline,
+  placeBooking,
+  waitlistPosition,
+} from './booking.ts'
 import { confirmedOf, waitlistOf } from './state.ts'
 
 /** Clase de 2 plazas con Ana y Bea confirmadas y Carla y Dani en lista de espera. */
@@ -53,6 +60,22 @@ describe('cancelar una reserva', () => {
     expect(cancellationDeadline({ startsAt: '2026-11-02T10:00:00.000Z' }).toISOString()).toBe(NOW.toISOString())
     expect(cancelByClient(state, ana.email, ana.code, NOW).result.booking.status).toBe('cancelled')
     expect(codeOf(() => cancelByClient(state, ana.email, ana.code, minutesFromNow(1)))).toBe('too_late')
+  })
+
+  it('sabe si aún se puede cancelar online: hasta 2 horas antes, incluido el minuto exacto', () => {
+    const startsAt = '2026-11-02T10:00:00.000Z' // 2 h después de NOW
+    expect(canCancelOnline({ startsAt }, minutesFromNow(-30))).toBe(true)
+    expect(canCancelOnline({ startsAt }, NOW)).toBe(true)
+    expect(canCancelOnline({ startsAt }, minutesFromNow(1))).toBe(false)
+    expect(canCancelOnline({ startsAt }, minutesFromNow(119))).toBe(false)
+  })
+
+  it('una plaza reservada a menos de 2 horas ya no se puede cancelar online', () => {
+    let state = stateWith(session({ startsAt: '2026-11-02T09:30:00.000Z' })) // 1 h 30 min después de NOW
+    state = placeBooking(state, person('Ana'), meta()).state
+    const ana = byName(state, 'Ana')
+    expect(ana.status).toBe('confirmed')
+    expect(codeOf(() => cancelByClient(state, ana.email, ana.code, NOW))).toBe('too_late')
   })
 
   it('la lista de espera se puede dejar hasta que empieza la clase', () => {

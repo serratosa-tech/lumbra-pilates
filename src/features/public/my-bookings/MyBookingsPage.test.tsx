@@ -3,7 +3,10 @@ import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router'
 import { beforeEach, describe, expect, it } from 'vitest'
 import { ToastProvider } from '../../../components/ui/index.ts'
-import { DEMO_EXAMPLES, getDataSource, resetDemoData } from '../../../data/index.ts'
+import { DEMO_EXAMPLES, getDataSource, resetDemoData, type BookingDetails } from '../../../data/index.ts'
+import { formatDateTimeRange } from '../../../lib/dates.ts'
+import { capitalize } from '../../../lib/text.ts'
+import { BookingResult } from './BookingResult.tsx'
 import { MyBookingsPage } from './MyBookingsPage.tsx'
 
 function renderPage() {
@@ -11,6 +14,17 @@ function renderPage() {
     <MemoryRouter>
       <ToastProvider>
         <MyBookingsPage />
+      </ToastProvider>
+    </MemoryRouter>,
+  )
+}
+
+/** La reserva encontrada, vista en un momento concreto. */
+function renderResult(details: BookingDetails, now: Date) {
+  return render(
+    <MemoryRouter>
+      <ToastProvider>
+        <BookingResult details={details} now={now} />
       </ToastProvider>
     </MemoryRouter>,
   )
@@ -28,7 +42,8 @@ describe('Mis reservas', () => {
     await user.type(screen.getByLabelText(/Código de reserva/), 'ABC')
     await user.click(screen.getByRole('button', { name: 'Consultar reserva' }))
     const code = screen.getByLabelText(/Código de reserva/)
-    expect(code).toHaveAccessibleDescription(/El código tiene la forma LUM-7K3Q/)
+    expect(code).toHaveAccessibleDescription(/El código tiene la forma LUM-XXXX/)
+    expect(code).toHaveAttribute('placeholder', 'LUM-XXXX')
     expect(code).toHaveFocus()
   })
 
@@ -58,6 +73,25 @@ describe('Mis reservas', () => {
 
     const after = await getDataSource().findBooking(confirmed.email, confirmed.code)
     expect(after?.session).toMatchObject({ waitlistCount: 0, bookedCount: before?.session.bookedCount })
+  })
+
+  it('muestra la fecha con la franja horaria una sola vez y sin coma tras el día de la semana', async () => {
+    const [confirmed] = DEMO_EXAMPLES
+    const details = (await getDataSource().findBooking(confirmed.email, confirmed.code))!
+    const { startsAt, durationMinutes } = details.session
+    renderResult(details, new Date(new Date(startsAt).getTime() - 24 * 60 * 60_000))
+    const when = capitalize(formatDateTimeRange(startsAt, durationMinutes))
+    expect(when).toMatch(/^[A-Z][a-zé]+ \d{1,2} de [a-z]+\s·\s\d\d:\d\d–\d\d:\d\d$/)
+    expect(screen.getByText(when)).toBeInTheDocument()
+  })
+
+  it('pasado el plazo de 2 horas no ofrece cancelar ni dice hasta cuándo se puede', async () => {
+    const [confirmed] = DEMO_EXAMPLES
+    const details = (await getDataSource().findBooking(confirmed.email, confirmed.code))!
+    renderResult(details, new Date(new Date(details.session.startsAt).getTime() - 90 * 60_000))
+    expect(screen.getByText('Ya no se puede cancelar online')).toBeInTheDocument()
+    expect(screen.queryByText(/Puedes cancelar/)).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Cancelar reserva' })).not.toBeInTheDocument()
   })
 
   it('muestra la posición en la lista de espera', async () => {

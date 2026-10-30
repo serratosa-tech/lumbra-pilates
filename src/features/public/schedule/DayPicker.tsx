@@ -1,7 +1,8 @@
 import { useEffect, useRef, type KeyboardEvent } from 'react'
 import { plural } from '../../../components/schedule/labels.ts'
 import { cn } from '../../../lib/cn.ts'
-import { formatDayMonth, formatLongWeekday, formatShortWeekday } from '../../../lib/dates.ts'
+import { formatDate, formatShortWeekday } from '../../../lib/dates.ts'
+import { capitalize } from '../../../lib/text.ts'
 import { useScrollFade } from '../../../lib/useScrollFade.ts'
 import type { ScheduleDay } from './ScheduleViews.tsx'
 import { dayTabId } from './useScheduleParams.ts'
@@ -59,7 +60,7 @@ export function DayPicker({ days, selected, onSelect, panelId }: DayPickerProps)
             aria-selected={isSelected}
             aria-controls={panelId}
             tabIndex={isSelected ? 0 : -1}
-            aria-label={`${formatLongWeekday(day.date)} ${formatDayMonth(day.date)}${day.isToday ? ', hoy' : ''}, ${plural(day.sessions.length, 'clase')}`}
+            aria-label={`${capitalize(formatDate(day.date))}${day.isToday ? ', hoy' : ''}, ${plural(day.sessions.length, 'clase')}`}
             onClick={() => onSelect(day.weekday)}
             className={cn(
               'flex min-w-[4.5rem] flex-1 shrink-0 snap-start flex-col items-center rounded-md border px-3 py-2 transition-colors duration-(--duration-fast)',

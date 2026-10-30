@@ -11,7 +11,7 @@ export const SWATCHES = [
   { token: 'tinta', hex: '#2a201b', className: 'bg-tinta' },
   { token: 'tinta-700', hex: '#4a3b32', className: 'bg-tinta-700' },
   { token: 'piedra', hex: '#6e5b4e', className: 'bg-piedra' },
-  { token: 'exito', hex: '#3d6b4f', className: 'bg-exito' },
+  { token: 'éxito', hex: '#3d6b4f', className: 'bg-exito' },
   { token: 'aviso', hex: '#8a5a12', className: 'bg-aviso' },
   { token: 'error', hex: '#a3342b', className: 'bg-error' },
   { token: 'info', hex: '#3f5e7a', className: 'bg-info' },

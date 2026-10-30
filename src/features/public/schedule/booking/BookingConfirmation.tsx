@@ -1,13 +1,15 @@
 import { CalendarPlus, CircleCheck, Copy, Hourglass, Ticket } from 'lucide-react'
 import { useEffect, useRef } from 'react'
 import { Button, ButtonLink, useToast } from '../../../../components/ui/index.ts'
-import { CANCELLATION_LIMIT_HOURS, type BookingDetails } from '../../../../data/index.ts'
+import { CANCELLATION_LIMIT_HOURS, canCancelOnline, type BookingDetails } from '../../../../data/index.ts'
 import { cn } from '../../../../lib/cn.ts'
-import { formatDay, formatTime, formatTimeRange } from '../../../../lib/dates.ts'
+import { formatDate, formatTime, formatTimeRange } from '../../../../lib/dates.ts'
+import { STUDIO } from '../../../../lib/site.ts'
+import { capitalize } from '../../../../lib/text.ts'
 import { downloadBookingCalendar } from '../../bookingCalendar.ts'
 
 /** Resultado de la reserva: código, resumen y siguientes pasos. */
-export function BookingConfirmation({ details }: { details: BookingDetails }) {
+export function BookingConfirmation({ details, now }: { details: BookingDetails; now: Date }) {
   const { booking, session, waitlistPosition } = details
   const toast = useToast()
   const headingRef = useRef<HTMLParagraphElement>(null)
@@ -27,7 +29,7 @@ export function BookingConfirmation({ details }: { details: BookingDetails }) {
 
   const summary = [
     ['Clase', session.name],
-    ['Día', formatDay(session.startsAt)],
+    ['Día', capitalize(formatDate(session.startsAt))],
     ['Hora', formatTimeRange(session.startsAt, session.durationMinutes)],
     ['Instructora', session.instructor],
     ['A nombre de', booking.name],
@@ -50,7 +52,7 @@ export function BookingConfirmation({ details }: { details: BookingDetails }) {
       </span>
       <p ref={headingRef} tabIndex={-1} className="mt-4 max-w-sm text-lg font-semibold outline-none">
         {confirmed
-          ? `Te esperamos el ${formatDay(session.startsAt)} a las ${formatTime(session.startsAt)}.`
+          ? `Te esperamos el ${formatDate(session.startsAt)} a las ${formatTime(session.startsAt)}.`
           : `Estás en el puesto ${waitlistPosition} de la lista de espera.`}
       </p>
       {!confirmed && (
@@ -81,8 +83,11 @@ export function BookingConfirmation({ details }: { details: BookingDetails }) {
       </dl>
 
       <p className="mt-4 max-w-sm text-sm text-piedra">
-        Guarda el código: junto con tu email te permite consultar la reserva y cancelarla hasta{' '}
-        {CANCELLATION_LIMIT_HOURS} horas antes.
+        {!confirmed
+          ? 'Guarda el código: junto con tu email te permite consultar tu puesto y salir de la lista de espera hasta que empiece la clase.'
+          : canCancelOnline(session, now)
+            ? `Guarda el código: junto con tu email te permite consultar la reserva y cancelarla hasta ${CANCELLATION_LIMIT_HOURS} horas antes.`
+            : `Guarda el código: junto con tu email te permite consultar la reserva. Como la clase empieza en menos de ${CANCELLATION_LIMIT_HOURS} horas, ya no se puede cancelar online; si no puedes venir, escribe a ${STUDIO.email}.`}
       </p>
 
       <div className="mt-5 flex w-full flex-wrap justify-center gap-3">
@@ -90,7 +95,7 @@ export function BookingConfirmation({ details }: { details: BookingDetails }) {
           <Button
             variant="secondary"
             onClick={() => {
-              downloadBookingCalendar(details)
+              downloadBookingCalendar(details, now)
               toast({ title: 'Evento descargado', description: 'Ábrelo para añadir la clase a tu calendario.' })
             }}
             icon={<CalendarPlus aria-hidden="true" strokeWidth={1.75} className="size-4" />}

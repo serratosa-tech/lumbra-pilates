@@ -14,15 +14,18 @@ async function classWithSpots(): Promise<ClassSession> {
   return sessions.find((s) => s.status === 'scheduled' && s.bookedCount < s.capacity - 1)!
 }
 
-function renderDialog(session: ClassSession) {
+function renderDialog(session: ClassSession, now = new Date()) {
   return render(
     <MemoryRouter>
       <ToastProvider>
-        <BookingDialog classId={session.id} now={new Date()} onClose={() => {}} />
+        <BookingDialog classId={session.id} now={now} onClose={() => {}} />
       </ToastProvider>
     </MemoryRouter>,
   )
 }
+
+const minutesBefore = (session: ClassSession, minutes: number) =>
+  new Date(new Date(session.startsAt).getTime() - minutes * 60_000)
 
 async function fillForm(user: ReturnType<typeof userEvent.setup>, email = 'nora.vidal@correo.example') {
   await user.type(screen.getByLabelText(/Nombre y apellidos/), 'Nora Vidal')
@@ -72,5 +75,38 @@ describe('reserva desde el detalle de una clase', () => {
     await user.click(screen.getByRole('button', { name: /Reservar plaza/ }))
     expect(await screen.findByText('Ya tienes esta clase reservada')).toBeInTheDocument()
     expect(screen.getByLabelText(/Nombre y apellidos/)).toHaveValue('Nora Vidal')
+  })
+
+  it('con más de 2 horas de margen no avisa y la confirmación ofrece cancelar hasta 2 horas antes', async () => {
+    const user = userEvent.setup()
+    const session = await classWithSpots()
+    renderDialog(session, minutesBefore(session, 180))
+    await screen.findByRole('button', { name: /Reservar plaza/ })
+    expect(screen.queryByText('Sin cancelación online')).not.toBeInTheDocument()
+    expect(screen.getByText(/Puedes cancelar hasta 2 horas antes/)).toBeInTheDocument()
+
+    await fillForm(user)
+    await user.click(screen.getByRole('button', { name: /Reservar plaza/ }))
+    const dialog = await screen.findByRole('dialog', { name: '¡Plaza reservada!' })
+    expect(within(dialog).getByText(/cancelarla hasta 2 horas antes/)).toBeInTheDocument()
+  })
+
+  it('si la clase empieza en menos de 2 horas, avisa antes de reservar y no promete cancelar', async () => {
+    const user = userEvent.setup()
+    const session = await classWithSpots()
+    renderDialog(session, minutesBefore(session, 90))
+    await screen.findByRole('button', { name: /Reservar plaza/ })
+
+    expect(screen.getByText('Sin cancelación online')).toBeInTheDocument()
+    expect(
+      screen.getByText(/Esta clase empieza en menos de 2 horas: una vez reservada no podrás cancelarla online/),
+    ).toBeInTheDocument()
+    expect(screen.queryByText(/Puedes cancelar hasta/)).not.toBeInTheDocument()
+
+    await fillForm(user)
+    await user.click(screen.getByRole('button', { name: /Reservar plaza/ }))
+    const dialog = await screen.findByRole('dialog', { name: '¡Plaza reservada!' })
+    expect(within(dialog).getByText(/ya no se puede cancelar online/)).toBeInTheDocument()
+    expect(within(dialog).queryByText(/cancelarla hasta/)).not.toBeInTheDocument()
   })
 })

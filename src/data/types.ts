@@ -135,6 +135,7 @@ export interface WeekMetrics {
   /** De 0 a 1. */
   occupancy: number
   fullSessions: number
+  /** Personas en lista de espera de clases que aún no han empezado. */
   waitlisted: number
   cancellations: number
   /** De 0 a 1, sobre las reservas de la semana (sin contar las de clases canceladas). */

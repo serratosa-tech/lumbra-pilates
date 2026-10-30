@@ -254,7 +254,7 @@ export function createDemoDataSource(options: DemoOptions = {}): DemoDataSource 
     getMetrics: (from, to) =>
       run(() => {
         requireStudio()
-        return computeMetrics(current(), from, to)
+        return computeMetrics(current(), from, to, now())
       }),
 
     reset: () =>

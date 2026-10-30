@@ -22,6 +22,48 @@ interface SessionCardProps {
 // El botón o enlace se extiende con ::after a toda la tarjeta; el anillo de foco lo pinta la tarjeta.
 const STRETCHED = 'text-left after:absolute after:inset-0 after:rounded-[inherit] focus-visible:outline-none'
 
+/**
+ * Clase que ya ha empezado: solo hora, nombre y estado, atenuada, para que destaquen las que se pueden reservar.
+ * El contraste del texto se mantiene (sin opacidad).
+ */
+function PastSessionCard({ session, now, compact, Heading }: { session: ClassSession; now: Date; compact: boolean; Heading: 'h3' | 'h4' }) {
+  const status = spotsStatus(session, now)
+  const time = formatTime(session.startsAt)
+  const timeTag = <time dateTime={session.startsAt}>{time}</time>
+  const heading = (
+    <Heading className={cn('min-w-0 font-sans font-semibold tracking-normal', compact ? 'text-xs leading-snug' : 'flex-1 text-base')}>
+      {session.name}
+      <span className="sr-only">{`, ${time}, ${status.label}`}</span>
+    </Heading>
+  )
+  const label = (
+    <span aria-hidden="true" className="text-xs font-semibold whitespace-nowrap">
+      {status.label}
+    </span>
+  )
+  const card = 'rounded-md border border-dashed border-arena-200 bg-crema text-piedra'
+
+  // En las columnas de escritorio no cabe todo en una fila: hora y estado arriba, el nombre debajo.
+  if (compact) {
+    return (
+      <article className={cn(card, 'flex flex-col gap-1 px-3 py-2')}>
+        <p className="flex flex-wrap items-baseline justify-between gap-x-2">
+          <span className="font-display text-base leading-tight tabular-nums">{timeTag}</span>
+          {label}
+        </p>
+        {heading}
+      </article>
+    )
+  }
+  return (
+    <article className={cn(card, 'flex flex-wrap items-center gap-x-4 gap-y-1 px-4 py-2.5 sm:px-5')}>
+      <p className="w-[5ch] shrink-0 font-display text-xl leading-none tabular-nums">{timeTag}</p>
+      {heading}
+      {label}
+    </article>
+  )
+}
+
 /** Tarjeta de una clase del horario. Las pasadas y canceladas se muestran, pero no se pueden abrir. */
 export function SessionCard({ session, now, variant = 'row', onOpen, to, headingLevel: Heading = 'h3' }: SessionCardProps) {
   const status = spotsStatus(session, now)
@@ -30,6 +72,8 @@ export function SessionCard({ session, now, variant = 'row', onOpen, to, heading
   const full = status.state === 'full'
   const accessibleSuffix = `, ${time}, ${status.label}`
   const compact = variant === 'compact'
+
+  if (status.state === 'past') return <PastSessionCard session={session} now={now} compact={compact} Heading={Heading} />
 
   const title = interactive ? (
     to ? (

@@ -13,7 +13,7 @@ function validateCode(code: string): ReactNode {
   if (!isBookingCode(normalizeCode(code)))
     return (
       <>
-        El código tiene la forma <span className="whitespace-nowrap">LUM-7K3Q</span>: cuatro letras o números tras
+        El código tiene la forma <span className="whitespace-nowrap">LUM-XXXX</span>: cuatro letras o números tras
         «LUM-».
       </>
     )
@@ -75,7 +75,7 @@ export function LookupForm({ initial, searching, onSearch }: LookupFormProps) {
               autoComplete="off"
               autoCapitalize="characters"
               spellCheck={false}
-              placeholder="LUM-7K3Q"
+              placeholder="LUM-XXXX"
               value={values.code}
               onChange={(e) => setValues((v) => ({ ...v, code: e.target.value }))}
               className="uppercase tracking-wider placeholder:normal-case"

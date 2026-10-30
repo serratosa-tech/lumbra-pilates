@@ -3,9 +3,16 @@ import { useState } from 'react'
 import { LEVEL_LABELS, plural } from '../../../../components/schedule/labels.ts'
 import { SpotsMeter } from '../../../../components/schedule/SpotsMeter.tsx'
 import { Alert, Button, EmptyState, ResponsiveModal, Skeleton } from '../../../../components/ui/index.ts'
-import { isBookable, sessionState, type BookingDetails, type ClassSession } from '../../../../data/index.ts'
+import {
+  CANCELLATION_LIMIT_HOURS,
+  canCancelOnline,
+  isBookable,
+  sessionState,
+  type BookingDetails,
+  type ClassSession,
+} from '../../../../data/index.ts'
 import { formatDateTime, formatTimeRange } from '../../../../lib/dates.ts'
-import { SEP } from '../../../../lib/text.ts'
+import { capitalize, SEP } from '../../../../lib/text.ts'
 import { useAsyncData } from '../../../../lib/useAsyncData.ts'
 import { BookingConfirmation } from './BookingConfirmation.tsx'
 import { BookingForm } from './BookingForm.tsx'
@@ -90,11 +97,13 @@ export function BookingDialog({ classId, now, onClose }: { classId: string; now:
     description = `${session.name}${SEP}${formatDateTime(session.startsAt)}`
     if (result) {
       title = result.booking.status === 'confirmed' ? '¡Plaza reservada!' : 'Estás en la lista de espera'
-      content = <BookingConfirmation details={result} />
+      content = <BookingConfirmation details={result} now={now} />
     } else {
       title = session.name
-      description = formatDateTime(session.startsAt)
+      description = capitalize(formatDateTime(session.startsAt))
       const unavailable = isBookable(status) ? null : UNAVAILABLE[status === 'cancelled' ? 'cancelled' : 'past']
+      const waitlist = status === 'full'
+      const cancellable = canCancelOnline(session, now)
       content = (
         <>
           <SessionSummary session={session} now={now} />
@@ -104,10 +113,19 @@ export function BookingDialog({ classId, now, onClose }: { classId: string; now:
             </Alert>
           ) : (
             <>
+              {/* Pasado el plazo de cancelación se avisa antes de reservar, no después. */}
+              {!cancellable && (
+                <Alert tone="aviso" title="Sin cancelación online" className="mb-5">
+                  Esta clase empieza en menos de {CANCELLATION_LIMIT_HOURS} horas:{' '}
+                  {waitlist
+                    ? 'si consigues plaza desde la lista de espera, no podrás cancelarla online.'
+                    : 'una vez reservada no podrás cancelarla online.'}
+                </Alert>
+              )}
               <h3 className="mb-4 font-sans text-base font-semibold tracking-normal">
-                {status === 'full' ? 'La clase está completa: apúntate a la lista de espera' : 'Tus datos'}
+                {waitlist ? 'La clase está completa: apúntate a la lista de espera' : 'Tus datos'}
               </h3>
-              <BookingForm sessionId={session.id} waitlist={status === 'full'} onBooked={setResult} />
+              <BookingForm sessionId={session.id} waitlist={waitlist} cancellable={cancellable} onBooked={setResult} />
             </>
           )}
         </>

@@ -15,10 +15,12 @@ interface BookingFormProps {
   sessionId: string
   /** La clase está llena: el formulario apunta a la lista de espera. */
   waitlist: boolean
+  /** Aún se está a tiempo de cancelar online una plaza en esta clase. */
+  cancellable: boolean
   onBooked: (details: BookingDetails) => void
 }
 
-export function BookingForm({ sessionId, waitlist, onBooked }: BookingFormProps) {
+export function BookingForm({ sessionId, waitlist, cancellable, onBooked }: BookingFormProps) {
   const { formRef, values, field, onSubmit, submitting, serverError, errorCount } = useBookingForm(sessionId, onBooked)
   const name = field('name')
   const email = field('email')
@@ -114,7 +116,9 @@ export function BookingForm({ sessionId, waitlist, onBooked }: BookingFormProps)
       <p className="mt-3 text-center text-sm text-piedra">
         {waitlist
           ? 'Si se libera una plaza, pasarás a tenerla automáticamente.'
-          : `Sin pagos ni cuentas. Puedes cancelar hasta ${CANCELLATION_LIMIT_HOURS} horas antes.`}
+          : cancellable
+            ? `Sin pagos ni cuentas. Puedes cancelar hasta ${CANCELLATION_LIMIT_HOURS} horas antes.`
+            : 'Sin pagos ni cuentas.'}
       </p>
     </form>
   )

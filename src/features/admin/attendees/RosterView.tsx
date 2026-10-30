@@ -15,8 +15,8 @@ import {
   type Roster,
 } from '../../../data/index.ts'
 import { cn } from '../../../lib/cn.ts'
-import { formatDateTime, formatTimeRange } from '../../../lib/dates.ts'
-import { SEP } from '../../../lib/text.ts'
+import { formatDateTime, formatDateTimeRange } from '../../../lib/dates.ts'
+import { capitalize, SEP } from '../../../lib/text.ts'
 import { useAsyncData } from '../../../lib/useAsyncData.ts'
 import { ManualBookingDialog } from './ManualBookingDialog.tsx'
 
@@ -181,7 +181,7 @@ export function RosterView({ sessionId, now }: { sessionId: string; now: Date })
             {isCancelled && <Badge tone="error">Cancelada</Badge>}
           </h1>
           <p className="mt-2 text-tinta-700">
-            {formatDateTime(session.startsAt)} ({formatTimeRange(session.startsAt, session.durationMinutes)})
+            {capitalize(formatDateTimeRange(session.startsAt, session.durationMinutes))}
             {SEP}
             {session.instructor}
             {SEP}

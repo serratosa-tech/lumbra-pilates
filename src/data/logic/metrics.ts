@@ -1,5 +1,6 @@
 import { studioTime } from '../../lib/dates.ts'
 import type { IsoDateTime, SlotOccupancy, StudioState, WeekMetrics } from '../types.ts'
+import { startMs } from './state.ts'
 
 /** Franjas de dos horas que se comparan en el gráfico de ocupación. */
 const SLOT_HOURS = 2
@@ -8,11 +9,15 @@ const LAST_HOUR = 21
 
 const ratio = (part: number, total: number) => (total === 0 ? 0 : part / total)
 
-/** Métricas de las clases que empiezan dentro de [from, to). */
-export function computeMetrics(state: StudioState, from: IsoDateTime, to: IsoDateTime): WeekMetrics {
+/**
+ * Métricas de las clases que empiezan dentro de [from, to). La lista de espera solo cuenta
+ * en las clases que aún no han empezado: en las demás ya nadie puede conseguir plaza.
+ */
+export function computeMetrics(state: StudioState, from: IsoDateTime, to: IsoDateTime, now: Date): WeekMetrics {
   const inRange = state.sessions.filter((s) => s.startsAt >= from && s.startsAt < to)
   const scheduled = inRange.filter((s) => s.status === 'scheduled')
   const scheduledIds = new Set(scheduled.map((s) => s.id))
+  const upcomingIds = new Set(scheduled.filter((s) => startMs(s) > now.getTime()).map((s) => s.id))
   const rangeIds = new Set(inRange.map((s) => s.id))
 
   const confirmedBySession = new Map<string, number>()
@@ -25,7 +30,7 @@ export function computeMetrics(state: StudioState, from: IsoDateTime, to: IsoDat
     if (b.status === 'cancelled') cancellations++
     if (!scheduledIds.has(b.sessionId)) continue
     if (b.status === 'confirmed') confirmedBySession.set(b.sessionId, (confirmedBySession.get(b.sessionId) ?? 0) + 1)
-    if (b.status === 'waitlisted') waitlisted++
+    if (b.status === 'waitlisted' && upcomingIds.has(b.sessionId)) waitlisted++
   }
 
   const booked = (id: string) => confirmedBySession.get(id) ?? 0

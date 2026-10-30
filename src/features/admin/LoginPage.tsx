@@ -68,8 +68,8 @@ export function LoginPage() {
           <div className="mt-8 rounded-lg border border-arena-200 bg-white p-5 shadow-sm sm:p-7">
             <section aria-labelledby="cuenta-demo" className="rounded-md bg-info-50 p-4 text-sm">
               <h2 id="cuenta-demo" className="flex items-center gap-2 font-sans text-base font-semibold tracking-normal text-info">
-                <KeyRound aria-hidden="true" strokeWidth={1.75} className="size-4" />
-                Cuenta de demostración
+                <KeyRound aria-hidden="true" strokeWidth={1.75} className="size-4 shrink-0" />
+                <span className="min-w-0 [overflow-wrap:anywhere]">Cuenta demo</span>
               </h2>
               <dl className="mt-2 grid grid-cols-[auto_minmax(0,1fr)] gap-x-3 gap-y-1 text-tinta-700">
                 <dt>Email</dt>

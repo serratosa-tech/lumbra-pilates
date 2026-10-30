@@ -3,6 +3,7 @@ import { Link, useSearchParams } from 'react-router'
 import { spotsStatus } from '../../../components/schedule/labels.ts'
 import { Seo } from '../../../components/Seo.tsx'
 import { Alert, Badge, Button, EmptyState, Skeleton } from '../../../components/ui/index.ts'
+import { hasEnded } from '../../../data/index.ts'
 import { cn } from '../../../lib/cn.ts'
 import { formatDate, formatTime, isSameDate, studioDate } from '../../../lib/dates.ts'
 import { capitalize, SEP } from '../../../lib/text.ts'
@@ -62,7 +63,7 @@ function SessionPicker({ now }: { now: Date }) {
               <section
                 key={day.date.day}
                 aria-labelledby={`asist-${day.date.day}`}
-                className="scroll-mt-12 rounded-lg border border-arena-200 bg-white px-4 shadow-sm"
+                className="rounded-lg border border-arena-200 bg-white px-4 shadow-sm"
               >
                 <h2
                   id={`asist-${day.date.day}`}
@@ -75,7 +76,7 @@ function SessionPicker({ now }: { now: Date }) {
                   {day.sessions.map((session) => {
                     const { state } = spotsStatus(session, now)
                     // Las terminadas se atenúan con colores más suaves (sin opacidad, para mantener el contraste AA).
-                    const past = now.getTime() >= new Date(session.startsAt).getTime() + session.durationMinutes * 60_000
+                    const past = hasEnded(session, now)
                     return (
                       <li key={session.id}>
                         <Link
@@ -101,7 +102,8 @@ function SessionPicker({ now }: { now: Date }) {
                             {state !== 'cancelled' && (
                               <span className="block text-sm text-piedra">
                                 {session.bookedCount}/{session.capacity} plazas
-                                {session.waitlistCount > 0 && `${SEP}${session.waitlistCount} en espera`}
+                                {/* Terminada la clase, nadie sigue esperando plaza. */}
+                                {!past && session.waitlistCount > 0 && `${SEP}${session.waitlistCount} en espera`}
                                 {past && `${SEP}Finalizada`}
                               </span>
                             )}

@@ -9,6 +9,7 @@ import {
   DataError,
   errorMessage,
   getDataSource,
+  hasEnded,
   sessionState,
   type Attendance,
   type Booking,
@@ -166,7 +167,7 @@ export function RosterView({ sessionId, now }: { sessionId: string; now: Date })
   const { session, confirmed, waitlist, cancelled }: Roster = state.data
   const status = sessionState(session, now)
   const isCancelled = status === 'cancelled'
-  const ended = now.getTime() >= new Date(session.startsAt).getTime() + session.durationMinutes * 60_000
+  const ended = hasEnded(session, now)
   const attendanceOpen = canMarkAttendance(session, now)
   const attended = confirmed.filter((b) => shownAttendance(b) === 'attended').length
   const noShow = confirmed.filter((b) => shownAttendance(b) === 'no_show').length
@@ -257,8 +258,11 @@ export function RosterView({ sessionId, now }: { sessionId: string; now: Date })
             Lista de espera{' '}
             <span className="font-sans text-base font-normal text-piedra tabular-nums">{waitlist.length}</span>
           </h2>
+          {ended && waitlist.length > 0 && (
+            <p className="mt-1 text-sm text-piedra">Histórico: la clase terminó sin que estas personas consiguieran plaza.</p>
+          )}
           {waitlist.length === 0 ? (
-            <p className="mt-2 text-piedra">Nadie esperando plaza.</p>
+            <p className="mt-2 text-piedra">{ended ? 'Nadie se quedó esperando plaza.' : 'Nadie esperando plaza.'}</p>
           ) : (
             <ol className="mt-2 divide-y divide-arena-200">
               {waitlist.map((booking, index) => (

@@ -1,5 +1,15 @@
 import { describe, expect, it } from 'vitest'
-import { toSessionInput, validateSessionForm, type SessionFormValues } from './sessionForm.ts'
+import { CATALOG } from '../../../test/fixtures.ts'
+import {
+  fieldsOffTypeDefaults,
+  newSessionForm,
+  toSessionInput,
+  validateSessionForm,
+  withClassType,
+  type SessionFormValues,
+} from './sessionForm.ts'
+
+const [MAT_FLOW, REFORMER] = CATALOG.classTypes
 
 const NOW = new Date('2026-11-02T08:00:00.000Z')
 const values: SessionFormValues = {
@@ -30,6 +40,32 @@ describe('formulario de clase', () => {
     )
     expect(Object.keys(errors).sort()).toEqual(['capacity', 'classTypeId', 'durationMinutes', 'time'])
     expect(errors.time).toBe('La clase tiene que empezar en el futuro.')
+  })
+
+  it('una clase nueva toma la duración y el aforo del tipo', () => {
+    expect(newSessionForm(REFORMER, 'lucia-ferrer', { year: 2026, month: 11, day: 4 })).toMatchObject({
+      classTypeId: 'reformer',
+      durationMinutes: '50',
+      capacity: '8',
+    })
+  })
+
+  it('al cambiar el tipo, actualiza duración y aforo salvo los cambiados a mano', () => {
+    const fresh = { ...values, durationMinutes: '55', capacity: '12' }
+    expect(withClassType(fresh, REFORMER, new Set())).toMatchObject({ classTypeId: 'reformer', durationMinutes: '50', capacity: '8' })
+    expect(withClassType({ ...fresh, capacity: '6' }, REFORMER, new Set(['capacity']))).toMatchObject({
+      durationMinutes: '50',
+      capacity: '6',
+    })
+    expect(withClassType({ ...fresh, durationMinutes: '60' }, REFORMER, new Set(['durationMinutes']))).toMatchObject({
+      durationMinutes: '60',
+      capacity: '8',
+    })
+  })
+
+  it('al editar, cuenta como cambiado a mano lo que no coincide con el tipo', () => {
+    expect(fieldsOffTypeDefaults({ ...values, durationMinutes: '55', capacity: '12' }, MAT_FLOW)).toEqual(new Set())
+    expect(fieldsOffTypeDefaults({ ...values, durationMinutes: '55', capacity: '10' }, MAT_FLOW)).toEqual(new Set(['capacity']))
   })
 
   it('no deja bajar el aforo por debajo de las plazas reservadas', () => {

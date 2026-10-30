@@ -14,7 +14,9 @@ export interface SessionFormValues {
 
 export type SessionFormErrors = Partial<Record<keyof SessionFormValues, string>>
 
-const DEFAULT_CAPACITY = 10
+/** Campos que propone el tipo de clase. */
+export type TypeDefaultField = 'durationMinutes' | 'capacity'
+const TYPE_DEFAULT_FIELDS: TypeDefaultField[] = ['durationMinutes', 'capacity']
 
 export function newSessionForm(classType: ClassType | undefined, instructorId: string, date: CalendarDate): SessionFormValues {
   return {
@@ -23,8 +25,30 @@ export function newSessionForm(classType: ClassType | undefined, instructorId: s
     date: toDateKey(date),
     time: '18:00',
     durationMinutes: String(classType?.durationMinutes ?? 50),
-    capacity: String(DEFAULT_CAPACITY),
+    capacity: String(classType?.capacity ?? 10),
   }
+}
+
+/**
+ * Campos que ya no coinciden con lo que propone el tipo de clase: al editar una clase
+ * existente, los que se ajustaron en su día cuentan como cambiados a mano.
+ */
+export function fieldsOffTypeDefaults(values: SessionFormValues, classType: ClassType | undefined): Set<TypeDefaultField> {
+  return new Set(TYPE_DEFAULT_FIELDS.filter((field) => !classType || values[field] !== String(classType[field])))
+}
+
+/** Cambia el tipo de clase: la duración y el aforo pasan a los del nuevo tipo, salvo los cambiados a mano. */
+export function withClassType(
+  values: SessionFormValues,
+  classType: ClassType | undefined,
+  edited: ReadonlySet<TypeDefaultField>,
+): SessionFormValues {
+  const next = { ...values, classTypeId: classType?.id ?? '' }
+  if (!classType) return next
+  for (const field of TYPE_DEFAULT_FIELDS) {
+    if (!edited.has(field)) next[field] = String(classType[field])
+  }
+  return next
 }
 
 export function sessionToForm(session: ClassSession): SessionFormValues {

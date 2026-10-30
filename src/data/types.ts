@@ -12,7 +12,9 @@ export interface ClassType {
   summary: string
   level: ClassLevel
   intensity: ClassIntensity
+  /** Duración y aforo habituales: los valores propuestos al programar una clase de este tipo. */
   durationMinutes: number
+  capacity: number
 }
 
 export interface Instructor {

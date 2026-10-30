@@ -44,9 +44,12 @@ export function useStudioWeek(now: Date) {
   }
 }
 
+/** Separación entre la cabecera fija y el bloque del día al que se lleva la vista. */
+const TODAY_GAP_PX = 16
+
 /**
- * En móvil, al abrir la semana actual, lleva directamente a la sección del día de hoy
- * (la que contiene el encabezado `targetId`); los días anteriores quedan arriba.
+ * Al abrir la semana actual, lleva directamente a la sección del día de hoy (la que contiene
+ * el encabezado `targetId`), justo bajo la cabecera fija; los días anteriores quedan arriba.
  * Solo una vez por apertura, no en cada recarga de datos.
  */
 export function useScrollToToday(targetId: string | null) {
@@ -57,11 +60,20 @@ export function useScrollToToday(targetId: string | null) {
       return
     }
     if (done.current === targetId) return
-    done.current = targetId
-    const section = document.getElementById(targetId)?.closest('section')
-    // Si hoy es el primer día con clases no hace falta moverse.
-    if (!section?.previousElementSibling || !window.matchMedia('(max-width: 47.99rem)').matches) return
-    section.scrollIntoView({ block: 'start', behavior: 'instant' })
+    // En el siguiente fotograma: al llegar desde otra pestaña, el efecto del layout (que se ejecuta
+    // después de este) sube la página arriba del todo, y esto tiene que ir detrás.
+    const frame = requestAnimationFrame(() => {
+      done.current = targetId
+      const section = document.getElementById(targetId)?.closest('section')
+      // Si hoy es el primer día con clases no hace falta moverse.
+      if (!section?.previousElementSibling) return
+      const header = document.querySelector('header')
+      // La cabecera solo tapa contenido cuando está fija (en pantallas muy bajas deja de estarlo).
+      const covered = header && getComputedStyle(header).position === 'sticky' ? header.getBoundingClientRect().height : 0
+      const top = section.getBoundingClientRect().top + window.scrollY - covered - TODAY_GAP_PX
+      window.scrollTo({ top, behavior: 'instant' })
+    })
+    return () => cancelAnimationFrame(frame)
   }, [targetId])
 }
 

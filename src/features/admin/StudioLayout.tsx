@@ -1,6 +1,6 @@
 import { CalendarRange, ExternalLink, LayoutDashboard, LogOut, UsersRound, type LucideIcon } from 'lucide-react'
-import { useRef, useState } from 'react'
-import { Link, NavLink, Outlet, useNavigate } from 'react-router'
+import { useEffect, useRef, useState } from 'react'
+import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router'
 import { useRouteFocus } from '../../app/useRouteFocus.ts'
 import { LogoFull } from '../../components/brand/Logo.tsx'
 import { Button, useToast } from '../../components/ui/index.ts'
@@ -21,6 +21,18 @@ export function StudioLayout() {
   const mainRef = useRef<HTMLElement>(null)
   const tabsRef = useRef<HTMLDivElement>(null)
   useScrollFade(tabsRef)
+  const { pathname } = useLocation()
+
+  // En móvil, la pestaña activa siempre a la vista, entera y fuera del degradado del borde.
+  useEffect(() => {
+    const list = tabsRef.current
+    const tab = list?.querySelector<HTMLElement>('[aria-current="page"]')
+    if (!list || !tab) return
+    const listBox = list.getBoundingClientRect()
+    const tabBox = tab.getBoundingClientRect()
+    const centered = list.scrollLeft + tabBox.left - listBox.left - (listBox.width - tabBox.width) / 2
+    list.scrollTo({ left: centered, behavior: 'instant' })
+  }, [pathname])
   const navigate = useNavigate()
   const toast = useToast()
   const [leaving, setLeaving] = useState(false)

@@ -2,6 +2,7 @@ import { SEP } from '../../lib/text.ts'
 import type { BadgeTone } from '../ui/index.ts'
 import {
   freeSpots,
+  hasEnded,
   sessionState,
   type BookingStatus,
   type ClassIntensity,
@@ -43,10 +44,8 @@ export function spotsStatus(session: ClassSession, now: Date, short = false): Sp
   switch (state) {
     case 'cancelled':
       return { state, label: 'Cancelada', tone: 'neutral' }
-    case 'past': {
-      const ended = now.getTime() >= new Date(session.startsAt).getTime() + session.durationMinutes * 60_000
-      return { state, label: ended ? 'Finalizada' : 'En curso', tone: 'neutral' }
-    }
+    case 'past':
+      return { state, label: hasEnded(session, now) ? 'Finalizada' : 'En curso', tone: 'neutral' }
     case 'full':
       return { state, label: short ? 'Completa' : `Completa${SEP}lista de espera`, tone: 'error' }
     case 'last_spots':

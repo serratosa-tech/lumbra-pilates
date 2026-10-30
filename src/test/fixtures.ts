@@ -16,8 +16,8 @@ export const NOW = new Date('2026-11-02T08:00:00.000Z') // lunes, 9:00 en Madrid
 
 export const CATALOG: Catalog = {
   classTypes: [
-    { id: 'mat-flow', name: 'Mat Flow', summary: '', level: 'todos', intensity: 2, durationMinutes: 55 },
-    { id: 'reformer', name: 'Reformer', summary: '', level: 'avanzado', intensity: 3, durationMinutes: 50 },
+    { id: 'mat-flow', name: 'Mat Flow', summary: '', level: 'todos', intensity: 2, durationMinutes: 55, capacity: 12 },
+    { id: 'reformer', name: 'Reformer', summary: '', level: 'avanzado', intensity: 3, durationMinutes: 50, capacity: 8 },
   ],
   instructors: [
     { id: 'marta', name: 'Marta', role: '', bio: '', specialties: [], initials: 'M' },

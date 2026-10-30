@@ -1,5 +1,5 @@
 import type { ClassLevel, ClassSession } from '../types.ts'
-import { startMs } from './state.ts'
+import { endMs, startMs } from './state.ts'
 
 /** Estado de una clase en el horario. */
 export type SessionState = 'available' | 'last_spots' | 'full' | 'past' | 'cancelled'
@@ -18,6 +18,11 @@ export function sessionState(session: ClassSession, now: Date): SessionState {
   if (free === 0) return 'full'
   if (free <= LAST_SPOTS_THRESHOLD) return 'last_spots'
   return 'available'
+}
+
+/** La clase ya ha terminado (no solo empezado). */
+export function hasEnded(session: Pick<ClassSession, 'startsAt' | 'durationMinutes'>, now: Date): boolean {
+  return now.getTime() >= endMs(session)
 }
 
 /** Se puede reservar (o entrar en la lista de espera). */

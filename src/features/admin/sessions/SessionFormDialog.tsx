@@ -11,11 +11,14 @@ import {
 } from '../../../data/index.ts'
 import { formatDateTime, type CalendarDate } from '../../../lib/dates.ts'
 import {
+  fieldsOffTypeDefaults,
   newSessionForm,
   sessionToForm,
   toSessionInput,
   validateSessionForm,
+  withClassType,
   type SessionFormValues,
+  type TypeDefaultField,
 } from './sessionForm.ts'
 
 interface SessionFormDialogProps {
@@ -36,6 +39,10 @@ export function SessionFormDialog({ session, defaultDate, classTypes, instructor
   const [values, setValues] = useState<SessionFormValues>(() =>
     session ? sessionToForm(session) : newSessionForm(classTypes[0], instructors[0]?.id ?? '', defaultDate),
   )
+  // Duración y aforo que la persona ha fijado a mano: cambiar el tipo de clase ya no los toca.
+  const [edited, setEdited] = useState<Set<TypeDefaultField>>(() =>
+    fieldsOffTypeDefaults(values, classTypes.find((t) => t.id === values.classTypeId)),
+  )
   const [submitted, setSubmitted] = useState(false)
   const [saving, setSaving] = useState(false)
   const [serverError, setServerError] = useState<unknown>(null)
@@ -48,16 +55,14 @@ export function SessionFormDialog({ session, defaultDate, classTypes, instructor
     setServerError(null)
   }
 
+  function setByHand(field: TypeDefaultField, value: string) {
+    set(field, value)
+    setEdited((fields) => new Set(fields).add(field))
+  }
+
   function changeType(classTypeId: string) {
-    const previous = classTypes.find((t) => t.id === values.classTypeId)
-    const next = classTypes.find((t) => t.id === classTypeId)
-    // Si la duración era la del tipo anterior, pasa a la del nuevo; si se cambió a mano, se respeta.
-    const keepDuration = !previous || String(previous.durationMinutes) !== values.durationMinutes
-    setValues((v) => ({
-      ...v,
-      classTypeId,
-      durationMinutes: keepDuration || !next ? v.durationMinutes : String(next.durationMinutes),
-    }))
+    setValues((v) => withClassType(v, classTypes.find((t) => t.id === classTypeId), edited))
+    setServerError(null)
   }
 
   async function submit(event: FormEvent<HTMLFormElement>) {
@@ -158,7 +163,7 @@ export function SessionFormDialog({ session, defaultDate, classTypes, instructor
                 max={DURATION_RANGE.max}
                 step={5}
                 value={values.durationMinutes}
-                onChange={(e) => set('durationMinutes', e.target.value)}
+                onChange={(e) => setByHand('durationMinutes', e.target.value)}
               />
             )}
           </Field>
@@ -177,7 +182,7 @@ export function SessionFormDialog({ session, defaultDate, classTypes, instructor
                 min={Math.max(CAPACITY_RANGE.min, booked)}
                 max={CAPACITY_RANGE.max}
                 value={values.capacity}
-                onChange={(e) => set('capacity', e.target.value)}
+                onChange={(e) => setByHand('capacity', e.target.value)}
               />
             )}
           </Field>

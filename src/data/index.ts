@@ -8,7 +8,15 @@ export { DataError, errorMessage, type DataErrorCode } from './errors.ts'
 export { DEMO_CREDENTIALS } from './demo/demoDataSource.ts'
 export { CANCELLATION_LIMIT_HOURS, canCancelOnline, cancellationDeadline } from './logic/booking.ts'
 export { isBookingCode, normalizeCode } from './logic/codes.ts'
-export { freeSpots, filterSessions, isBookable, sessionState, type SessionFilters, type SessionState } from './logic/schedule.ts'
+export {
+  freeSpots,
+  filterSessions,
+  hasEnded,
+  isBookable,
+  sessionState,
+  type SessionFilters,
+  type SessionState,
+} from './logic/schedule.ts'
 export { ATTENDANCE_OPENS_MINUTES, CAPACITY_RANGE, DURATION_RANGE, canMarkAttendance } from './logic/sessions.ts'
 export {
   validateBookingForm,

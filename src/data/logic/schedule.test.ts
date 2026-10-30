@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { NOW } from '../../test/fixtures.ts'
 import type { ClassSession } from '../types.ts'
-import { filterSessions, isBookable, sessionState } from './schedule.ts'
+import { filterSessions, hasEnded, isBookable, sessionState } from './schedule.ts'
 
 const base: ClassSession = {
   id: 's1',
@@ -28,6 +28,13 @@ describe('estado de una clase en el horario', () => {
     [{ status: 'cancelled' as const }, 'cancelled'],
   ])('%o → %s', (overrides, expected) => {
     expect(sessionState({ ...base, ...overrides }, NOW)).toBe(expected)
+  })
+
+  it('una clase termina al acabar su duración, no al empezar', () => {
+    const at = (minutes: number) => new Date(Date.parse(base.startsAt) + minutes * 60_000)
+    expect(hasEnded(base, at(0))).toBe(false)
+    expect(hasEnded(base, at(54))).toBe(false)
+    expect(hasEnded(base, at(55))).toBe(true)
   })
 
   it('solo se reservan (o se entra en lista de espera) las clases futuras y activas', () => {

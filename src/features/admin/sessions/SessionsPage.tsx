@@ -14,7 +14,7 @@ import {
   Skeleton,
   useToast,
 } from '../../../components/ui/index.ts'
-import { errorMessage, getDataSource, type ClassSession } from '../../../data/index.ts'
+import { errorMessage, getDataSource, hasEnded, type ClassSession } from '../../../data/index.ts'
 import {
   addDays,
   formatDate,
@@ -61,6 +61,7 @@ function SessionRow({
 }) {
   const { state } = spotsStatus(session, now)
   const editable = state !== 'past' && state !== 'cancelled'
+  const ended = hasEnded(session, now)
   const attendeesLink = `/estudio/asistentes?clase=${session.id}`
   return (
     // En móvil las acciones van en un menú de tres puntos, arriba a la derecha y a la altura de la hora.
@@ -80,7 +81,8 @@ function SessionRow({
         </p>
         <p className="mt-1 text-sm text-tinta-700">
           {session.bookedCount} de {session.capacity} plazas
-          {session.waitlistCount > 0 && `${SEP}${session.waitlistCount} en espera`}
+          {/* Como en Asistentes: terminada la clase, nadie sigue esperando plaza. */}
+          {!ended && session.waitlistCount > 0 && `${SEP}${session.waitlistCount} en espera`}
         </p>
         {state !== 'cancelled' && <SpotsMeter session={session} now={now} className="mt-2" />}
       </div>
@@ -218,7 +220,7 @@ export function SessionsPage() {
               <section
                 key={day.date.day}
                 aria-labelledby={`dia-${day.date.day}`}
-                className="scroll-mt-12 rounded-lg border border-arena-200 bg-white px-4 shadow-sm sm:px-6"
+                className="rounded-lg border border-arena-200 bg-white px-4 shadow-sm sm:px-6"
               >
                 {/* El número de clases va a la derecha, sin separador: ninguna línea empieza por «·». */}
                 <h2

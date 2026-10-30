@@ -9,6 +9,7 @@ export const CLASS_TYPES: ClassType[] = [
     level: 'iniciacion',
     intensity: 2,
     durationMinutes: 50,
+    capacity: 8,
   },
   {
     id: 'mat-flow',
@@ -18,6 +19,7 @@ export const CLASS_TYPES: ClassType[] = [
     level: 'todos',
     intensity: 2,
     durationMinutes: 55,
+    capacity: 12,
   },
   {
     id: 'reformer-intenso',
@@ -27,6 +29,7 @@ export const CLASS_TYPES: ClassType[] = [
     level: 'avanzado',
     intensity: 3,
     durationMinutes: 50,
+    capacity: 8,
   },
   {
     id: 'respira-y-estira',
@@ -36,5 +39,6 @@ export const CLASS_TYPES: ClassType[] = [
     level: 'iniciacion',
     intensity: 1,
     durationMinutes: 45,
+    capacity: 10,
   },
 ]

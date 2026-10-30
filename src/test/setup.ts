@@ -13,7 +13,7 @@ HTMLDialogElement.prototype.close ??= function (this: HTMLDialogElement) {
   this.removeAttribute('open')
 }
 
-// Tampoco ResizeObserver, matchMedia ni scrollIntoView: sustitutos que no hacen nada.
+// Tampoco ResizeObserver, matchMedia, scrollIntoView ni scrollTo en elementos: sustitutos que no hacen nada.
 globalThis.ResizeObserver ??= class {
   observe() {}
   unobserve() {}
@@ -31,3 +31,4 @@ window.matchMedia ??= (query: string) =>
     dispatchEvent: () => false,
   }) as MediaQueryList
 Element.prototype.scrollIntoView ??= function () {}
+Element.prototype.scrollTo ??= function () {}

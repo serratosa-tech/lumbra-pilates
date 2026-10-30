@@ -53,8 +53,9 @@ export function TodaySchedule({ state, onRetry }: { state: HomeState; onRetry: (
 
   return (
     <section aria-labelledby="horario-titulo" id="horario-hoy" className="bg-white/60 py-12 sm:py-20 lg:py-24">
-      <div className="container-page grid grid-cols-1 gap-8 lg:grid-cols-[0.8fr_1.2fr] lg:gap-16">
-        <div>
+      <div className="container-page grid grid-cols-1 gap-4 sm:gap-6 lg:grid-cols-[0.8fr_1.2fr] lg:gap-16">
+        {/* En escritorio el título acompaña al recorrer la lista, por debajo de la cabecera fija. */}
+        <div className="lg:sticky lg:top-28 lg:self-start">
           <SectionHeading id="horario-titulo" kicker="Horario" title={title}>
             <p>{subtitleFor(days)}</p>
           </SectionHeading>
@@ -63,7 +64,8 @@ export function TodaySchedule({ state, onRetry }: { state: HomeState; onRetry: (
           </ButtonLink>
         </div>
 
-        <div className="rounded-lg border border-arena-200 bg-crema px-3 pb-4 shadow-sm sm:px-5">
+        {/* El panel con fondo propio solo en escritorio: en móvil y tablet las tarjetas usan todo el ancho. */}
+        <div className="lg:rounded-lg lg:border lg:border-arena-200 lg:bg-crema lg:px-5 lg:pb-4 lg:shadow-sm">
           {state.status === 'loading' && <LoadingList />}
           {state.status === 'error' && (
             <div className="py-6">

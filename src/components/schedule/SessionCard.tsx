@@ -23,7 +23,8 @@ interface SessionCardProps {
 const STRETCHED = 'text-left after:absolute after:inset-0 after:rounded-[inherit] focus-visible:outline-none'
 
 /**
- * Clase que ya ha empezado: solo hora, nombre y estado, atenuada, para que destaquen las que se pueden reservar.
+ * Clase que ya ha empezado: solo hora, nombre y estado («En curso», «Finalizada» o «Cancelada»),
+ * atenuada, para que destaquen las que se pueden reservar.
  * El contraste del texto se mantiene (sin opacidad).
  */
 function PastSessionCard({ session, now, compact, Heading }: { session: ClassSession; now: Date; compact: boolean; Heading: 'h3' | 'h4' }) {
@@ -55,11 +56,14 @@ function PastSessionCard({ session, now, compact, Heading }: { session: ClassSes
       </article>
     )
   }
+  // En móvil el estado va bajo el nombre, para que el nombre quepa en una línea.
   return (
-    <article className={cn(card, 'flex flex-wrap items-center gap-x-4 gap-y-1 px-4 py-2.5 sm:px-5')}>
+    <article className={cn(card, 'flex items-center gap-x-4 px-4 py-2.5 sm:px-5')}>
       <p className="w-[5ch] shrink-0 font-display text-xl leading-none tabular-nums">{timeTag}</p>
-      {heading}
-      {label}
+      <div className="flex min-w-0 flex-1 flex-col sm:flex-row sm:flex-wrap sm:items-center sm:justify-between sm:gap-x-4">
+        {heading}
+        {label}
+      </div>
     </article>
   )
 }
@@ -73,7 +77,10 @@ export function SessionCard({ session, now, variant = 'row', onOpen, to, heading
   const accessibleSuffix = `, ${time}, ${status.label}`
   const compact = variant === 'compact'
 
-  if (status.state === 'past') return <PastSessionCard session={session} now={now} compact={compact} Heading={Heading} />
+  // Toda clase que ya ha empezado, cancelada o no, va en versión compacta.
+  if (now.getTime() >= new Date(session.startsAt).getTime()) {
+    return <PastSessionCard session={session} now={now} compact={compact} Heading={Heading} />
+  }
 
   const title = interactive ? (
     to ? (
@@ -103,60 +110,48 @@ export function SessionCard({ session, now, variant = 'row', onOpen, to, heading
         interactive ? 'border-arena-200 hover:-translate-y-0.5 hover:border-arena-400 hover:shadow-md' : 'border-arena-200/70 bg-white/55 shadow-none',
         compact
           ? 'flex h-full flex-col gap-2 p-3'
-          : // Con texto muy grande el contenido (mínimo en rem) baja bajo la hora en vez de desbordar.
-            'flex flex-wrap items-start gap-x-4 gap-y-2 p-4 pr-10 sm:items-center sm:gap-x-5 sm:px-5',
+          : // En móvil la hora va encima del nombre: el texto usa todo el ancho de la tarjeta.
+            // Desde sm, en fila; con texto muy grande el contenido baja bajo la hora en vez de desbordar.
+            'flex flex-col gap-2 p-4 sm:flex-row sm:flex-wrap sm:items-center sm:gap-x-5 sm:px-5',
       )}
     >
-      {/* Ancho fijo en «ch» (crece con el texto) y cifras tabulares: los nombres empiezan todos a la misma altura. */}
+      {/* Desde sm, ancho fijo en «ch» (crece con el texto) y cifras tabulares: los nombres empiezan a la misma altura. */}
       <p
         className={cn(
           'shrink-0 font-display leading-none tabular-nums',
-          compact ? 'text-xl' : 'w-[5ch] pt-0.5 text-2xl sm:self-start sm:text-3xl',
+          compact ? 'text-xl' : 'text-2xl sm:w-[5ch] sm:self-start sm:pt-0.5 sm:text-3xl',
           !interactive && 'text-tinta-700',
         )}
       >
         <time dateTime={session.startsAt}>{time}</time>
       </p>
 
-      <div className={compact ? 'min-w-0' : 'min-w-[min(9rem,100%)] flex-1'}>
+      <div className={compact ? 'min-w-0' : 'min-w-0 sm:min-w-[min(12rem,100%)] sm:flex-1'}>
         <Heading className={cn('font-sans font-semibold tracking-normal', compact ? 'text-sm leading-snug' : 'text-lg')}>
           {title}
         </Heading>
-        {/* En móvil, la instructora en su fila y debajo duración y nivel siempre lado a lado, igual en todas las tarjetas. */}
-        <ul
-          className={cn(
-            'mt-1 text-piedra',
-            compact
-              ? 'flex flex-col gap-0.5 text-xs'
-              : 'grid grid-cols-[auto_minmax(0,1fr)] gap-x-3 gap-y-1 text-sm sm:flex sm:flex-wrap sm:items-center',
-          )}
-        >
-          <li className={cn('inline-flex items-center gap-1.5', !compact && 'col-span-2')}>
-            <UserRound aria-hidden="true" strokeWidth={1.75} className="size-4 shrink-0" />
-            {session.instructor}
-          </li>
-          <li className="inline-flex items-center gap-1.5 whitespace-nowrap">
-            <Clock aria-hidden="true" strokeWidth={1.75} className="size-4 shrink-0" />
-            {session.durationMinutes} min
-          </li>
-          <li className="inline-flex items-center gap-1.5">
-            <Gauge aria-hidden="true" strokeWidth={1.75} className="size-4 shrink-0" />
-            {LEVEL_LABELS[session.level]}
-          </li>
+        {/* Cada dato es un bloque entero con su icono: si no cabe, baja completo a la línea siguiente. */}
+        <ul className={cn('mt-1 text-piedra', compact ? 'flex flex-col gap-0.5 text-xs' : 'flex flex-wrap items-center gap-x-3 gap-y-1 text-sm')}>
+          {[
+            { icon: UserRound, text: session.instructor },
+            { icon: Clock, text: `${session.durationMinutes} min` },
+            { icon: Gauge, text: LEVEL_LABELS[session.level] },
+          ].map(({ icon: Icon, text }) => (
+            <li key={text} className={cn('inline-flex items-center gap-1.5', !compact && 'whitespace-nowrap')}>
+              <Icon aria-hidden="true" strokeWidth={1.75} className="size-4 shrink-0" />
+              {text}
+            </li>
+          ))}
         </ul>
         <SpotsMeter session={session} now={now} compact={compact} className="mt-3" />
       </div>
 
-      {/* La flecha móvil va en posición absoluta, fuera del flujo: no resta ancho al contenido. */}
       {!compact && interactive && (
         <>
-          <ChevronRight
-            aria-hidden="true"
-            strokeWidth={1.75}
-            className="absolute top-1/2 right-3 size-5 -translate-y-1/2 text-piedra sm:hidden"
-          />
+          {/* En móvil, la flecha va en la fila de la hora: no resta ancho al nombre ni a los datos. */}
+          <ChevronRight aria-hidden="true" strokeWidth={1.75} className="absolute top-4 right-3 size-6 text-piedra sm:hidden" />
           <span aria-hidden="true" className="hidden self-center sm:block">
-            <span className={buttonClasses(full ? 'ghost' : 'secondary', 'md')}>{full ? 'Lista de espera' : 'Reservar'}</span>
+            <span className={buttonClasses('secondary', 'md')}>{full ? 'Lista de espera' : 'Reservar'}</span>
           </span>
         </>
       )}

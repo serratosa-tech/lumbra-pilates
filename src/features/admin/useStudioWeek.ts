@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react'
 import { useSearchParams } from 'react-router'
 import type { ClassSession } from '../../data/index.ts'
 import {
@@ -41,6 +42,27 @@ export function useStudioWeek(now: Date) {
     changeWeek: (delta: number) => setOffset(safeOffset + delta),
     goToCurrent: () => setOffset(0),
   }
+}
+
+/**
+ * En móvil, al abrir la semana actual, lleva directamente a la sección del día de hoy
+ * (la que contiene el encabezado `targetId`); los días anteriores quedan arriba.
+ * Solo una vez por apertura, no en cada recarga de datos.
+ */
+export function useScrollToToday(targetId: string | null) {
+  const done = useRef<string | null>(null)
+  useEffect(() => {
+    if (!targetId) {
+      done.current = null
+      return
+    }
+    if (done.current === targetId) return
+    done.current = targetId
+    const section = document.getElementById(targetId)?.closest('section')
+    // Si hoy es el primer día con clases no hace falta moverse.
+    if (!section?.previousElementSibling || !window.matchMedia('(max-width: 47.99rem)').matches) return
+    section.scrollIntoView({ block: 'start', behavior: 'instant' })
+  }, [targetId])
 }
 
 export interface DayGroup {

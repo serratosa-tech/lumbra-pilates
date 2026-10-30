@@ -1,3 +1,4 @@
+import { SEP } from '../../lib/text.ts'
 import type { BadgeTone } from '../ui/index.ts'
 import {
   freeSpots,
@@ -47,7 +48,7 @@ export function spotsStatus(session: ClassSession, now: Date, short = false): Sp
       return { state, label: ended ? 'Finalizada' : 'En curso', tone: 'neutral' }
     }
     case 'full':
-      return { state, label: short ? 'Completa' : 'Completa · lista de espera', tone: 'error' }
+      return { state, label: short ? 'Completa' : `Completa${SEP}lista de espera`, tone: 'error' }
     case 'last_spots':
       return { state, label: free === 1 ? 'Última plaza' : `Últimas ${free}${short ? '' : ' plazas'}`, tone: 'aviso' }
     default:

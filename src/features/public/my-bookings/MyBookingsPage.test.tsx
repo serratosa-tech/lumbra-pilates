@@ -27,8 +27,9 @@ describe('Mis reservas', () => {
     await user.type(screen.getByLabelText(/^Email/), 'ana@correo.example')
     await user.type(screen.getByLabelText(/Código de reserva/), 'ABC')
     await user.click(screen.getByRole('button', { name: 'Consultar reserva' }))
-    expect(screen.getByText(/El código tiene la forma LUM-7K3Q/)).toBeInTheDocument()
-    expect(screen.getByLabelText(/Código de reserva/)).toHaveFocus()
+    const code = screen.getByLabelText(/Código de reserva/)
+    expect(code).toHaveAccessibleDescription(/El código tiene la forma LUM-7K3Q/)
+    expect(code).toHaveFocus()
   })
 
   it('avisa si no hay ninguna reserva con esos datos', async () => {

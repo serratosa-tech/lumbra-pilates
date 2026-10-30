@@ -4,6 +4,7 @@ import { plural, spotsStatus } from '../../../components/schedule/labels.ts'
 import { SpotsMeter } from '../../../components/schedule/SpotsMeter.tsx'
 import { Seo } from '../../../components/Seo.tsx'
 import {
+  ActionMenu,
   Alert,
   Badge,
   Button,
@@ -24,10 +25,11 @@ import {
   isSameDate,
   studioDate,
 } from '../../../lib/dates.ts'
+import { SEP } from '../../../lib/text.ts'
 import { useAsyncData } from '../../../lib/useAsyncData.ts'
 import { useNow } from '../../../lib/useNow.ts'
 import { PanelHeader } from '../PanelHeader.tsx'
-import { groupByDay, useStudioWeek } from '../useStudioWeek.ts'
+import { groupByDay, useScrollToToday, useStudioWeek } from '../useStudioWeek.ts'
 import { SessionFormDialog } from './SessionFormDialog.tsx'
 
 function CancelSummary({ session }: { session: ClassSession }) {
@@ -60,8 +62,10 @@ function SessionRow({
 }) {
   const { state } = spotsStatus(session, now)
   const editable = state !== 'past' && state !== 'cancelled'
+  const attendeesLink = `/estudio/asistentes?clase=${session.id}`
   return (
-    <li className="flex flex-wrap items-start gap-x-5 gap-y-3 py-4">
+    // En móvil las acciones van en un menú de tres puntos, arriba a la derecha y a la altura de la hora.
+    <li className="relative flex flex-wrap items-start gap-x-5 gap-y-3 py-4 pr-12 md:pr-0">
       <p className="w-[5ch] shrink-0 font-display text-2xl leading-none tabular-nums">
         {formatTime(session.startsAt)}
       </p>
@@ -71,17 +75,33 @@ function SessionRow({
           {state === 'cancelled' && <Badge tone="error">Cancelada</Badge>}
         </h3>
         <p className="text-sm text-piedra">
-          {session.instructor} · {formatTimeRange(session.startsAt, session.durationMinutes)}
+          {session.instructor}
+          {SEP}
+          {formatTimeRange(session.startsAt, session.durationMinutes)}
         </p>
         <p className="mt-1 text-sm text-tinta-700">
           {session.bookedCount} de {session.capacity} plazas
-          {session.waitlistCount > 0 && ` · ${session.waitlistCount} en espera`}
+          {session.waitlistCount > 0 && `${SEP}${session.waitlistCount} en espera`}
         </p>
         {state !== 'cancelled' && <SpotsMeter session={session} now={now} className="mt-2" />}
       </div>
-      <div className="flex max-w-full flex-wrap gap-1 sm:justify-end">
+      <div className="absolute top-1.5 right-0 md:hidden">
+        <ActionMenu
+          label={`Acciones de ${session.name}, ${formatTime(session.startsAt)}`}
+          items={[
+            { label: 'Asistentes', icon: UsersRound, to: attendeesLink },
+            ...(editable
+              ? [
+                  { label: 'Editar', icon: Pencil, onSelect: onEdit },
+                  { label: 'Cancelar clase', icon: Ban, onSelect: onCancel },
+                ]
+              : []),
+          ]}
+        />
+      </div>
+      <div className="hidden max-w-full flex-wrap gap-1 md:flex md:justify-end">
         <ButtonLink
-          to={`/estudio/asistentes?clase=${session.id}`}
+          to={attendeesLink}
           variant="ghost"
           icon={<UsersRound aria-hidden="true" strokeWidth={1.75} className="size-4" />}
         >
@@ -122,6 +142,8 @@ export function SessionsPage() {
   const today = studioDate(now)
   // Al crear, la fecha propuesta es mañana si estamos en la semana actual; si no, el lunes de esa semana.
   const defaultDate = week.isCurrent ? addDays(today, 1) : week.monday
+  const hasToday = Boolean(week.isCurrent && data?.sessions.some((s) => isSameDate(studioDate(new Date(s.startsAt)), today)))
+  useScrollToToday(hasToday ? `dia-${today.day}` : null)
 
   async function confirmCancel() {
     if (!cancelling) return
@@ -197,15 +219,19 @@ export function SessionsPage() {
               <section
                 key={day.date.day}
                 aria-labelledby={`dia-${day.date.day}`}
-                className="rounded-lg border border-arena-200 bg-white px-4 shadow-sm sm:px-6"
+                className="scroll-mt-12 rounded-lg border border-arena-200 bg-white px-4 shadow-sm sm:px-6"
               >
+                {/* El número de clases va a la derecha, sin separador: ninguna línea empieza por «·». */}
                 <h2
                   id={`dia-${day.date.day}`}
-                  className="flex flex-wrap items-baseline gap-x-2 border-b border-arena-200 py-3 font-sans text-base font-semibold tracking-normal"
+                  className="flex flex-wrap items-center gap-x-2 gap-y-1 border-b border-arena-200 py-3 font-sans text-base font-semibold tracking-normal"
                 >
                   {formatLongWeekday(day.date)}, {formatDayMonth(day.date)}
                   {isSameDate(day.date, today) && <Badge tone="terracota">Hoy</Badge>}
-                  <span className="text-sm font-normal text-piedra">· {plural(day.sessions.length, 'clase')}</span>
+                  <span className="ml-auto text-sm font-normal whitespace-nowrap text-piedra">
+                    <span className="sr-only">, </span>
+                    {plural(day.sessions.length, 'clase')}
+                  </span>
                 </h2>
                 <ul className="divide-y divide-arena-200">
                   {day.sessions.map((session) => (

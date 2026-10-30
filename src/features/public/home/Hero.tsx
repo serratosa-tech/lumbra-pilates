@@ -4,6 +4,7 @@ import { spotsStatus } from '../../../components/schedule/labels.ts'
 import { Badge, ButtonLink, buttonClasses, Skeleton } from '../../../components/ui/index.ts'
 import { formatTime } from '../../../lib/dates.ts'
 import { SLOGAN } from '../../../lib/site.ts'
+import { SEP } from '../../../lib/text.ts'
 import { useNow } from '../../../lib/useNow.ts'
 import { scheduleLink } from '../schedule/useScheduleParams.ts'
 import { dayHeading } from './upcoming.ts'
@@ -26,7 +27,7 @@ function NextClassCard({ state }: { state: HomeState }) {
         <>
           <p className="flex items-center gap-1.5 text-xs font-semibold tracking-wide text-terracota-700 uppercase">
             <Sparkles aria-hidden="true" strokeWidth={1.75} className="size-4 shrink-0" />
-            {firstDay.relation === 'hoy' ? 'Próxima clase hoy' : `Próxima clase · ${dayHeading(firstDay)}`}
+            {firstDay.relation === 'hoy' ? 'Próxima clase hoy' : `Próxima clase${SEP}${dayHeading(firstDay)}`}
           </p>
           <p className="mt-3 flex flex-wrap items-baseline gap-x-3">
             <span className="font-display text-3xl">{formatTime(next.startsAt)}</span>

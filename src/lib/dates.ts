@@ -1,4 +1,5 @@
 import type { IsoDateTime } from '../data/types.ts'
+import { SEP } from './text.ts'
 
 /** El estudio trabaja siempre en hora peninsular española. */
 export const STUDIO_TIME_ZONE = 'Europe/Madrid'
@@ -159,7 +160,7 @@ const capitalize = (text: string) => text.charAt(0).toUpperCase() + text.slice(1
 
 /** «Jueves, 29 de octubre · 18:30» */
 export function formatDateTime(iso: IsoDateTime): string {
-  return `${capitalize(formatDay(iso))} · ${formatTime(iso)}`
+  return `${capitalize(formatDay(iso))}${SEP}${formatTime(iso)}`
 }
 
 /** «18:30–19:20» */

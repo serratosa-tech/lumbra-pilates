@@ -12,7 +12,7 @@ export interface FieldControlProps {
 interface FieldProps {
   label: string
   hint?: string
-  error?: string
+  error?: ReactNode
   required?: boolean
   className?: string
   /** Recibe los atributos de accesibilidad que hay que pasar al control. */

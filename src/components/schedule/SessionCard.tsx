@@ -78,17 +78,20 @@ export function SessionCard({ session, now, variant = 'row', onOpen, to, heading
         <Heading className={cn('font-sans font-semibold tracking-normal', compact ? 'text-sm leading-snug' : 'text-lg')}>
           {title}
         </Heading>
+        {/* En móvil, la instructora en su fila y debajo duración y nivel siempre lado a lado, igual en todas las tarjetas. */}
         <ul
           className={cn(
-            'mt-1 flex flex-wrap text-piedra',
-            compact ? 'flex-col gap-0.5 text-xs' : 'items-center gap-x-3 gap-y-1 text-sm',
+            'mt-1 text-piedra',
+            compact
+              ? 'flex flex-col gap-0.5 text-xs'
+              : 'grid grid-cols-[auto_minmax(0,1fr)] gap-x-3 gap-y-1 text-sm sm:flex sm:flex-wrap sm:items-center',
           )}
         >
-          <li className="inline-flex items-center gap-1.5">
+          <li className={cn('inline-flex items-center gap-1.5', !compact && 'col-span-2')}>
             <UserRound aria-hidden="true" strokeWidth={1.75} className="size-4 shrink-0" />
             {session.instructor}
           </li>
-          <li className="inline-flex items-center gap-1.5">
+          <li className="inline-flex items-center gap-1.5 whitespace-nowrap">
             <Clock aria-hidden="true" strokeWidth={1.75} className="size-4 shrink-0" />
             {session.durationMinutes} min
           </li>
@@ -100,16 +103,18 @@ export function SessionCard({ session, now, variant = 'row', onOpen, to, heading
         <SpotsMeter session={session} now={now} compact={compact} className="mt-3" />
       </div>
 
+      {/* La flecha móvil va en posición absoluta, fuera del flujo: no resta ancho al contenido. */}
       {!compact && interactive && (
-        <span aria-hidden="true" className="self-center">
+        <>
           <ChevronRight
+            aria-hidden="true"
             strokeWidth={1.75}
             className="absolute top-1/2 right-3 size-5 -translate-y-1/2 text-piedra sm:hidden"
           />
-          <span className="hidden sm:block">
+          <span aria-hidden="true" className="hidden self-center sm:block">
             <span className={buttonClasses(full ? 'ghost' : 'secondary', 'md')}>{full ? 'Lista de espera' : 'Reservar'}</span>
           </span>
-        </span>
+        </>
       )}
     </article>
   )

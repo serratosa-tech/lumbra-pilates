@@ -1,8 +1,45 @@
 import { act, render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import { Pencil, UsersRound } from 'lucide-react'
 import { useState } from 'react'
+import { MemoryRouter } from 'react-router'
 import { describe, expect, it, vi } from 'vitest'
-import { Button, Field, Input, Modal, ToastProvider, useToast } from './index.ts'
+import { ActionMenu, Button, Field, Input, Modal, ToastProvider, useToast } from './index.ts'
+
+describe('ActionMenu', () => {
+  it('se maneja con teclado, ejecuta la acción y devuelve el foco', async () => {
+    const user = userEvent.setup()
+    const onEdit = vi.fn()
+    render(
+      <MemoryRouter>
+        <ActionMenu
+          label="Acciones de Mat Flow"
+          items={[
+            { label: 'Asistentes', icon: UsersRound, to: '/estudio/asistentes' },
+            { label: 'Editar', icon: Pencil, onSelect: onEdit },
+          ]}
+        />
+      </MemoryRouter>,
+    )
+    const trigger = screen.getByRole('button', { name: 'Acciones de Mat Flow' })
+    trigger.focus()
+    await user.keyboard('{ArrowDown}')
+    expect(trigger).toHaveAttribute('aria-expanded', 'true')
+    expect(screen.getByRole('menuitem', { name: 'Asistentes' })).toHaveFocus()
+
+    await user.keyboard('{ArrowDown}{ArrowDown}')
+    expect(screen.getByRole('menuitem', { name: 'Asistentes' })).toHaveFocus()
+    await user.keyboard('{End}{Enter}')
+    expect(onEdit).toHaveBeenCalledOnce()
+    expect(screen.queryByRole('menu')).not.toBeInTheDocument()
+    expect(trigger).toHaveFocus()
+
+    await user.click(trigger)
+    await user.keyboard('{Escape}')
+    expect(screen.queryByRole('menu')).not.toBeInTheDocument()
+    expect(trigger).toHaveFocus()
+  })
+})
 
 describe('Button', () => {
   it('en carga anuncia aria-busy y conserva el texto', () => {

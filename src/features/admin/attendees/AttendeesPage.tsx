@@ -3,11 +3,13 @@ import { Link, useSearchParams } from 'react-router'
 import { spotsStatus } from '../../../components/schedule/labels.ts'
 import { Seo } from '../../../components/Seo.tsx'
 import { Alert, Badge, Button, EmptyState, Skeleton } from '../../../components/ui/index.ts'
+import { cn } from '../../../lib/cn.ts'
 import { formatDayMonth, formatLongWeekday, formatTime, isSameDate, studioDate } from '../../../lib/dates.ts'
+import { SEP } from '../../../lib/text.ts'
 import { useAsyncData } from '../../../lib/useAsyncData.ts'
 import { useNow } from '../../../lib/useNow.ts'
 import { PanelHeader } from '../PanelHeader.tsx'
-import { groupByDay, useStudioWeek } from '../useStudioWeek.ts'
+import { groupByDay, useScrollToToday, useStudioWeek } from '../useStudioWeek.ts'
 import { RosterView } from './RosterView.tsx'
 
 /** Lista de clases de la semana para elegir de cuál ver los asistentes. */
@@ -17,6 +19,11 @@ function SessionPicker({ now }: { now: Date }) {
   const { state, retry } = useAsyncData(`asistentes-semana:${week.weekKey}`, (ds) =>
     ds.listSessions(week.range.from, week.range.to),
   )
+  const hasToday =
+    week.isCurrent &&
+    state.status === 'ready' &&
+    state.data.some((s) => isSameDate(studioDate(new Date(s.startsAt)), today))
+  useScrollToToday(hasToday ? `asist-${today.day}` : null)
 
   return (
     <>
@@ -55,7 +62,7 @@ function SessionPicker({ now }: { now: Date }) {
               <section
                 key={day.date.day}
                 aria-labelledby={`asist-${day.date.day}`}
-                className="rounded-lg border border-arena-200 bg-white px-4 shadow-sm"
+                className="scroll-mt-12 rounded-lg border border-arena-200 bg-white px-4 shadow-sm"
               >
                 <h2
                   id={`asist-${day.date.day}`}
@@ -66,21 +73,38 @@ function SessionPicker({ now }: { now: Date }) {
                 </h2>
                 <ul className="divide-y divide-arena-200">
                   {day.sessions.map((session) => {
-                    const status = spotsStatus(session, now)
+                    const { state } = spotsStatus(session, now)
+                    // Las terminadas se atenúan con colores más suaves (sin opacidad, para mantener el contraste AA).
+                    const past = now.getTime() >= new Date(session.startsAt).getTime() + session.durationMinutes * 60_000
                     return (
                       <li key={session.id}>
                         <Link
                           to={`/estudio/asistentes?clase=${session.id}`}
-                          className="-mx-2 flex min-h-12 items-center gap-3 rounded-sm px-2 py-2 hover:bg-arena-100"
+                          className={cn(
+                            '-mx-2 flex min-h-12 items-center gap-3 rounded-sm px-2 py-2 hover:bg-arena-100',
+                            past && 'bg-arena-100/40',
+                          )}
                         >
-                          <span className="w-[5ch] shrink-0 font-display text-lg tabular-nums">{formatTime(session.startsAt)}</span>
+                          <span
+                            className={cn(
+                              'w-[5ch] shrink-0 font-display text-lg tabular-nums',
+                              (past || state === 'cancelled') && 'text-piedra',
+                            )}
+                          >
+                            {formatTime(session.startsAt)}
+                          </span>
                           <span className="min-w-0 flex-1">
-                            <span className="block font-semibold">{session.name}</span>
-                            <span className="block text-sm text-piedra">
-                              {status.state === 'cancelled'
-                                ? 'Cancelada'
-                                : `${session.bookedCount}/${session.capacity} plazas${session.waitlistCount ? ` · ${session.waitlistCount} en espera` : ''}`}
+                            <span className={cn('flex flex-wrap items-center gap-x-2 gap-y-1 font-semibold', past && 'text-tinta-700')}>
+                              {session.name}
+                              {state === 'cancelled' && <Badge tone="error">Cancelada</Badge>}
                             </span>
+                            {state !== 'cancelled' && (
+                              <span className="block text-sm text-piedra">
+                                {session.bookedCount}/{session.capacity} plazas
+                                {session.waitlistCount > 0 && `${SEP}${session.waitlistCount} en espera`}
+                                {past && `${SEP}Finalizada`}
+                              </span>
+                            )}
                           </span>
                           <ChevronRight aria-hidden="true" strokeWidth={1.75} className="size-5 shrink-0 text-piedra" />
                         </Link>

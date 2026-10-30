@@ -5,13 +5,14 @@ import { SpotsMeter } from '../../../../components/schedule/SpotsMeter.tsx'
 import { Alert, Button, EmptyState, ResponsiveModal, Skeleton } from '../../../../components/ui/index.ts'
 import { isBookable, sessionState, type BookingDetails, type ClassSession } from '../../../../data/index.ts'
 import { formatDateTime, formatTimeRange } from '../../../../lib/dates.ts'
+import { SEP } from '../../../../lib/text.ts'
 import { useAsyncData } from '../../../../lib/useAsyncData.ts'
 import { BookingConfirmation } from './BookingConfirmation.tsx'
 import { BookingForm } from './BookingForm.tsx'
 
 function SessionSummary({ session, now }: { session: ClassSession; now: Date }) {
   const items = [
-    { icon: Clock, text: `${formatTimeRange(session.startsAt, session.durationMinutes)} · ${session.durationMinutes} min` },
+    { icon: Clock, text: `${formatTimeRange(session.startsAt, session.durationMinutes)}${SEP}${session.durationMinutes} min` },
     { icon: UserRound, text: `Con ${session.instructor}` },
     { icon: Gauge, text: LEVEL_LABELS[session.level] },
   ]
@@ -86,7 +87,7 @@ export function BookingDialog({ classId, now, onClose }: { classId: string; now:
       </EmptyState>
     )
   } else if (session && status) {
-    description = `${session.name} · ${formatDateTime(session.startsAt)}`
+    description = `${session.name}${SEP}${formatDateTime(session.startsAt)}`
     if (result) {
       title = result.booking.status === 'confirmed' ? '¡Plaza reservada!' : 'Estás en la lista de espera'
       content = <BookingConfirmation details={result} />

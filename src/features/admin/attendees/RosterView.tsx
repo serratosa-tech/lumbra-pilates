@@ -16,6 +16,7 @@ import {
 } from '../../../data/index.ts'
 import { cn } from '../../../lib/cn.ts'
 import { formatDateTime, formatTimeRange } from '../../../lib/dates.ts'
+import { SEP } from '../../../lib/text.ts'
 import { useAsyncData } from '../../../lib/useAsyncData.ts'
 import { ManualBookingDialog } from './ManualBookingDialog.tsx'
 
@@ -75,7 +76,9 @@ function PersonInfo({ booking }: { booking: Booking }) {
         {booking.promotedAt && <Badge tone="terracota">Desde la lista</Badge>}
       </p>
       <p className="text-sm break-all text-piedra">
-        {booking.email} · {booking.phone}
+        {booking.email}
+        {SEP}
+        <span className="whitespace-nowrap">{booking.phone}</span>
       </p>
     </div>
   )
@@ -178,8 +181,11 @@ export function RosterView({ sessionId, now }: { sessionId: string; now: Date })
             {isCancelled && <Badge tone="error">Cancelada</Badge>}
           </h1>
           <p className="mt-2 text-tinta-700">
-            {formatDateTime(session.startsAt)} ({formatTimeRange(session.startsAt, session.durationMinutes)}) ·{' '}
-            {session.instructor} · {LEVEL_LABELS[session.level]}
+            {formatDateTime(session.startsAt)} ({formatTimeRange(session.startsAt, session.durationMinutes)})
+            {SEP}
+            {session.instructor}
+            {SEP}
+            {LEVEL_LABELS[session.level]}
           </p>
           {!isCancelled && <SpotsMeter session={session} now={now} className="mt-3" />}
         </div>
@@ -207,7 +213,9 @@ export function RosterView({ sessionId, now }: { sessionId: string; now: Date })
             </h2>
             {attendanceOpen && confirmed.length > 0 && (
               <p className="text-sm text-piedra">
-                {attended} asistieron · {noShow} no vinieron · {confirmed.length - attended - noShow} sin marcar
+                {attended} asistieron{SEP}
+                {noShow} no vinieron{SEP}
+                {confirmed.length - attended - noShow} sin marcar
               </p>
             )}
           </div>
@@ -307,7 +315,9 @@ export function RosterView({ sessionId, now }: { sessionId: string; now: Date })
       >
         {cancelling && (
           <p className="text-tinta-700">
-            {cancelling.name} · {session.name}, {formatDateTime(session.startsAt)}.{' '}
+            {cancelling.name}
+            {SEP}
+            {session.name}, {formatDateTime(session.startsAt)}.{' '}
             {cancelling.status === 'confirmed' && waitlist.length > 0
               ? `La plaza pasará a ${waitlist[0].name}, la primera de la lista de espera.`
               : cancelling.status === 'confirmed'

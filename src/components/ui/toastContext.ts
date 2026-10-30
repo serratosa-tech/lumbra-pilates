@@ -1,10 +1,10 @@
-import { createContext, useContext } from 'react'
+import { createContext, useContext, type ReactNode } from 'react'
 
 export type ToastTone = 'exito' | 'info' | 'error'
 
 export interface ToastOptions {
   title: string
-  description?: string
+  description?: ReactNode
   tone?: ToastTone
 }
 

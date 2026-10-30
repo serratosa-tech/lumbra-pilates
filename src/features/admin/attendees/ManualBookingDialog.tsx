@@ -41,10 +41,14 @@ export function ManualBookingDialog({ session, onClose }: { session: ClassSessio
       const { booking, waitlistPosition } = await getDataSource().addManualBooking({ sessionId: session.id, ...values })
       toast({
         title: booking.status === 'confirmed' ? 'Reserva añadida' : 'Añadida a la lista de espera',
-        description:
-          booking.status === 'confirmed'
-            ? `${booking.name} tiene plaza. Código ${booking.code}.`
-            : `${booking.name} está en el puesto ${waitlistPosition}. Código ${booking.code}.`,
+        description: (
+          <>
+            {booking.status === 'confirmed'
+              ? `${booking.name} tiene plaza.`
+              : `${booking.name} está en el puesto ${waitlistPosition}.`}{' '}
+            Código <span className="whitespace-nowrap">{booking.code}</span>.
+          </>
+        ),
       })
       onClose()
     } catch (error) {

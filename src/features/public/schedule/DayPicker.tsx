@@ -2,6 +2,7 @@ import { useEffect, useRef, type KeyboardEvent } from 'react'
 import { plural } from '../../../components/schedule/labels.ts'
 import { cn } from '../../../lib/cn.ts'
 import { formatDayMonth, formatLongWeekday, formatShortWeekday } from '../../../lib/dates.ts'
+import { useScrollFade } from '../../../lib/useScrollFade.ts'
 import type { ScheduleDay } from './ScheduleViews.tsx'
 import { dayTabId } from './useScheduleParams.ts'
 
@@ -15,6 +16,7 @@ interface DayPickerProps {
 /** Selector de día deslizable (pestañas con flechas, Inicio y Fin). */
 export function DayPicker({ days, selected, onSelect, panelId }: DayPickerProps) {
   const listRef = useRef<HTMLDivElement>(null)
+  useScrollFade(listRef)
 
   // Centra el día elegido sin mover la página en vertical.
   useEffect(() => {
@@ -44,7 +46,7 @@ export function DayPicker({ days, selected, onSelect, panelId }: DayPickerProps)
       role="tablist"
       aria-label="Día de la semana"
       onKeyDown={onKeyDown}
-      className="-mx-4 flex snap-x gap-2 overflow-x-auto scroll-px-4 px-4 py-1 [scrollbar-width:none] sm:-mx-6 sm:px-6"
+      className="scroll-fade -mx-4 flex snap-x gap-2 overflow-x-auto scroll-px-4 px-4 py-1 [scrollbar-width:none] sm:-mx-6 sm:px-6"
     >
       {days.map((day) => {
         const isSelected = day.weekday === selected

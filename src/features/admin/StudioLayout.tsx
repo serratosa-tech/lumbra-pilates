@@ -6,6 +6,7 @@ import { LogoFull } from '../../components/brand/Logo.tsx'
 import { Button, useToast } from '../../components/ui/index.ts'
 import { getDataSource } from '../../data/index.ts'
 import { cn } from '../../lib/cn.ts'
+import { useScrollFade } from '../../lib/useScrollFade.ts'
 import { useStudioUser } from './studioUser.ts'
 
 const STUDIO_NAV: Array<{ to: string; label: string; icon: LucideIcon }> = [
@@ -18,6 +19,8 @@ const STUDIO_NAV: Array<{ to: string; label: string; icon: LucideIcon }> = [
 export function StudioLayout() {
   const user = useStudioUser()
   const mainRef = useRef<HTMLElement>(null)
+  const tabsRef = useRef<HTMLDivElement>(null)
+  useScrollFade(tabsRef)
   const navigate = useNavigate()
   const toast = useToast()
   const [leaving, setLeaving] = useState(false)
@@ -49,26 +52,30 @@ export function StudioLayout() {
           </nav>
 
           <div className="flex items-center gap-1">
+            {/* En móvil solo el icono; el texto sigue disponible para lectores de pantalla. */}
             <Link
               to="/"
-              className="hidden min-h-11 items-center gap-1.5 rounded-full px-3 text-sm font-semibold text-tinta-700 hover:bg-arena-100 md:inline-flex"
+              title="Ver la web"
+              className="inline-flex min-h-11 min-w-11 items-center justify-center gap-1.5 rounded-full text-sm font-semibold text-tinta-700 hover:bg-arena-100 md:px-3"
             >
-              Ver la web
+              <span className="sr-only md:not-sr-only">Ver la web</span>
               <ExternalLink aria-hidden="true" strokeWidth={1.75} className="size-4" />
             </Link>
+            {/* Por debajo de 400 px también solo el icono, para que todo quepa en una línea junto al logo. */}
             <Button
               variant="ghost"
               onClick={signOut}
               loading={leaving}
               icon={<LogOut aria-hidden="true" strokeWidth={1.75} className="size-4" />}
               title={`Sesión iniciada como ${user.name}`}
+              className="max-[24.99rem]:px-3.5"
             >
-              Cerrar sesión
+              <span className="sr-only min-[25rem]:not-sr-only">Cerrar sesión</span>
             </Button>
           </div>
         </div>
         <nav aria-label="Panel (móvil)" className="border-t border-arena-200/80 lg:hidden">
-          <div className="container-page overflow-x-auto py-1.5 [scrollbar-width:none]">
+          <div ref={tabsRef} className="container-page scroll-fade overflow-x-auto py-1.5 [scrollbar-width:none]">
             <StudioTabs />
           </div>
         </nav>

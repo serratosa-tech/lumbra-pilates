@@ -1,5 +1,5 @@
 import { Search, Sparkles } from 'lucide-react'
-import { useState, type FormEvent } from 'react'
+import { useState, type FormEvent, type ReactNode } from 'react'
 import { Button, Field, Input } from '../../../components/ui/index.ts'
 import { DEMO_EXAMPLES, isBookingCode, normalizeCode, validateEmail } from '../../../data/index.ts'
 
@@ -8,9 +8,15 @@ export interface LookupQuery {
   code: string
 }
 
-function validateCode(code: string): string | undefined {
+function validateCode(code: string): ReactNode {
   if (!code.trim()) return 'Escribe tu código de reserva.'
-  if (!isBookingCode(normalizeCode(code))) return 'El código tiene la forma LUM-7K3Q: cuatro letras o números tras «LUM-».'
+  if (!isBookingCode(normalizeCode(code)))
+    return (
+      <>
+        El código tiene la forma <span className="whitespace-nowrap">LUM-7K3Q</span>: cuatro letras o números tras
+        «LUM-».
+      </>
+    )
   return undefined
 }
 
@@ -96,8 +102,10 @@ export function LookupForm({ initial, searching, onSearch }: LookupFormProps) {
                 className="flex min-h-11 w-full flex-col items-start rounded-sm border border-arena-200 bg-white px-3 py-2 text-left text-sm transition-colors hover:border-arena-400 hover:bg-crema"
               >
                 <span className="font-semibold">{example.label}</span>
-                <span className="break-all text-piedra">
-                  {example.email} · <span className="tabular-nums">{example.code}</span>
+                {/* Si no caben en una línea, el código baja entero a la siguiente: nunca se parte. */}
+                <span className="flex max-w-full flex-wrap gap-x-1 text-piedra">
+                  <span className="min-w-0 break-all">{example.email}{' ·'}</span>
+                  <span className="whitespace-nowrap tabular-nums">{example.code}</span>
                 </span>
               </button>
             </li>

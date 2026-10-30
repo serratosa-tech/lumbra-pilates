@@ -13,12 +13,16 @@ import { useStudioUser } from '../studioUser.ts'
 import { useStudioWeek } from '../useStudioWeek.ts'
 import { OccupancyChart } from './OccupancyChart.tsx'
 
-const percent = (value: number) => `${Math.round(value * 100)} %`
+const percent = (value: number) => `${Math.round(value * 100)} %`
+
+// 2×2 desde 320 px; con el texto del navegador muy grande (el rem de la consulta crece) pasa a una columna.
+const METRICS_GRID = 'grid grid-cols-1 gap-3 min-[20rem]:grid-cols-2 lg:grid-cols-4'
 
 function MetricCard({ icon: Icon, label, value, detail }: { icon: LucideIcon; label: string; value: string; detail: string }) {
   return (
-    <Card as="li" className="flex flex-col gap-1 p-4 sm:p-5">
-      <p className="flex items-center gap-2 text-sm font-semibold text-tinta-700">
+    <Card as="li" className="flex min-w-0 flex-col gap-1 p-4 sm:p-5">
+      {/* En tarjetas estrechas el icono va encima de la etiqueta para que el texto tenga todo el ancho. */}
+      <p className="flex flex-col items-start gap-2 text-sm font-semibold text-tinta-700 sm:flex-row sm:items-center">
         <span className="grid size-8 shrink-0 place-items-center rounded-full bg-arena-100 text-terracota-600">
           <Icon aria-hidden="true" strokeWidth={1.75} className="size-4" />
         </span>
@@ -89,13 +93,13 @@ export function OverviewPage() {
       <section aria-label="Métricas de la semana" className="mt-6">
         {metrics.state.status === 'error' && <RetryAlert onRetry={metrics.retry} />}
         {metrics.state.status === 'loading' && (
-          <div role="status" className="grid grid-cols-1 gap-3 min-[30rem]:grid-cols-2 lg:grid-cols-4">
+          <div role="status" className={METRICS_GRID}>
             <span className="sr-only">Cargando métricas…</span>
             {Array.from({ length: 4 }, (_, i) => (
-              <div key={i} className="flex flex-col gap-3 rounded-lg border border-arena-200 bg-white p-5">
-                <Skeleton className="h-5 w-32" />
+              <div key={i} className="flex flex-col gap-3 rounded-lg border border-arena-200 bg-white p-4 sm:p-5">
+                <Skeleton className="h-5 w-full max-w-32" />
                 <Skeleton className="h-9 w-20" />
-                <Skeleton className="h-4 w-28" />
+                <Skeleton className="h-4 w-full max-w-28" />
               </div>
             ))}
           </div>
@@ -106,7 +110,7 @@ export function OverviewPage() {
               Programa clases desde la sección «Clases» para ver aquí sus métricas.
             </EmptyState>
           ) : (
-            <ul className="grid grid-cols-1 gap-3 min-[30rem]:grid-cols-2 lg:grid-cols-4">
+            <ul className={METRICS_GRID}>
               {metricCards(metrics.state.data).map((card) => (
                 <MetricCard key={card.label} {...card} />
               ))}

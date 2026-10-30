@@ -1,4 +1,4 @@
-import { CalendarPlus, Clock, Contact, Gauge, Hash, UserRound, X } from 'lucide-react'
+import { CalendarPlus, Clock, Contact, Gauge, Hash, UserRound, X, type LucideIcon } from 'lucide-react'
 import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { BOOKING_STATUS_LABELS, LEVEL_LABELS } from '../../../components/schedule/labels.ts'
 import { Alert, Badge, Button, ButtonLink, Card, Modal, useToast } from '../../../components/ui/index.ts'
@@ -135,12 +135,13 @@ export function BookingResult({ details, now }: { details: BookingDetails; now: 
     }
   }
 
-  const facts = [
-    { icon: Clock, text: `${formatDateTime(session.startsAt)} (${formatTimeRange(session.startsAt, session.durationMinutes)})` },
-    { icon: UserRound, text: `Con ${session.instructor}` },
-    { icon: Gauge, text: LEVEL_LABELS[session.level] },
-    { icon: Contact, text: `A nombre de ${booking.name}` },
-    { icon: Hash, text: `Código ${booking.code}` },
+  const facts: Array<{ key: string; icon: LucideIcon; text: ReactNode }> = [
+    { key: 'when', icon: Clock, text: `${formatDateTime(session.startsAt)} (${formatTimeRange(session.startsAt, session.durationMinutes)})` },
+    { key: 'instructor', icon: UserRound, text: `Con ${session.instructor}` },
+    { key: 'level', icon: Gauge, text: LEVEL_LABELS[session.level] },
+    { key: 'name', icon: Contact, text: `A nombre de ${booking.name}` },
+    // El código nunca se parte por el guion.
+    { key: 'code', icon: Hash, text: <>Código <span className="whitespace-nowrap">{booking.code}</span></> },
   ]
 
   return (
@@ -152,8 +153,8 @@ export function BookingResult({ details, now }: { details: BookingDetails; now: 
         <Badge tone={status.tone}>{status.label}</Badge>
       </div>
       <ul className="mt-4 flex flex-col gap-2 text-tinta-700">
-        {facts.map(({ icon: Icon, text }) => (
-          <li key={text} className="flex items-start gap-2">
+        {facts.map(({ key, icon: Icon, text }) => (
+          <li key={key} className="flex items-start gap-2">
             <Icon aria-hidden="true" strokeWidth={1.75} className="mt-1 size-4 shrink-0 text-terracota-600" />
             <span className="min-w-0 break-words">{text}</span>
           </li>

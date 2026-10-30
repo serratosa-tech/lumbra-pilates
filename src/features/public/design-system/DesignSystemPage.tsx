@@ -19,6 +19,7 @@ import {
   Textarea,
   useToast,
 } from '../../../components/ui/index.ts'
+import { SEP } from '../../../lib/text.ts'
 import { SWATCHES } from './swatches.ts'
 
 function Block({ id, title, children }: { id: string; title: string; children: ReactNode }) {
@@ -114,10 +115,10 @@ export function DesignSystemPage() {
             <img src="/favicon.svg" alt="Favicon de Lumbra" width="48" height="48" className="size-12" />
           </Card>
           <Card className="flex flex-col justify-center gap-2 py-8">
-            <p className="font-display text-2xl">Fraunces · titulares</p>
-            <p className="font-display text-2xl italic">Fraunces cursiva · acentos</p>
-            <p>Figtree normal · texto de lectura</p>
-            <p className="font-semibold">Figtree seminegrita · botones y etiquetas</p>
+            <p className="font-display text-2xl">Fraunces{SEP}titulares</p>
+            <p className="font-display text-2xl italic">Fraunces cursiva{SEP}acentos</p>
+            <p>Figtree normal{SEP}texto de lectura</p>
+            <p className="font-semibold">Figtree seminegrita{SEP}botones y etiquetas</p>
           </Card>
         </div>
       </Block>

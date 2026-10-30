@@ -1,3 +1,4 @@
+export { ActionMenu, type ActionMenuItem } from './ActionMenu.tsx'
 export { Alert } from './Alert.tsx'
 export { Badge, type BadgeTone } from './Badge.tsx'
 export { Button, ButtonLink } from './Button.tsx'

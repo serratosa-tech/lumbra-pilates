@@ -36,6 +36,10 @@ Viven en funciones puras con tests en `src/data/logic/`, para reutilizarlas con 
 - Una sola sala: dos clases no pueden solaparse.
 - La asistencia se marca desde 30 minutos antes de la clase.
 
+## Backend
+
+El backend en Supabase (esquema, seguridad RLS, funciones de reserva, datos de ejemplo, cuentas demo y pruebas) está en [`supabase/`](supabase/README.md), con una guía paso a paso. La app lo usará a partir de la fase 5.
+
 ## Scripts
 
 | Comando | Qué hace |

@@ -10,7 +10,8 @@ supabase/
 │   ├── 0003_funciones_internas.sql       piezas internas (no se pueden llamar desde la app)
 │   ├── 0004_funciones_publicas.sql       horario, reservar, Mis reservas, health_check
 │   ├── 0005_funciones_cliente_estudio.sql  cuentas de cliente y panel del estudio
-│   └── 0006_cuentas_demo.sql             blindaje y restauración de las cuentas demo
+│   ├── 0006_cuentas_demo.sql             blindaje y restauración de las cuentas demo
+│   └── 0007_ajustes_supabase.sql         cierra la función de «Enable automatic RLS» y repite RLS en demo_accounts
 ├── seed.sql                            ← opcional: datos de ejemplo de la demo
 ├── cron.sql                            ← opcional: restauración automática (requiere seed.sql)
 └── tests/seguridad_y_reglas.sql        ← comprobaciones (no deja rastro)
@@ -50,7 +51,7 @@ VITE_SUPABASE_PUBLISHABLE_KEY=sb_publishable_...
 ## 3. Ajustes del proyecto antes de empezar
 
 1. **Data API → «Automatically expose new tables»: desactivado.** Las tablas nuevas no dan permiso a nadie. La app solo ve lo que este SQL concede con `GRANT` explícitos (tabla del apartado 7). Aun así, cada migración retira todos los permisos antes de conceder, así que el resultado es el mismo aunque el ajuste cambie.
-2. **«Enable automatic RLS»: activado.** Las migraciones activan RLS de forma explícita en todas las tablas, así que no dependen de este ajuste.
+2. **«Enable automatic RLS»: activado.** Las migraciones activan RLS de forma explícita en todas las tablas, así que no dependen de este ajuste. Al activarlo, Supabase crea la función `public.rls_auto_enable()` y un *event trigger* (un aviso que Postgres ejecuta solo cada vez que se crea una tabla). Como la función vive en `public`, los visitantes tenían permiso para ejecutarla. La migración `0007` les retira ese permiso. El *event trigger* sigue funcionando igual, porque lo ejecuta Postgres por su cuenta: las tablas nuevas siguen recibiendo RLS.
 3. **Authentication → Sign In / Providers → «Allow new users to sign up»: desactivado.** Nadie puede crearse una cuenta desde fuera. Las cuentas (las de la demo y la del estudio real) se crean a mano desde el panel (apartado 5).
 
 ## 4. Paso a paso en el editor SQL
@@ -59,7 +60,9 @@ En Supabase → **SQL Editor**:
 
 1. Pulsa **+ New query**.
 2. Abre `migrations/0001_esquema.sql` en VS Code, copia **todo** el contenido, pégalo en el editor y pulsa **Run** (o Ctrl + Enter). Debe aparecer «Success. No rows returned».
-3. Repite con `0002`, `0003`, `0004`, `0005` y `0006`, **en orden** y cada una una sola vez. Cada migración usa lo que crean las anteriores.
+3. Repite con `0002`, `0003`, `0004`, `0005`, `0006` y `0007`, **en orden**. Cada migración usa lo que crean las anteriores. Ejecuta cada una una sola vez; la `0007` se puede repetir sin problema.
+   - Al pegar `0001`, el editor avisa de que `private.demo_accounts` no tiene RLS y ofrece **«Run and enable RLS»**. Puedes elegir cualquiera de las dos opciones: `0002` activa RLS en esa tabla y `0007` lo repite, así que el resultado final es el mismo.
+   - Si `0007` se para con «No se ha podido retirar EXECUTE sobre public.rls_auto_enable() (su dueño es …)», es que esa función pertenece a otro usuario interno de Supabase y el editor no puede cambiar sus permisos. No hay riesgo real: una función de *event trigger* no se puede llamar desde la API, solo la ejecuta Postgres al crear tablas. Pero las pruebas 11.2 y 11.5 lo marcarán, así que avisa para ajustarlas.
 4. *(Opcional, para la demo)* Ejecuta `seed.sql`. Crea el catálogo, unas 110 clases (de la semana pasada a dentro de dos semanas) y unas 600 reservas de ejemplo. Puedes volver a ejecutarlo cuando quieras: siempre empieza de cero.
 5. Crea y vincula las cuentas demo (apartado 5).
 6. *(Opcional)* Activa la restauración automática con `cron.sql` (apartado 8).
@@ -75,6 +78,7 @@ Qué hace cada migración:
 | `0004_funciones_publicas.sql` | Lo único que puede usar un visitante: horario, reservar, Mis reservas, cancelar y `health_check`. |
 | `0005_funciones_cliente_estudio.sql` | Mis reservas con cuenta y todas las funciones del panel. |
 | `0006_cuentas_demo.sql` | Trigger que blinda las cuentas demo, vinculación y restauración. |
+| `0007_ajustes_supabase.sql` | Retira a `anon` y `authenticated` el permiso de ejecutar `public.rls_auto_enable()`, solo si existe (en proyectos sin «Enable automatic RLS» no hace nada). Además, vuelve a activar RLS en `private.demo_accounts` de forma explícita. |
 
 ## 5. Cuentas: crear a mano y vincular
 

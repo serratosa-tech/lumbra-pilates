@@ -173,6 +173,12 @@ begin
 
   perform pg_temp.check('11.4 el visitante no puede entrar en el esquema private',
                         not has_schema_privilege('anon', 'private', 'USAGE'));
+
+  -- La función del «Enable automatic RLS» de Supabase (si el proyecto la tiene): nadie de fuera la ejecuta.
+  perform pg_temp.check('11.5 rls_auto_enable no es ejecutable por anon ni authenticated',
+    to_regprocedure('public.rls_auto_enable()') is null
+    or not (has_function_privilege('anon', 'public.rls_auto_enable()', 'EXECUTE')
+            or has_function_privilege('authenticated', 'public.rls_auto_enable()', 'EXECUTE')));
 end;
 $$;
 

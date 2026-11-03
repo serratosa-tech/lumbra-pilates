@@ -5,19 +5,22 @@ import { DesignSystemPage } from '../features/public/design-system/DesignSystemP
 import { HomePage } from '../features/public/home/HomePage.tsx'
 import { MyBookingsPage } from '../features/public/my-bookings/MyBookingsPage.tsx'
 import { NotFoundPage } from '../features/public/NotFoundPage.tsx'
-import { LegalNoticePage } from '../features/public/legal/LegalNoticePage.tsx'
-import { PrivacyPage } from '../features/public/legal/PrivacyPage.tsx'
 import { SchedulePage } from '../features/public/schedule/SchedulePage.tsx'
 import { PublicLayout } from './PublicLayout.tsx'
 import { RootLayout } from './RootLayout.tsx'
 
 // El panel del estudio va en su propio fragmento: la web pública no lo descarga.
 const StudioApp = lazy(() => import('../features/admin/StudioApp.tsx'))
+// Los textos legales, también: se visitan poco y pesan.
+const PrivacyPage = lazy(() => import('../features/public/legal/PrivacyPage.tsx').then((m) => ({ default: m.PrivacyPage })))
+const LegalNoticePage = lazy(() =>
+  import('../features/public/legal/LegalNoticePage.tsx').then((m) => ({ default: m.LegalNoticePage })),
+)
 
-function PanelFallback() {
+function PageFallback({ label }: { label: string }) {
   return (
     <div className="grid min-h-[60dvh] place-items-center">
-      <Spinner label="Cargando el panel…" className="text-terracota-600" />
+      <Spinner label={label} className="text-terracota-600" />
     </div>
   )
 }
@@ -30,7 +33,7 @@ export default function App() {
           <Route
             path="estudio/*"
             element={
-              <Suspense fallback={<PanelFallback />}>
+              <Suspense fallback={<PageFallback label="Cargando el panel…" />}>
                 <StudioApp />
               </Suspense>
             }
@@ -39,8 +42,22 @@ export default function App() {
             <Route index element={<HomePage />} />
             <Route path="clases" element={<SchedulePage />} />
             <Route path="mis-reservas" element={<MyBookingsPage />} />
-            <Route path="privacidad" element={<PrivacyPage />} />
-            <Route path="aviso-legal" element={<LegalNoticePage />} />
+            <Route
+              path="privacidad"
+              element={
+                <Suspense fallback={<PageFallback label="Cargando…" />}>
+                  <PrivacyPage />
+                </Suspense>
+              }
+            />
+            <Route
+              path="aviso-legal"
+              element={
+                <Suspense fallback={<PageFallback label="Cargando…" />}>
+                  <LegalNoticePage />
+                </Suspense>
+              }
+            />
             <Route path="sistema" element={<DesignSystemPage />} />
             <Route path="*" element={<NotFoundPage />} />
           </Route>

@@ -23,7 +23,7 @@ import { createRest } from './rest.ts'
 import { hasStoredSession } from './storedSession.ts'
 import { toDataError } from './toDataError.ts'
 
-type SupabaseModule = Pick<typeof import('@supabase/supabase-js'), 'createClient'>
+type SupabaseModule = typeof import('./supabaseJs.ts')
 
 export interface SupabaseOptions {
   /** null si faltan las variables de entorno: cada petición falla con `unavailable`. */
@@ -66,7 +66,7 @@ const sessionArgs = (input: SessionInput) => ({
 export function createSupabaseDataSource(options: SupabaseOptions): DataSource {
   const { config, storage } = options
   const fetchImpl = options.fetch ?? ((...args: Parameters<typeof fetch>) => globalThis.fetch(...args))
-  const loadSupabase = options.loadSupabase ?? (() => import('@supabase/supabase-js'))
+  const loadSupabase = options.loadSupabase ?? (() => import('./supabaseJs.ts'))
   const rest = config ? createRest(config, fetchImpl) : null
   const listeners = new Set<() => void>()
   const notify = () => listeners.forEach((listener) => listener())

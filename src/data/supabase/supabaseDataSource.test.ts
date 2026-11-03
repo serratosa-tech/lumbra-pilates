@@ -180,6 +180,12 @@ describe('Supabase · cuentas, con supabase-js diferido', () => {
     await ds.signOut()
     expect(supabase.signOut).toHaveBeenCalledWith({ scope: 'local' })
     expect(await ds.getAccount()).toBeNull()
+
+    // Sin sesión, las funciones de cuenta ni se piden (evita un 401 al refrescar justo al salir).
+    supabase.rpc.mockClear()
+    await expect(ds.listMyBookings()).rejects.toMatchObject({ code: 'unauthorized' })
+    await expect(ds.getRoster(SESSION_ID)).rejects.toMatchObject({ code: 'unauthorized' })
+    expect(supabase.rpc).not.toHaveBeenCalled()
   })
 
   it('el estudio es miembro y sus métricas salen de list_studio_bookings y list_sessions', async () => {

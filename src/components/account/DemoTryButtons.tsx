@@ -14,8 +14,8 @@ export function DemoTryButtons({ className }: { className?: string }) {
   const { pending, signInAs } = useDemoSignIn()
 
   return (
-    <div className={cn('flex flex-wrap items-center gap-x-1 gap-y-0.5 text-sm text-piedra', className)}>
-      <span id="explora-demo" className="mr-1">
+    <div className={cn('flex flex-wrap items-center gap-x-4 text-sm text-piedra', className)}>
+      <span id="explora-demo" className="w-full sm:w-auto">
         Explora la demo:
       </span>
       {BUTTONS.map(({ kind, label, icon: Icon }) => (
@@ -26,7 +26,7 @@ export function DemoTryButtons({ className }: { className?: string }) {
           aria-busy={pending === kind || undefined}
           disabled={pending !== null && pending !== kind}
           onClick={() => signInAs(kind)}
-          className="inline-flex min-h-11 items-center gap-1.5 rounded-full px-3 font-semibold text-terracota-700 underline decoration-terracota-700/35 underline-offset-4 transition-colors duration-(--duration-fast) hover:bg-arena-100 hover:decoration-terracota-700 disabled:opacity-55 aria-busy:pointer-events-none"
+          className="inline-flex min-h-11 items-center gap-1.5 rounded-sm font-semibold text-terracota-700 underline decoration-terracota-700/35 underline-offset-4 transition-colors duration-(--duration-fast) hover:text-terracota-600 hover:decoration-terracota-600 disabled:opacity-55 aria-busy:pointer-events-none"
         >
           {pending === kind ? <Spinner /> : <Icon aria-hidden="true" strokeWidth={1.75} className="size-4 shrink-0" />}
           {label}

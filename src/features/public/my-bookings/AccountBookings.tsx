@@ -61,7 +61,13 @@ export function AccountBookings({ account, now }: { account: Account; now: Date 
           <UserRound aria-hidden="true" strokeWidth={1.75} className="mt-1 size-4 shrink-0 text-terracota-600" />
           <span className="min-w-0 [overflow-wrap:anywhere]">
             Has entrado como <strong className="font-semibold text-tinta">{account.name}</strong>
-            <span className="text-piedra"> · {account.email}</span>
+            {/* En pantallas estrechas el email va en su propia línea: ninguna empieza por «·». */}
+            <span aria-hidden="true" className="hidden text-piedra sm:inline">
+              {' '}
+              ·{' '}
+            </span>
+            <span className="sr-only sm:hidden">, </span>
+            <span className="block text-piedra sm:inline">{account.email}</span>
           </span>
         </p>
         <Button variant="ghost" onClick={signOut} loading={leaving} icon={<LogOut aria-hidden="true" strokeWidth={1.75} className="size-4" />}>

@@ -126,6 +126,18 @@ export function createSupabaseDataSource(options: SupabaseOptions): DataSource {
     return data as T
   }
 
+  /**
+   * RPC que solo existe para cuentas con sesión (cliente y estudio). Sin sesión ni se pide:
+   * por ejemplo, la lista de «Tus reservas» que se refresca justo al cerrar sesión.
+   */
+  async function sessionRpc<T>(fn: string, args?: Record<string, unknown>): Promise<T> {
+    if (!clientPromise && !hasStoredSession(storage)) throw new DataError('unauthorized')
+    const supabase = await client()
+    const { data } = await supabase.auth.getSession()
+    if (!data.session) throw new DataError('unauthorized')
+    return clientRpc<T>(fn, args)
+  }
+
   /** Ejecuta un cambio y avisa a quien muestra datos para que se refresque. */
   async function change<T>(operation: Promise<T>): Promise<T> {
     const result = await operation
@@ -225,31 +237,31 @@ export function createSupabaseDataSource(options: SupabaseOptions): DataSource {
 
     getAccount,
 
-    listMyBookings: () => clientRpc<BookingDetails[]>('list_my_bookings'),
+    listMyBookings: () => sessionRpc<BookingDetails[]>('list_my_bookings'),
 
-    cancelMyBooking: (bookingId) => change(clientRpc<ClientCancellation>('cancel_my_booking', { p_booking_id: bookingId })),
+    cancelMyBooking: (bookingId) => change(sessionRpc<ClientCancellation>('cancel_my_booking', { p_booking_id: bookingId })),
 
-    getRoster: (sessionId) => clientRpc<Roster>('get_roster', { p_session_id: sessionId }),
+    getRoster: (sessionId) => sessionRpc<Roster>('get_roster', { p_session_id: sessionId }),
 
-    createSession: (input) => change(clientRpc<ClassSession>('create_session', sessionArgs(input))),
+    createSession: (input) => change(sessionRpc<ClassSession>('create_session', sessionArgs(input))),
 
     updateSession: (id, input) =>
-      change(clientRpc<{ session: ClassSession; promoted: Booking[] }>('update_session', { p_id: id, ...sessionArgs(input) })),
+      change(sessionRpc<{ session: ClassSession; promoted: Booking[] }>('update_session', { p_id: id, ...sessionArgs(input) })),
 
-    cancelSession: (id) => change(clientRpc<Booking[]>('cancel_session', { p_id: id })),
+    cancelSession: (id) => change(sessionRpc<Booking[]>('cancel_session', { p_id: id })),
 
-    addManualBooking: (input) => change(clientRpc<BookingDetails>('add_manual_booking', bookingArgs(input))),
+    addManualBooking: (input) => change(sessionRpc<BookingDetails>('add_manual_booking', bookingArgs(input))),
 
     cancelBookingById: (bookingId) =>
-      change(clientRpc<CancellationResult>('cancel_booking_by_id', { p_booking_id: bookingId })),
+      change(sessionRpc<CancellationResult>('cancel_booking_by_id', { p_booking_id: bookingId })),
 
     setAttendance: (bookingId, attendance) =>
-      change(clientRpc<Booking>('set_attendance', { p_booking_id: bookingId, p_attendance: attendance })),
+      change(sessionRpc<Booking>('set_attendance', { p_booking_id: bookingId, p_attendance: attendance })),
 
     async getMetrics(from, to) {
       // Las métricas se calculan en la app con la misma función que la demo: no se duplica la lógica en SQL.
       const [bookings, sessions] = await Promise.all([
-        clientRpc<Booking[]>('list_studio_bookings', { p_from: from, p_to: to }),
+        sessionRpc<Booking[]>('list_studio_bookings', { p_from: from, p_to: to }),
         listSessions(from, to),
       ])
       return computeMetrics({ sessions, bookings }, from, to, new Date())

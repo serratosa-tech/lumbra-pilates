@@ -40,11 +40,16 @@ export function DemoAccountCard({ kind, onSignedIn, headingLevel: Heading = 'h3'
         <span className="min-w-0 [overflow-wrap:anywhere]">{copy.title}</span>
       </Heading>
       <p className="mt-1 text-sm text-piedra">{copy.text}</p>
-      <dl className="mt-2 grid grid-cols-[auto_minmax(0,1fr)] gap-x-3 gap-y-1 text-sm text-tinta-700">
-        <dt>Email</dt>
-        <dd className="font-semibold break-all">{email}</dd>
-        <dt>Contraseña</dt>
-        <dd className="font-semibold">{password}</dd>
+      {/* Si el email no cabe junto a su etiqueta, baja entero a la línea siguiente: nunca se parte. */}
+      <dl className="mt-2 flex flex-col gap-1 text-sm text-tinta-700">
+        <div className="flex flex-wrap gap-x-2">
+          <dt>Email</dt>
+          <dd className="min-w-0 font-semibold [overflow-wrap:anywhere]">{email}</dd>
+        </div>
+        <div className="flex flex-wrap gap-x-2">
+          <dt>Contraseña</dt>
+          <dd className="font-semibold">{password}</dd>
+        </div>
       </dl>
       <Button
         variant="secondary"

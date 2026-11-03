@@ -1,5 +1,5 @@
 import type { ClassType, Instructor } from '../../../data/index.ts'
-import { useAsyncData, type AsyncState } from '../../../lib/useAsyncData.ts'
+import { LIVE_REFRESH_MS, useAsyncData, type AsyncState } from '../../../lib/useAsyncData.ts'
 import { loadUpcoming, type UpcomingDay } from './upcoming.ts'
 
 export interface HomeData {
@@ -19,5 +19,5 @@ export function useHomeData() {
       loadUpcoming(ds, new Date()),
     ])
     return { classTypes, instructors, upcoming }
-  })
+  }, { refreshMs: LIVE_REFRESH_MS })
 }

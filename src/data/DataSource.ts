@@ -1,4 +1,5 @@
 import type {
+  Account,
   Attendance,
   Booking,
   BookingDetails,
@@ -6,17 +7,17 @@ import type {
   CancellationResult,
   ClassSession,
   ClassType,
+  ClientCancellation,
   Instructor,
   IsoDateTime,
   Roster,
   SessionInput,
-  StudioUser,
   WeekMetrics,
 } from './types.ts'
 
 /**
- * Contrato de acceso a datos. La app solo depende de esta interfaz;
- * la implementación concreta (demo en el navegador o Supabase) se elige en `src/data/index.ts`.
+ * Contrato de acceso a datos. La app solo depende de esta interfaz; la implementación es la de
+ * Supabase (`src/data/supabase`) y, en los tests, la demo en memoria (`src/data/demo`).
  * Los errores de negocio llegan como `DataError` con un código estable.
  */
 export interface DataSource {
@@ -29,19 +30,33 @@ export interface DataSource {
   listSessions(from: IsoDateTime, to: IsoDateTime): Promise<ClassSession[]>
   /** Una clase, o null si no existe. */
   getSession(id: string): Promise<ClassSession | null>
-  /** Reserva una plaza; si la clase está llena, la reserva entra en lista de espera. */
+  /**
+   * Reserva una plaza; si la clase está llena, la reserva entra en lista de espera.
+   * Con sesión iniciada, la reserva queda ligada a la cuenta (y el cliente demo reserva siempre con sus datos).
+   */
   createBooking(input: BookingInput): Promise<BookingDetails>
   /** Reserva de una persona, identificada por su email y su código; null si no coinciden. */
   findBooking(email: string, code: string): Promise<BookingDetails | null>
   /** Cancela la reserva (hasta 2 h antes) y, si liberaba plaza, sube a la primera de la lista de espera. */
-  cancelBooking(email: string, code: string): Promise<CancellationResult>
-  /** Avisa de cualquier cambio en los datos; devuelve la función para dejar de escuchar. */
+  cancelBooking(email: string, code: string): Promise<ClientCancellation>
+  /** Avisa de cualquier cambio en los datos o en la sesión; devuelve la función para dejar de escuchar. */
   subscribe(listener: () => void): () => void
+  /** Adelanta la descarga de lo necesario para reservar o iniciar sesión, sin esperar a que termine. */
+  prepare(): void
 
-  // Panel del estudio (requieren sesión iniciada)
-  signIn(email: string, password: string): Promise<StudioUser>
+  // Cuentas
+  signIn(email: string, password: string): Promise<Account>
+  /** Cierra la sesión solo en este navegador (la cuenta demo la comparten muchos visitantes). */
   signOut(): Promise<void>
-  getStudioUser(): Promise<StudioUser | null>
+  /** Cuenta con sesión iniciada, o null. */
+  getAccount(): Promise<Account | null>
+
+  // Cliente con cuenta
+  /** Reservas de la cuenta, con su clase y su posición en la lista de espera. */
+  listMyBookings(): Promise<BookingDetails[]>
+  cancelMyBooking(bookingId: string): Promise<ClientCancellation>
+
+  // Panel del estudio (solo miembros)
   getRoster(sessionId: string): Promise<Roster>
   createSession(input: SessionInput): Promise<ClassSession>
   updateSession(id: string, input: SessionInput): Promise<{ session: ClassSession; promoted: Booking[] }>

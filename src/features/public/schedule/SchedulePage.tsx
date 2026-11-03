@@ -11,7 +11,7 @@ import {
   toDateKey,
   weekRange,
 } from '../../../lib/dates.ts'
-import { useAsyncData } from '../../../lib/useAsyncData.ts'
+import { LIVE_REFRESH_MS, useAsyncData } from '../../../lib/useAsyncData.ts'
 import { useNow } from '../../../lib/useNow.ts'
 import { BookingDialog } from './booking/BookingDialog.tsx'
 import { DayPicker } from './DayPicker.tsx'
@@ -35,7 +35,7 @@ export function SchedulePage() {
       ds.listInstructors(),
     ])
     return { sessions, classTypes, instructors }
-  })
+  }, { refreshMs: LIVE_REFRESH_MS })
 
   const data = state.status === 'ready' ? state.data : undefined
   const today = studioDate(now)
@@ -51,7 +51,7 @@ export function SchedulePage() {
     <div className="container-page py-8 sm:py-12 lg:py-14">
       <Seo
         title="Horario de clases y reservas"
-        description="Horario semanal de Lumbra Pilates en Valencia: reformer, mat y movilidad en grupos reducidos. Mira las plazas libres en tiempo real y reserva sin crear cuenta."
+        description="Horario semanal de Lumbra Pilates en Valencia: reformer, mat y movilidad en grupos reducidos. Mira las plazas libres, que se actualizan solas cada minuto, y reserva sin crear cuenta."
       />
 
       <header className="flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
@@ -86,7 +86,7 @@ export function SchedulePage() {
       <p className="mt-4 text-sm text-piedra" aria-live="polite">
         {data &&
           data.sessions.length > 0 &&
-          `${plural(visibleCount, 'clase')} esta semana${params.activeFilters > 0 ? ' con los filtros elegidos' : ''}. Plazas actualizadas en tiempo real.`}
+          `${plural(visibleCount, 'clase')} esta semana${params.activeFilters > 0 ? ' con los filtros elegidos' : ''}. Plazas actualizadas cada minuto.`}
       </p>
 
       {state.status === 'loading' && <ScheduleSkeleton />}

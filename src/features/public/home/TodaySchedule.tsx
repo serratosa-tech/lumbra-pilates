@@ -39,11 +39,12 @@ function LoadingList() {
 }
 
 function subtitleFor(days: UpcomingDay[] | undefined): string {
-  if (!days || days.length === 0) return 'Las próximas clases, con las plazas libres en tiempo real.'
+  if (!days || days.length === 0) return 'Las próximas clases, con las plazas libres actualizadas cada minuto.'
   if (days[0].relation !== 'hoy')
-    return 'Hoy ya no quedan clases. Estas son las siguientes, con las plazas libres en tiempo real.'
-  if (days.length > 1) return 'Lo que queda de hoy y lo siguiente en el calendario, con las plazas libres en tiempo real.'
-  return 'Las clases que quedan hoy, con las plazas libres en tiempo real.'
+    return 'Hoy ya no quedan clases. Estas son las siguientes, con las plazas libres actualizadas cada minuto.'
+  if (days.length > 1)
+    return 'Lo que queda de hoy y lo siguiente en el calendario, con las plazas libres actualizadas cada minuto.'
+  return 'Las clases que quedan hoy, con las plazas libres actualizadas cada minuto.'
 }
 
 export function TodaySchedule({ state, onRetry }: { state: HomeState; onRetry: () => void }) {

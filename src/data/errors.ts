@@ -13,6 +13,9 @@ export type DataErrorCode =
   | 'invalid_input'
   | 'invalid_credentials'
   | 'unauthorized'
+  | 'too_many_attempts'
+  | 'network'
+  | 'unavailable'
 
 const MESSAGES: Record<DataErrorCode, string> = {
   not_found: 'No encontramos ninguna reserva con ese email y ese código.',
@@ -29,6 +32,14 @@ const MESSAGES: Record<DataErrorCode, string> = {
   invalid_input: 'Revisa los datos: hay algún campo incorrecto.',
   invalid_credentials: 'El email o la contraseña no son correctos.',
   unauthorized: 'Tu sesión ha caducado. Vuelve a entrar.',
+  too_many_attempts: 'Demasiados intentos. Espera unos minutos y vuelve a probar.',
+  network: 'Sin conexión. Revisa tu conexión a internet y vuelve a intentarlo.',
+  unavailable: 'El servicio de reservas no está disponible ahora mismo. Vuelve a intentarlo en un rato.',
+}
+
+/** ¿Es un código conocido? Sirve para reconocerlos en las respuestas del servidor. */
+export function isDataErrorCode(value: unknown): value is DataErrorCode {
+  return typeof value === 'string' && Object.hasOwn(MESSAGES, value)
 }
 
 /** Error de negocio con un código estable; el mensaje ya está en español para mostrarlo tal cual. */

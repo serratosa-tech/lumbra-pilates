@@ -3,7 +3,8 @@ import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router'
 import { beforeEach, describe, expect, it } from 'vitest'
 import { ToastProvider } from '../../../../components/ui/index.ts'
-import { getDataSource, resetDemoData, type ClassSession } from '../../../../data/index.ts'
+import { getDataSource, type ClassSession } from '../../../../data/index.ts'
+import { resetTestData } from '../../../../test/dataSource.ts'
 import { addDays, startOfWeek, studioDate, weekRange } from '../../../../lib/dates.ts'
 import { BookingDialog } from './BookingDialog.tsx'
 
@@ -36,7 +37,7 @@ async function fillForm(user: ReturnType<typeof userEvent.setup>, email = 'nora.
 
 describe('reserva desde el detalle de una clase', () => {
   beforeEach(async () => {
-    await resetDemoData()
+    await resetTestData()
   })
 
   it('valida en vivo sin perder lo escrito', async () => {

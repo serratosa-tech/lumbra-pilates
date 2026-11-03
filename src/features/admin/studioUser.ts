@@ -1,7 +1,7 @@
 import { useOutletContext } from 'react-router'
-import type { StudioUser } from '../../data/index.ts'
+import type { Account } from '../../data/index.ts'
 
-/** Usuario del panel, que RequireStudio pasa a las rutas protegidas. */
-export function useStudioUser(): StudioUser {
-  return useOutletContext<StudioUser>()
+/** Cuenta del estudio con sesión, que RequireStudio pasa a las rutas protegidas. */
+export function useStudioUser(): Account {
+  return useOutletContext<Account>()
 }

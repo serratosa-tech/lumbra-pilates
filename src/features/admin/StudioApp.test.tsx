@@ -3,7 +3,9 @@ import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Route, Routes } from 'react-router'
 import { beforeEach, describe, expect, it } from 'vitest'
 import { ToastProvider } from '../../components/ui/index.ts'
-import { DEMO_CREDENTIALS, getDataSource } from '../../data/index.ts'
+import { DEMO_ACCOUNTS, getDataSource } from '../../data/index.ts'
+
+const DEMO_CREDENTIALS = DEMO_ACCOUNTS.studio
 import StudioApp from './StudioApp.tsx'
 
 function renderAt(path: string) {

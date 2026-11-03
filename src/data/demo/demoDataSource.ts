@@ -1,4 +1,5 @@
 import type { DataSource } from '../DataSource.ts'
+import { DEMO_ACCOUNTS } from '../demoAccounts.ts'
 import { DataError } from '../errors.ts'
 import {
   cancelBookingById,
@@ -13,33 +14,34 @@ import { cancelSession, createSession, setAttendance, updateSession } from '../l
 import { confirmedOf, getSessionRecord, toClassSession, waitlistOf } from '../logic/state.ts'
 import { normalizeEmail } from '../logic/validation.ts'
 import type {
+  Account,
   Booking,
   BookingDetails,
+  BookingInput,
   BookingSource,
   Catalog,
+  CancellationResult,
+  ClientCancellation,
   SessionRecord,
   StudioState,
-  StudioUser,
 } from '../types.ts'
 import { buildSeed, DEMO_CATALOG } from './seed/index.ts'
 import { clearState, currentWeekKey, loadState, saveState, STORAGE_KEY, type LoadedState } from './store.ts'
 
-/** Cuenta del panel en la demo (en la fase 5 pasa a Supabase Auth). */
-export const DEMO_CREDENTIALS = { email: 'estudio@lumbra.example', password: 'demo1234' }
-const DEMO_USER: StudioUser = { email: DEMO_CREDENTIALS.email, name: 'Lucía Ferrer' }
+/** Las mismas cuentas demo que en Supabase, con las mismas reglas. */
+const ACCOUNTS: Array<Account & { password: string }> = [
+  { ...DEMO_ACCOUNTS.client, role: 'client' },
+  { ...DEMO_ACCOUNTS.studio, phone: null, role: 'studio' },
+]
 
 export interface DemoOptions {
-  /** Dónde se guardan los datos (localStorage en el navegador); null = solo en memoria. */
+  /** Dónde se guardan los datos; null = solo en memoria. */
   storage?: Storage | null
-  /** Dónde vive la sesión del panel (sessionStorage en el navegador). */
+  /** Dónde vive la sesión. */
   authStorage?: Storage | null
   now?: () => Date
-  /** Retardo simulado de red, para que se vean los estados de carga. */
-  latencyMs?: number
   seed?: (now: Date) => StudioState
   catalog?: Catalog
-  /** Refresca los datos cuando otra pestaña los cambia. */
-  syncTabs?: boolean
 }
 
 export interface DemoDataSource extends DataSource {
@@ -47,13 +49,16 @@ export interface DemoDataSource extends DataSource {
   reset(): Promise<void>
 }
 
+/**
+ * Implementación en memoria de la capa de datos, con la lógica de src/data/logic.
+ * Solo la usan los tests: replica lo que hacen las funciones de Supabase.
+ */
 export function createDemoDataSource(options: DemoOptions = {}): DemoDataSource {
   const storage = options.storage ?? null
   const authStorage = options.authStorage ?? null
   const now = options.now ?? (() => new Date())
   const seed = options.seed ?? buildSeed
   const catalog = options.catalog ?? DEMO_CATALOG
-  const latencyMs = options.latencyMs ?? 0
   const listeners = new Set<() => void>()
 
   let loaded: LoadedState = loadState(storage, now(), seed)
@@ -72,10 +77,8 @@ export function createDemoDataSource(options: DemoOptions = {}): DemoDataSource 
     notify()
   }
 
-  async function run<T>(operation: () => T): Promise<T> {
-    if (latencyMs > 0) await new Promise((resolve) => setTimeout(resolve, latencyMs))
-    return operation()
-  }
+  // Asíncrono como la red, para que los componentes pasen por su estado de carga.
+  const run = async <T>(operation: () => T): Promise<T> => operation()
 
   const view = (record: SessionRecord, state = current()) => toClassSession(record, state, catalog)
 
@@ -92,25 +95,35 @@ export function createDemoDataSource(options: DemoOptions = {}): DemoDataSource 
     source,
   })
 
-  function readUser(): StudioUser | null {
+  const forClient = ({ booking, promoted }: CancellationResult): ClientCancellation => ({ booking, promoted: promoted !== null })
+
+  function readAccount(): Account | null {
     try {
       const raw = authStorage?.getItem(STORAGE_KEY)
-      return raw ? (JSON.parse(raw) as StudioUser) : null
+      return raw ? (JSON.parse(raw) as Account) : null
     } catch {
       return null
     }
   }
 
-  function requireStudio() {
-    if (!readUser()) throw new DataError('unauthorized')
+  function requireAccount(): Account {
+    const account = readAccount()
+    if (!account) throw new DataError('unauthorized')
+    return account
   }
 
-  if (options.syncTabs && typeof window !== 'undefined') {
-    window.addEventListener('storage', (event) => {
-      if (event.key !== STORAGE_KEY || event.storageArea !== storage) return
-      loaded = loadState(storage, now(), seed)
-      notify()
-    })
+  function requireStudio() {
+    if (readAccount()?.role !== 'studio') throw new DataError('unauthorized')
+  }
+
+  /** Como book_class: con sesión se usa el email de la cuenta y, con el cliente demo, también su nombre y teléfono. */
+  function bookingInputFor(input: BookingInput): BookingInput {
+    const account = readAccount()
+    if (!account) return input
+    if (account.role === 'client' && account.phone) {
+      return { ...input, name: account.name, email: account.email, phone: account.phone }
+    }
+    return { ...input, email: account.email }
   }
 
   return {
@@ -137,7 +150,7 @@ export function createDemoDataSource(options: DemoOptions = {}): DemoDataSource 
     createBooking: (input) =>
       run(() => {
         const state = current()
-        const result = placeBooking(state, input, bookingMeta(state, 'web'))
+        const result = placeBooking(state, bookingInputFor(input), bookingMeta(state, 'web'))
         commit(result.state)
         return details(result.booking, result.state)
       }),
@@ -153,7 +166,7 @@ export function createDemoDataSource(options: DemoOptions = {}): DemoDataSource 
       run(() => {
         const result = cancelByClient(current(), email, code, now())
         commit(result.state)
-        return result.result
+        return forClient(result.result)
       }),
 
     subscribe(listener) {
@@ -161,18 +174,22 @@ export function createDemoDataSource(options: DemoOptions = {}): DemoDataSource 
       return () => listeners.delete(listener)
     },
 
+    prepare() {
+      // En memoria no hay nada que descargar.
+    },
+
     signIn: (email, password) =>
       run(() => {
-        if (normalizeEmail(email) !== DEMO_CREDENTIALS.email || password !== DEMO_CREDENTIALS.password) {
-          throw new DataError('invalid_credentials')
-        }
+        const found = ACCOUNTS.find((a) => a.email === normalizeEmail(email) && a.password === password)
+        if (!found) throw new DataError('invalid_credentials')
+        const { password: _password, ...account } = found
         try {
-          authStorage?.setItem(STORAGE_KEY, JSON.stringify(DEMO_USER))
+          authStorage?.setItem(STORAGE_KEY, JSON.stringify(account))
         } catch {
-          // Sin sessionStorage la sesión no se recuerda al recargar, pero el panel funciona.
+          // Sin almacenamiento la sesión no se recuerda, pero funciona.
         }
         notify()
-        return { ...DEMO_USER }
+        return account
       }),
 
     signOut: () =>
@@ -185,7 +202,28 @@ export function createDemoDataSource(options: DemoOptions = {}): DemoDataSource 
         notify()
       }),
 
-    getStudioUser: () => run(readUser),
+    getAccount: () => run(readAccount),
+
+    listMyBookings: () =>
+      run(() => {
+        const { email } = requireAccount()
+        const state = current()
+        return state.bookings
+          .filter((b) => b.email === email)
+          .map((b) => details(b, state))
+          .sort((a, b) => a.session.startsAt.localeCompare(b.session.startsAt))
+      }),
+
+    cancelMyBooking: (bookingId) =>
+      run(() => {
+        const { email } = requireAccount()
+        const state = current()
+        const booking = state.bookings.find((b) => b.id === bookingId && b.email === email)
+        if (!booking) throw new DataError('not_found')
+        const result = cancelByClient(state, booking.email, booking.code, now())
+        commit(result.state)
+        return forClient(result.result)
+      }),
 
     getRoster: (sessionId) =>
       run(() => {

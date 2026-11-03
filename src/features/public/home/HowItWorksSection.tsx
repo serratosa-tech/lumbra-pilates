@@ -5,7 +5,7 @@ const STEPS = [
   {
     icon: CalendarCheck,
     title: 'Elige tu clase',
-    text: 'Mira el horario de la semana y las plazas libres de cada clase en tiempo real.',
+    text: 'Mira el horario de la semana y las plazas libres de cada clase, que se actualizan solas cada minuto.',
   },
   {
     icon: UserRoundPen,

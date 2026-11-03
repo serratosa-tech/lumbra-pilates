@@ -1,8 +1,9 @@
 import { startOfWeek, studioDate, toDateKey } from '../../lib/dates.ts'
+import { STORAGE_KEY } from '../storage.ts'
 import type { StudioState } from '../types.ts'
 
-/** Única clave de la app en localStorage (y en sessionStorage para la sesión del panel). */
-export const STORAGE_KEY = 'lumbra-pilates:v1'
+// La demo en memoria (solo para los tests) guarda sus datos bajo la misma clave única de la app.
+export { STORAGE_KEY }
 /** Sube cuando cambia la forma de los datos guardados: los antiguos se descartan. */
 export const SCHEMA_VERSION = 1
 

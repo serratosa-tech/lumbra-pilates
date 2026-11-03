@@ -104,10 +104,16 @@ export interface BookingDetails {
   waitlistPosition: number | null
 }
 
-/** Resultado de una cancelación: la reserva cancelada y, si la hubo, la persona que sube de la lista. */
+/** Resultado de una cancelación en el panel: la reserva cancelada y, si la hubo, la persona que sube de la lista. */
 export interface CancellationResult {
   booking: Booking
   promoted: Booking | null
+}
+
+/** Resultado de una cancelación de cliente: solo si subió alguien, nunca sus datos. */
+export interface ClientCancellation {
+  booking: Booking
+  promoted: boolean
 }
 
 export interface Roster {
@@ -117,9 +123,16 @@ export interface Roster {
   cancelled: Booking[]
 }
 
-export interface StudioUser {
+/** `studio`: miembro del estudio (entra en el panel); `client`: cualquier otra cuenta. */
+export type AccountRole = 'client' | 'studio'
+
+/** Cuenta con sesión iniciada. */
+export interface Account {
   email: string
   name: string
+  /** Teléfono de la cuenta, si se conoce (el cliente demo tiene uno de ejemplo). */
+  phone: string | null
+  role: AccountRole
 }
 
 export interface SlotOccupancy {

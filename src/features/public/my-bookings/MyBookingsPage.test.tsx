@@ -3,7 +3,8 @@ import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router'
 import { beforeEach, describe, expect, it } from 'vitest'
 import { ToastProvider } from '../../../components/ui/index.ts'
-import { DEMO_EXAMPLES, getDataSource, resetDemoData, type BookingDetails } from '../../../data/index.ts'
+import { DEMO_EXAMPLES, getDataSource, type BookingDetails } from '../../../data/index.ts'
+import { resetTestData } from '../../../test/dataSource.ts'
 import { formatDateTimeRange } from '../../../lib/dates.ts'
 import { capitalize } from '../../../lib/text.ts'
 import { BookingResult } from './BookingResult.tsx'
@@ -32,7 +33,7 @@ function renderResult(details: BookingDetails, now: Date) {
 
 describe('Mis reservas', () => {
   beforeEach(async () => {
-    await resetDemoData()
+    await resetTestData()
   })
 
   it('pide un código con formato válido antes de buscar', async () => {

@@ -4,7 +4,7 @@ import { Navigate, useLocation, useNavigate } from 'react-router'
 import { LogoMark } from '../../components/brand/Logo.tsx'
 import { Seo } from '../../components/Seo.tsx'
 import { Alert, Button, Field, Input, Spinner } from '../../components/ui/index.ts'
-import { DEMO_CREDENTIALS, errorMessage, getDataSource, validateEmail } from '../../data/index.ts'
+import { DEMO_ACCOUNTS, errorMessage, getDataSource, validateEmail } from '../../data/index.ts'
 import { useAsyncData } from '../../lib/useAsyncData.ts'
 
 const HOME = '/estudio/resumen'
@@ -12,7 +12,7 @@ const HOME = '/estudio/resumen'
 export function LoginPage() {
   const navigate = useNavigate()
   const from = (useLocation().state as { from?: string } | null)?.from ?? HOME
-  const session = useAsyncData('sesion-estudio', (ds) => ds.getStudioUser())
+  const session = useAsyncData('sesion-estudio', (ds) => ds.getAccount())
   const [values, setValues] = useState({ email: '', password: '' })
   const [showPassword, setShowPassword] = useState(false)
   const [submitted, setSubmitted] = useState(false)
@@ -73,15 +73,15 @@ export function LoginPage() {
               </h2>
               <dl className="mt-2 grid grid-cols-[auto_minmax(0,1fr)] gap-x-3 gap-y-1 text-tinta-700">
                 <dt>Email</dt>
-                <dd className="font-semibold break-all">{DEMO_CREDENTIALS.email}</dd>
+                <dd className="font-semibold break-all">{DEMO_ACCOUNTS.studio.email}</dd>
                 <dt>Contraseña</dt>
-                <dd className="font-semibold">{DEMO_CREDENTIALS.password}</dd>
+                <dd className="font-semibold">{DEMO_ACCOUNTS.studio.password}</dd>
               </dl>
               <Button
                 variant="secondary"
                 className="mt-3 w-full"
                 loading={pending === 'demo'}
-                onClick={() => signIn(DEMO_CREDENTIALS.email, DEMO_CREDENTIALS.password, 'demo')}
+                onClick={() => signIn(DEMO_ACCOUNTS.studio.email, DEMO_ACCOUNTS.studio.password, 'demo')}
               >
                 Entrar con la cuenta demo
               </Button>

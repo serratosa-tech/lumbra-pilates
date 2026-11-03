@@ -1,6 +1,12 @@
 import '@testing-library/jest-dom/vitest'
 import { cleanup } from '@testing-library/react'
-import { afterEach } from 'vitest'
+import { afterEach, vi } from 'vitest'
+
+// Los componentes usan la demo en memoria en lugar de Supabase: los tests no salen a la red.
+vi.mock('../data/appDataSource.ts', async () => {
+  const { testDataSource } = await import('./dataSource.ts')
+  return { createAppDataSource: () => testDataSource }
+})
 
 // Sin `globals` de Vitest, Testing Library no desmonta solo entre tests.
 afterEach(cleanup)

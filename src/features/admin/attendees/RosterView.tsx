@@ -79,7 +79,7 @@ function PersonInfo({ booking }: { booking: Booking }) {
       <p className="text-sm break-all text-piedra">
         {booking.email}
         {SEP}
-        <span className="whitespace-nowrap">{booking.phone}</span>
+        <span className="inline-block max-w-full">{booking.phone}</span>
       </p>
     </div>
   )

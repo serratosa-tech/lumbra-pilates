@@ -13,7 +13,7 @@ function validateCode(code: string): ReactNode {
   if (!isBookingCode(normalizeCode(code)))
     return (
       <>
-        El código tiene la forma <span className="whitespace-nowrap">LUM-XXXX</span>: cuatro letras o números tras
+        El código tiene la forma <span className="inline-block max-w-full">LUM-XXXX</span>: cuatro letras o números tras
         «LUM-».
       </>
     )
@@ -105,10 +105,10 @@ export function LookupForm({ initial, searching, onSearch, accountAccess }: Look
                 className="flex min-h-11 w-full flex-col items-start rounded-sm border border-arena-200 bg-white px-3 py-2 text-left text-sm transition-colors hover:border-arena-400 hover:bg-crema"
               >
                 <span className="font-semibold">{example.label}</span>
-                {/* Si no caben en una línea, el código baja entero a la siguiente: nunca se parte. */}
+                {/* Si no caben en una línea, el código baja entero a la siguiente (con el texto muy grande, si ni así cabe, se parte por el guion). */}
                 <span className="flex max-w-full flex-wrap gap-x-1 text-piedra">
                   <span className="min-w-0 break-all">{example.email}{' ·'}</span>
-                  <span className="whitespace-nowrap tabular-nums">{example.code}</span>
+                  <span className="min-w-0 tabular-nums">{example.code}</span>
                 </span>
               </button>
             </li>

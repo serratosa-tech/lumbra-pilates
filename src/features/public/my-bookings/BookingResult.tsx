@@ -154,8 +154,8 @@ export function BookingResult({ details, now, onCancel = cancelWithCode, heading
     { key: 'instructor', icon: UserRound, text: `Con ${session.instructor}` },
     { key: 'level', icon: Gauge, text: LEVEL_LABELS[session.level] },
     { key: 'name', icon: Contact, text: `A nombre de ${booking.name}` },
-    // El código nunca se parte por el guion.
-    { key: 'code', icon: Hash, text: <>Código <span className="whitespace-nowrap">{booking.code}</span></> },
+    // El código baja entero a la línea siguiente; solo se parte por el guion si no cabe ni solo (texto muy grande).
+    { key: 'code', icon: Hash, text: <>Código <span className="inline-block max-w-full">{booking.code}</span></> },
   ]
 
   return (

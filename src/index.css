@@ -13,7 +13,9 @@
   body {
     @apply bg-crema font-sans text-base text-tinta antialiased;
     min-height: 100dvh;
-    overflow-wrap: break-word;
+    /* Una palabra que no cabe en ninguna línea (texto al 200 % en 320 px) se parte en vez de desbordar.
+       «anywhere» y no «break-word»: también deja estrecharse a las cajas flex y grid por debajo de su palabra más larga. */
+    overflow-wrap: anywhere;
   }
 
   h1,

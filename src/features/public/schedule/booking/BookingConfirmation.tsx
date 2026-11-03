@@ -65,7 +65,7 @@ export function BookingConfirmation({ details, now }: { details: BookingDetails;
       <div className="mt-5 w-full rounded-md border border-dashed border-terracota-300 bg-arena-100/60 px-4 py-4">
         <p className="text-xs font-semibold tracking-widest text-terracota-700 uppercase">Tu código de reserva</p>
         {/* El código nunca se parte; en pantallas estrechas (o con texto muy grande) baja un tamaño. */}
-        <p className="mt-1 font-display text-2xl tracking-[0.06em] whitespace-nowrap tabular-nums min-[22rem]:text-3xl min-[22rem]:tracking-[0.12em]">
+        <p className="mt-1 font-display text-2xl tracking-[0.06em] [overflow-wrap:normal] tabular-nums min-[22rem]:text-3xl min-[22rem]:tracking-[0.12em]">
           {booking.code}
         </p>
         <Button variant="ghost" onClick={copyCode} className="mt-1" icon={<Copy aria-hidden="true" strokeWidth={1.75} className="size-4" />}>

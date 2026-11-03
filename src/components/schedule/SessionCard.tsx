@@ -38,7 +38,7 @@ function PastSessionCard({ session, now, compact, Heading }: { session: ClassSes
     </Heading>
   )
   const label = (
-    <span aria-hidden="true" className="text-xs font-semibold whitespace-nowrap">
+    <span aria-hidden="true" className="text-xs font-semibold [overflow-wrap:normal]">
       {status.label}
     </span>
   )
@@ -57,10 +57,11 @@ function PastSessionCard({ session, now, compact, Heading }: { session: ClassSes
     )
   }
   // En móvil el estado va bajo el nombre, para que el nombre quepa en una línea.
+  // Con el texto muy grande, si al lado de la hora no quedan 8 rem, nombre y estado bajan debajo.
   return (
-    <article className={cn(card, 'flex items-center gap-x-4 px-4 py-2.5 sm:px-5')}>
+    <article className={cn(card, 'flex flex-wrap items-center gap-x-4 gap-y-1 px-4 py-2.5 sm:px-5')}>
       <p className="w-[5ch] shrink-0 font-display text-xl leading-none tabular-nums">{timeTag}</p>
-      <div className="flex min-w-0 flex-1 flex-col sm:flex-row sm:flex-wrap sm:items-center sm:justify-between sm:gap-x-4">
+      <div className="flex min-w-[min(8rem,100%)] flex-1 flex-col sm:flex-row sm:flex-wrap sm:items-center sm:justify-between sm:gap-x-4">
         {heading}
         {label}
       </div>
@@ -137,7 +138,7 @@ export function SessionCard({ session, now, variant = 'row', onOpen, to, heading
             { icon: Clock, text: `${session.durationMinutes} min` },
             { icon: Gauge, text: LEVEL_LABELS[session.level] },
           ].map(({ icon: Icon, text }) => (
-            <li key={text} className={cn('inline-flex items-center gap-1.5', !compact && 'whitespace-nowrap')}>
+            <li key={text} className="inline-flex min-w-0 items-center gap-1.5">
               <Icon aria-hidden="true" strokeWidth={1.75} className="size-4 shrink-0" />
               {text}
             </li>

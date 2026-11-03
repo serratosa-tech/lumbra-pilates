@@ -33,8 +33,10 @@ describe('tarjeta de clase', () => {
   it('una clase futura muestra sus datos como elementos completos y se puede abrir', () => {
     renderCard(base)
     expect(screen.getByRole('link', { name: /Mat Flow/ })).toBeInTheDocument()
+    // Cada dato es su propio bloque: si no cabe, baja entero a la línea siguiente
+    // (y solo se parte por dentro si ni solo cabe, con el texto muy grande).
     for (const text of ['Marta Ibáñez', '55 min', 'Todos los niveles']) {
-      expect(screen.getByText(text).closest('li')).toHaveClass('whitespace-nowrap')
+      expect(screen.getByText(text).closest('li')).toHaveClass('inline-flex', 'min-w-0')
     }
   })
 

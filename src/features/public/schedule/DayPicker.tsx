@@ -41,13 +41,15 @@ export function DayPicker({ days, selected, onSelect, panelId }: DayPickerProps)
     listRef.current?.querySelector<HTMLElement>(`#${dayTabId(days[target].weekday)}`)?.focus()
   }
 
+  // Una tira que se desliza en horizontal. Con el texto muy grande (su contenedor, que lleva `@container`,
+  // mide menos de 15 rem: 320 px al 150 % o más), los días pasan a varias filas en vez de quedar fuera de la vista.
   return (
     <div
       ref={listRef}
       role="tablist"
       aria-label="Día de la semana"
       onKeyDown={onKeyDown}
-      className="scroll-fade -mx-4 flex snap-x gap-2 overflow-x-auto scroll-px-4 px-4 py-1 [scrollbar-width:none] sm:-mx-6 sm:px-6"
+      className="scroll-fade -mx-4 flex snap-x gap-2 overflow-x-auto scroll-px-4 px-4 py-1 [scrollbar-width:none] @max-[15rem]:flex-wrap sm:-mx-6 sm:px-6"
     >
       {days.map((day) => {
         const isSelected = day.weekday === selected

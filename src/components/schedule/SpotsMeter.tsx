@@ -35,8 +35,8 @@ export function SpotsMeter({
 
   return (
     <div className={cn('flex w-full flex-col items-start gap-2', !compact && 'max-w-44', className)}>
-      {/* El distintivo nunca se parte; en móvil, una clase completa dice solo «Completa». */}
-      <Badge tone={status.tone} className="whitespace-nowrap">
+      {/* En móvil, una clase completa dice solo «Completa». Con el texto muy grande, el distintivo pasa de línea. */}
+      <Badge tone={status.tone} className="max-w-full">
         {short === status.label ? (
           status.label
         ) : (

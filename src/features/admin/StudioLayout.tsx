@@ -57,7 +57,7 @@ export function StudioLayout() {
         <div className="container-page flex min-h-16 flex-wrap items-center justify-between gap-x-4 gap-y-1 py-2">
           <div className="flex min-w-0 items-center gap-3">
             <Link to="/estudio/resumen" aria-label="Panel del estudio, resumen" className="-m-1 rounded-md p-1 text-tinta">
-              <LogoFull title="" className="h-9 w-auto" />
+              <LogoFull title="" className="h-9 w-auto max-w-full" />
             </Link>
             <span className="hidden border-l border-arena-400 pl-3 text-sm font-semibold text-piedra sm:inline">
               Panel del estudio
@@ -91,7 +91,7 @@ export function StudioLayout() {
             </Button>
           </div>
         </div>
-        <nav aria-label="Panel (móvil)" className="border-t border-arena-200/80 lg:hidden">
+        <nav aria-label="Panel (móvil)" className="@container border-t border-arena-200/80 lg:hidden">
           <div ref={tabsRef} className="container-page scroll-fade overflow-x-auto py-1.5 [scrollbar-width:none]">
             <StudioTabs />
           </div>
@@ -105,8 +105,10 @@ export function StudioLayout() {
 }
 
 function StudioTabs() {
+  // En la barra móvil (con `@container`), si mide menos de 19,5 rem (texto muy grande), las pestañas
+  // se apilan en vez de quedar fuera de la vista. A 320 px con el texto normal mide 20 rem: no cambia.
   return (
-    <ul className="flex items-center gap-1">
+    <ul className="flex items-center gap-1 @max-[19.5rem]:flex-wrap">
       {STUDIO_NAV.map(({ to, label, icon: Icon }) => (
         <li key={to} className="shrink-0">
           <NavLink

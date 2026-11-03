@@ -46,7 +46,7 @@ export function ManualBookingDialog({ session, onClose }: { session: ClassSessio
             {booking.status === 'confirmed'
               ? `${booking.name} tiene plaza.`
               : `${booking.name} está en el puesto ${waitlistPosition}.`}{' '}
-            Código <span className="whitespace-nowrap">{booking.code}</span>.
+            Código <span className="inline-block max-w-full">{booking.code}</span>.
           </>
         ),
       })

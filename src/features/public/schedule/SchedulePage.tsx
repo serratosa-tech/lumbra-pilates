@@ -125,7 +125,7 @@ export function SchedulePage() {
 
       {data && data.sessions.length > 0 && (
         <>
-          <div className="mt-4 lg:hidden">
+          <div className="mt-4 @container lg:hidden">
             <DayPicker days={days} selected={selectedDay.weekday} onSelect={params.selectDay} panelId={DAY_PANEL_ID} />
             <DayList
               day={selectedDay}

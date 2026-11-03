@@ -3,7 +3,7 @@ import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router'
 import { beforeEach, describe, expect, it } from 'vitest'
 import { ToastProvider } from '../../../../components/ui/index.ts'
-import { getDataSource, type ClassSession } from '../../../../data/index.ts'
+import { DEMO_ACCOUNTS, getDataSource, type ClassSession } from '../../../../data/index.ts'
 import { resetTestData } from '../../../../test/dataSource.ts'
 import { addDays, startOfWeek, studioDate, weekRange } from '../../../../lib/dates.ts'
 import { BookingDialog } from './BookingDialog.tsx'
@@ -90,6 +90,26 @@ describe('reserva desde el detalle de una clase', () => {
     await user.click(screen.getByRole('button', { name: /Reservar plaza/ }))
     const dialog = await screen.findByRole('dialog', { name: '¡Plaza reservada!' })
     expect(within(dialog).getByText(/cancelarla hasta 2 horas antes/)).toBeInTheDocument()
+  })
+
+  it('con la cuenta de cliente demo, los datos van rellenados y bloqueados y la reserva queda en la cuenta', async () => {
+    const user = userEvent.setup()
+    const { email, password, name, phone } = DEMO_ACCOUNTS.client
+    await getDataSource().signIn(email, password)
+    renderDialog(await classWithSpots())
+
+    const nameInput = await screen.findByLabelText(/Nombre y apellidos/)
+    expect(nameInput).toHaveValue(name)
+    expect(nameInput).toHaveAttribute('readonly')
+    expect(screen.getByLabelText(/^Email/)).toHaveValue(email)
+    expect(screen.getByLabelText(/^Email/)).toHaveAttribute('readonly')
+    expect(screen.getByLabelText(/Teléfono/)).toHaveValue(phone)
+    expect(screen.getByLabelText(/Teléfono/)).toHaveAttribute('readonly')
+
+    await user.click(screen.getByLabelText(/política de privacidad/))
+    await user.click(screen.getByRole('button', { name: /Reservar plaza/ }))
+    await screen.findByRole('dialog', { name: '¡Plaza reservada!' })
+    expect(await getDataSource().listMyBookings()).toHaveLength(1)
   })
 
   it('si la clase empieza en menos de 2 horas, avisa antes de reservar y no promete cancelar', async () => {

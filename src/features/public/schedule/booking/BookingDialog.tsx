@@ -1,11 +1,12 @@
 import { CalendarX2, Clock, Gauge, RotateCcw, UserRound, UsersRound } from 'lucide-react'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { LEVEL_LABELS, plural } from '../../../../components/schedule/labels.ts'
 import { SpotsMeter } from '../../../../components/schedule/SpotsMeter.tsx'
 import { Alert, Button, EmptyState, ResponsiveModal, Skeleton } from '../../../../components/ui/index.ts'
 import {
   CANCELLATION_LIMIT_HOURS,
   canCancelOnline,
+  getDataSource,
   isBookable,
   sessionState,
   type BookingDetails,
@@ -55,9 +56,16 @@ const UNAVAILABLE = {
 /** Detalle de una clase con su formulario de reserva o de lista de espera. */
 export function BookingDialog({ classId, now, onClose }: { classId: string; now: Date; onClose: () => void }) {
   const { state, retry } = useAsyncData(`clase:${classId}`, (ds) => ds.getSession(classId))
+  // Sin sesión guardada esto no descarga nada; con ella, rellena el formulario con los datos de la cuenta.
+  const accountState = useAsyncData('cuenta', (ds) => ds.getAccount()).state
   const [result, setResult] = useState<BookingDetails | null>(null)
 
-  const session = state.status === 'ready' ? state.data : null
+  // Quien abre una clase probablemente va a reservar: se adelanta la descarga de supabase-js.
+  useEffect(() => getDataSource().prepare(), [])
+
+  const session = state.status === 'ready' && accountState.status !== 'loading' ? state.data : null
+  // Si no se puede saber la cuenta, se reserva como visitante: el servidor aplica igualmente la de la sesión.
+  const account = accountState.status === 'ready' ? accountState.data : null
   const status = session ? sessionState(session, now) : null
 
   let title = 'Cargando la clase…'
@@ -86,7 +94,7 @@ export function BookingDialog({ classId, now, onClose }: { classId: string; now:
         Comprueba tu conexión y vuelve a intentarlo.
       </Alert>
     )
-  } else if (state.status === 'ready' && !session) {
+  } else if (state.status === 'ready' && accountState.status !== 'loading' && !session) {
     title = 'Clase no encontrada'
     content = (
       <EmptyState icon={CalendarX2} title="Esta clase ya no está en el horario" headingLevel="h3">
@@ -125,7 +133,13 @@ export function BookingDialog({ classId, now, onClose }: { classId: string; now:
               <h3 className="mb-4 font-sans text-base font-semibold tracking-normal">
                 {waitlist ? 'La clase está completa: apúntate a la lista de espera' : 'Tus datos'}
               </h3>
-              <BookingForm sessionId={session.id} waitlist={waitlist} cancellable={cancellable} onBooked={setResult} />
+              <BookingForm
+                sessionId={session.id}
+                waitlist={waitlist}
+                cancellable={cancellable}
+                onBooked={setResult}
+                account={account}
+              />
             </>
           )}
         </>

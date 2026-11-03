@@ -24,10 +24,12 @@ interface LookupFormProps {
   initial: LookupQuery
   searching: boolean
   onSearch: (query: LookupQuery) => void
+  /** Acceso con cuenta de cliente dentro de «Prueba la demo» (solo si no hay sesión). */
+  accountAccess?: ReactNode
 }
 
 /** Email + código, con validación en vivo tras el primer intento, y reservas de ejemplo de la demo. */
-export function LookupForm({ initial, searching, onSearch }: LookupFormProps) {
+export function LookupForm({ initial, searching, onSearch, accountAccess }: LookupFormProps) {
   const [values, setValues] = useState(initial)
   const [submitted, setSubmitted] = useState(false)
   const errors = { email: validateEmail(values.email), code: validateCode(values.code) }
@@ -92,7 +94,8 @@ export function LookupForm({ initial, searching, onSearch }: LookupFormProps) {
           <Sparkles aria-hidden="true" strokeWidth={1.75} className="size-4 text-terracota-600" />
           Prueba la demo
         </h2>
-        <p className="mt-1 text-sm text-piedra">Consulta una de estas reservas de ejemplo con un clic.</p>
+        <h3 className="mt-3 font-sans text-sm font-semibold tracking-normal">Reservas de ejemplo</h3>
+        <p className="mt-1 text-sm text-piedra">Consulta una de estas reservas sin cuenta con un clic.</p>
         <ul className="mt-3 flex flex-col gap-2">
           {DEMO_EXAMPLES.map((example) => (
             <li key={example.code}>
@@ -111,6 +114,7 @@ export function LookupForm({ initial, searching, onSearch }: LookupFormProps) {
             </li>
           ))}
         </ul>
+        {accountAccess && <div className="mt-5 border-t border-dashed border-arena-400 pt-4">{accountAccess}</div>}
       </section>
     </div>
   )

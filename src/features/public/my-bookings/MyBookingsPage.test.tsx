@@ -3,9 +3,9 @@ import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router'
 import { beforeEach, describe, expect, it } from 'vitest'
 import { ToastProvider } from '../../../components/ui/index.ts'
-import { DEMO_EXAMPLES, getDataSource, type BookingDetails } from '../../../data/index.ts'
+import { DEMO_ACCOUNTS, DEMO_EXAMPLES, getDataSource, type BookingDetails } from '../../../data/index.ts'
 import { resetTestData } from '../../../test/dataSource.ts'
-import { formatDateTimeRange } from '../../../lib/dates.ts'
+import { addDays, formatDateTimeRange, startOfWeek, studioDate, weekRange } from '../../../lib/dates.ts'
 import { capitalize } from '../../../lib/text.ts'
 import { BookingResult } from './BookingResult.tsx'
 import { MyBookingsPage } from './MyBookingsPage.tsx'
@@ -34,6 +34,37 @@ function renderResult(details: BookingDetails, now: Date) {
 describe('Mis reservas', () => {
   beforeEach(async () => {
     await resetTestData()
+  })
+
+  it('«Probar como cliente» entra y muestra las reservas de la cuenta, sin opciones de cuenta', async () => {
+    const user = userEvent.setup()
+    renderPage()
+    await user.click(await screen.findByRole('button', { name: 'Probar como cliente' }))
+    expect(await screen.findByRole('heading', { level: 1, name: 'Tus reservas' })).toBeInTheDocument()
+    expect(screen.getByText(DEMO_ACCOUNTS.client.name)).toBeInTheDocument()
+    expect(await screen.findByText('Aún no tienes reservas')).toBeInTheDocument()
+    expect(screen.queryByText(/contraseña/i)).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Probar como cliente' })).not.toBeInTheDocument()
+  })
+
+  it('con sesión de cliente, lista sus reservas y cancela con la cuenta', async () => {
+    const user = userEvent.setup()
+    const ds = getDataSource()
+    const { from, to } = weekRange(addDays(startOfWeek(studioDate(new Date())), 7))
+    const next = (await ds.listSessions(from, to)).find((s) => s.status === 'scheduled' && s.bookedCount < s.capacity)!
+    await ds.signIn(DEMO_ACCOUNTS.client.email, DEMO_ACCOUNTS.client.password)
+    await ds.createBooking({ sessionId: next.id, name: 'x', email: 'x@y.example', phone: '612345678' })
+
+    renderPage()
+    expect(await screen.findByRole('heading', { level: 2, name: 'Próximas' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { level: 3, name: next.name })).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: 'Cancelar reserva' }))
+    await user.click(screen.getByRole('button', { name: 'Sí, cancelar' }))
+    expect(await screen.findByRole('heading', { level: 2, name: 'Pasadas y canceladas' })).toBeInTheDocument()
+    expect(screen.getByText('Cancelaste esta reserva')).toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: 'Cerrar sesión' }))
+    expect(await screen.findByRole('heading', { level: 1, name: 'Consulta o cancela tu reserva' })).toBeInTheDocument()
   })
 
   it('pide un código con formato válido antes de buscar', async () => {

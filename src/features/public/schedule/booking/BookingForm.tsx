@@ -1,10 +1,11 @@
-import { ArrowRight } from 'lucide-react'
+import { ArrowRight, Lock } from 'lucide-react'
 import { Link } from 'react-router'
 import { Alert, Button, Checkbox, Field, Input } from '../../../../components/ui/index.ts'
 import {
   CANCELLATION_LIMIT_HOURS,
   DataError,
   errorMessage,
+  type Account,
   type BookingDetails,
 } from '../../../../data/index.ts'
 import { useBookingForm } from './useBookingForm.ts'
@@ -18,10 +19,18 @@ interface BookingFormProps {
   /** Aún se está a tiempo de cancelar online una plaza en esta clase. */
   cancellable: boolean
   onBooked: (details: BookingDetails) => void
+  /** Cuenta con sesión: sus datos van rellenados y bloqueados. */
+  account: Account | null
 }
 
-export function BookingForm({ sessionId, waitlist, cancellable, onBooked }: BookingFormProps) {
-  const { formRef, values, field, onSubmit, submitting, serverError, errorCount } = useBookingForm(sessionId, onBooked)
+const LOCKED_HINT = 'Dato de tu cuenta: no se puede cambiar.'
+
+export function BookingForm({ sessionId, waitlist, cancellable, onBooked, account }: BookingFormProps) {
+  const { formRef, values, locked, field, onSubmit, submitting, serverError, errorCount } = useBookingForm(
+    sessionId,
+    onBooked,
+    account,
+  )
   const name = field('name')
   const email = field('email')
   const phone = field('phone')
@@ -46,20 +55,37 @@ export function BookingForm({ sessionId, waitlist, cancellable, onBooked }: Book
         </Alert>
       )}
 
+      {account && (
+        <p className="mb-5 flex items-start gap-2 rounded-md bg-arena-100/70 p-3 text-sm text-tinta-700">
+          <Lock aria-hidden="true" strokeWidth={1.75} className="mt-0.5 size-4 shrink-0 text-terracota-600" />
+          <span className="min-w-0 [overflow-wrap:anywhere]">
+            Reservas con tu cuenta <strong className="font-semibold text-tinta">{account.email}</strong>.{' '}
+            {locked.name ? 'Tus datos vienen de la cuenta demo.' : 'El email es el de la cuenta.'} La reserva aparecerá
+            en Mis reservas.
+          </span>
+        </p>
+      )}
+
       <div className="flex flex-col gap-4">
-        <Field label="Nombre y apellidos" required error={name.error}>
+        <Field label="Nombre y apellidos" required error={name.error} hint={locked.name ? LOCKED_HINT : undefined}>
           {(control) => (
             <Input
               {...control}
               name="name"
               autoComplete="name"
+              readOnly={locked.name}
               value={values.name}
               onChange={(e) => name.set(e.target.value)}
               onBlur={name.onBlur}
             />
           )}
         </Field>
-        <Field label="Email" required error={email.error} hint="Con tu email y tu código podrás consultar o cancelar la reserva.">
+        <Field
+          label="Email"
+          required
+          error={email.error}
+          hint={locked.email ? LOCKED_HINT : 'Con tu email y tu código podrás consultar o cancelar la reserva.'}
+        >
           {(control) => (
             <Input
               {...control}
@@ -68,13 +94,19 @@ export function BookingForm({ sessionId, waitlist, cancellable, onBooked }: Book
               inputMode="email"
               autoComplete="email"
               spellCheck={false}
+              readOnly={locked.email}
               value={values.email}
               onChange={(e) => email.set(e.target.value)}
               onBlur={email.onBlur}
             />
           )}
         </Field>
-        <Field label="Teléfono" required error={phone.error} hint="Solo para avisarte si hay algún cambio en la clase.">
+        <Field
+          label="Teléfono"
+          required
+          error={phone.error}
+          hint={locked.phone ? LOCKED_HINT : 'Solo para avisarte si hay algún cambio en la clase.'}
+        >
           {(control) => (
             <Input
               {...control}
@@ -82,6 +114,7 @@ export function BookingForm({ sessionId, waitlist, cancellable, onBooked }: Book
               type="tel"
               inputMode="tel"
               autoComplete="tel"
+              readOnly={locked.phone}
               placeholder="612 345 678"
               value={values.phone}
               onChange={(e) => phone.set(e.target.value)}
@@ -117,8 +150,10 @@ export function BookingForm({ sessionId, waitlist, cancellable, onBooked }: Book
         {waitlist
           ? 'Si se libera una plaza, pasarás a tenerla automáticamente.'
           : cancellable
-            ? `Sin pagos ni cuentas. Puedes cancelar hasta ${CANCELLATION_LIMIT_HOURS} horas antes.`
-            : 'Sin pagos ni cuentas.'}
+            ? `${account ? 'Sin pagos.' : 'Sin pagos ni cuentas.'} Puedes cancelar hasta ${CANCELLATION_LIMIT_HOURS} horas antes.`
+            : account
+              ? 'Sin pagos.'
+              : 'Sin pagos ni cuentas.'}
       </p>
     </form>
   )

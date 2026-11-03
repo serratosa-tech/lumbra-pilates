@@ -2,21 +2,41 @@ import { useRef, useState, type FormEvent } from 'react'
 import {
   getDataSource,
   validateBookingForm,
+  type Account,
   type BookingDetails,
   type BookingFormValues,
 } from '../../../../data/index.ts'
 
 type FieldName = keyof BookingFormValues
+type TextField = Exclude<FieldName, 'privacy'>
 const FIELD_ORDER: FieldName[] = ['name', 'email', 'phone', 'privacy']
-const EMPTY: BookingFormValues = { name: '', email: '', phone: '', privacy: false }
+
+/**
+ * Campos que fija la cuenta (los mismos que impone book_class): el email de cualquier cuenta y,
+ * si la cuenta tiene datos de ejemplo (el cliente demo), también el nombre y el teléfono.
+ */
+function lockedFields(account: Account | null): Partial<Record<TextField, true>> {
+  if (!account) return {}
+  return account.phone ? { name: true, email: true, phone: true } : { email: true }
+}
+
+function initialValues(account: Account | null): BookingFormValues {
+  const locked = lockedFields(account)
+  return {
+    name: locked.name && account ? account.name : '',
+    email: account?.email ?? '',
+    phone: locked.phone && account?.phone ? account.phone : '',
+    privacy: false,
+  }
+}
 
 /**
  * Estado del formulario de reserva. Los errores aparecen al salir de cada campo (o al enviar)
  * y después se actualizan en vivo mientras se escribe. Lo escrito nunca se pierde.
  */
-export function useBookingForm(sessionId: string, onBooked: (details: BookingDetails) => void) {
+export function useBookingForm(sessionId: string, onBooked: (details: BookingDetails) => void, account: Account | null) {
   const formRef = useRef<HTMLFormElement>(null)
-  const [values, setValues] = useState<BookingFormValues>(EMPTY)
+  const [values, setValues] = useState<BookingFormValues>(() => initialValues(account))
   const [touched, setTouched] = useState<Partial<Record<FieldName, boolean>>>({})
   const [submitted, setSubmitted] = useState(false)
   const [submitting, setSubmitting] = useState(false)
@@ -57,5 +77,5 @@ export function useBookingForm(sessionId: string, onBooked: (details: BookingDet
     }
   }
 
-  return { formRef, values, field, onSubmit, submitting, serverError, errorCount: submitted ? Object.keys(errors).length : 0 }
+  return { formRef, values, locked: lockedFields(account), field, onSubmit, submitting, serverError, errorCount: submitted ? Object.keys(errors).length : 0 }
 }

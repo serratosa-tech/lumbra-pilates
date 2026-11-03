@@ -1,5 +1,6 @@
 import { ArrowRight, Clock, Sparkles, UserRound } from 'lucide-react'
 import { Link } from 'react-router'
+import { DemoTryButtons } from '../../../components/account/DemoTryButtons.tsx'
 import { spotsStatus } from '../../../components/schedule/labels.ts'
 import { Badge, ButtonLink, buttonClasses, Skeleton } from '../../../components/ui/index.ts'
 import { formatTime } from '../../../lib/dates.ts'
@@ -127,6 +128,7 @@ export function Hero({ state }: { state: HomeState }) {
               </li>
             ))}
           </ul>
+          <DemoTryButtons className="mt-4 sm:mt-5" />
         </div>
 
         <div className="relative">

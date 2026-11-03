@@ -4,7 +4,7 @@ import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router'
 import { useRouteFocus } from '../../app/useRouteFocus.ts'
 import { LogoFull } from '../../components/brand/Logo.tsx'
 import { Button, useToast } from '../../components/ui/index.ts'
-import { getDataSource } from '../../data/index.ts'
+import { errorMessage, getDataSource } from '../../data/index.ts'
 import { cn } from '../../lib/cn.ts'
 import { useScrollFade } from '../../lib/useScrollFade.ts'
 import { useStudioUser } from './studioUser.ts'
@@ -40,9 +40,14 @@ export function StudioLayout() {
 
   async function signOut() {
     setLeaving(true)
-    await getDataSource().signOut()
-    toast({ title: 'Has cerrado la sesión', tone: 'info' })
-    navigate('/estudio', { replace: true })
+    try {
+      await getDataSource().signOut()
+      toast({ title: 'Has cerrado la sesión', tone: 'info' })
+      navigate('/estudio', { replace: true })
+    } catch (error) {
+      setLeaving(false)
+      toast({ title: 'No se ha podido cerrar la sesión', description: errorMessage(error), tone: 'error' })
+    }
   }
 
   return (

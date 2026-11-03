@@ -1,5 +1,5 @@
 import { CalendarPlus, Clock, Contact, Gauge, Hash, UserRound, X, type LucideIcon } from 'lucide-react'
-import { useEffect, useRef, useState, type ReactNode } from 'react'
+import { useEffect, useId, useRef, useState, type ReactNode } from 'react'
 import { BOOKING_STATUS_LABELS, LEVEL_LABELS } from '../../../components/schedule/labels.ts'
 import { Alert, Badge, Button, ButtonLink, Card, Modal, useToast } from '../../../components/ui/index.ts'
 import {
@@ -9,6 +9,7 @@ import {
   errorMessage,
   getDataSource,
   type BookingDetails,
+  type ClientCancellation,
 } from '../../../data/index.ts'
 import { formatDate, formatDateTime, formatDateTimeRange, formatTime } from '../../../lib/dates.ts'
 import { STUDIO } from '../../../lib/site.ts'
@@ -96,9 +97,20 @@ function statusMessage(view: ResultView, details: BookingDetails): ReactNode {
   }
 }
 
-/** La reserva encontrada: estado, datos de la clase y acciones (cancelar, calendario). */
-export function BookingResult({ details, now }: { details: BookingDetails; now: Date }) {
+interface BookingResultProps {
+  details: BookingDetails
+  now: Date
+  /** Cómo se cancela: por defecto con email y código; con cuenta, por su id. */
+  onCancel?: (details: BookingDetails) => Promise<ClientCancellation>
+  headingLevel?: 'h2' | 'h3'
+}
+
+const cancelWithCode = ({ booking }: BookingDetails) => getDataSource().cancelBooking(booking.email, booking.code)
+
+/** La reserva: estado, datos de la clase y acciones (cancelar, calendario). */
+export function BookingResult({ details, now, onCancel = cancelWithCode, headingLevel: Heading = 'h2' }: BookingResultProps) {
   const { booking, session } = details
+  const headingId = useId()
   const toast = useToast()
   const [confirming, setConfirming] = useState(false)
   const [cancelling, setCancelling] = useState(false)
@@ -120,7 +132,7 @@ export function BookingResult({ details, now }: { details: BookingDetails; now: 
   async function cancel() {
     setCancelling(true)
     try {
-      const result = await getDataSource().cancelBooking(booking.email, booking.code)
+      const result = await onCancel(details)
       focusAfterCancel.current = true
       setConfirming(false)
       toast({
@@ -147,11 +159,16 @@ export function BookingResult({ details, now }: { details: BookingDetails; now: 
   ]
 
   return (
-    <Card as="article" className="animate-rise" aria-labelledby="reserva-titulo">
+    <Card as="article" className="animate-rise" aria-labelledby={headingId}>
       <div className="flex flex-wrap items-start justify-between gap-3">
-        <h2 id="reserva-titulo" ref={headingRef} tabIndex={-1} className="text-2xl outline-none">
+        <Heading
+          id={headingId}
+          ref={headingRef}
+          tabIndex={-1}
+          className={Heading === 'h3' ? 'text-xl outline-none' : 'text-2xl outline-none'}
+        >
           {session.name}
-        </h2>
+        </Heading>
         <Badge tone={status.tone}>{status.label}</Badge>
       </div>
       <ul className="mt-4 flex flex-col gap-2 text-tinta-700">

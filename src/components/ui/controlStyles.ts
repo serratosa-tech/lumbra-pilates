@@ -6,5 +6,8 @@ export const CONTROL_CLASSES = [
   'hover:border-tinta-700',
   'focus-visible:border-terracota-700 focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-terracota-700/35',
   'aria-invalid:border-error aria-invalid:focus-visible:ring-error/30',
+  // Solo lectura (datos de la cuenta): se distingue del campo editable sin perder contraste.
+  // Por atributo y no con :read-only, que también afecta a los <select>.
+  '[&[readonly]]:border-arena-400 [&[readonly]]:bg-arena-100 [&[readonly]]:hover:border-arena-400',
   'disabled:cursor-not-allowed disabled:border-arena-400 disabled:bg-arena-100 disabled:text-piedra',
 ].join(' ')

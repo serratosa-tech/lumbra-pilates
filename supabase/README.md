@@ -1,6 +1,6 @@
 # Backend de Lumbra Pilates en Supabase
 
-Esta carpeta contiene todo el backend de la app: la base de datos, la seguridad, la lógica de reservas y la demo que se mantiene sola. Es SQL que se pega en el editor SQL de Supabase. La app todavía no lo usa: la conexión llega en la fase 5.
+Esta carpeta contiene todo el backend de la app: la base de datos, la seguridad, la lógica de reservas y la demo que se mantiene sola. Es SQL que se pega en el editor SQL de Supabase. La app lo usa desde la fase 5 a través de `src/data/supabase/` (apartado 11).
 
 ```
 supabase/
@@ -41,7 +41,7 @@ En Supabase → **Project Settings → API Keys** hay dos tipos:
 | **Publishable** (`sb_publishable_…`) | En la app, en `.env.local` (ignorado por git) | Es pública por diseño: solo permite lo que dejan los permisos y RLS de este SQL. |
 | **Secret** (`sb_secret_…`, antes `service_role`) | **Nunca sale de Supabase.** Ni en la app, ni en el repositorio, ni en GitHub Actions ni en Cloudflare. | Se salta toda la seguridad. Ninguna parte de este proyecto la necesita. |
 
-El `.env.local` de la fase 5 tendrá esta forma (sin valores reales en el repositorio):
+El `.env.local` tiene esta forma (sin valores reales en el repositorio; la plantilla es `.env.example`):
 
 ```
 VITE_SUPABASE_URL=https://<tu-proyecto>.supabase.co
@@ -101,7 +101,7 @@ select private.register_demo_account('estudio@lumbra.example', 'studio', 'Lucía
 
 Esto guarda una copia del email y de la contraseña cifrada (para restaurarlas), hace a la cuenta de estudio miembro con `is_demo = true` y crea las reservas de ejemplo del cliente. El nombre y el teléfono que pasas son los **datos de ejemplo**: el cliente demo siempre reserva con ellos, aunque escriba otros en el formulario.
 
-5. **Comprueba que el inicio de sesión sigue funcionando con el trigger de blindaje.** Hasta la fase 5 la app no habla con Supabase, así que de momento lo cubre la prueba 13.5, que hace lo mismo que un inicio de sesión: actualizar `last_sign_in_at`. En la fase 5, lo primero será entrar con las dos cuentas demo desde la app. Si alguna diera «Database error», mira el apartado 9.
+5. **Comprueba que el inicio de sesión sigue funcionando con el trigger de blindaje.** Entra desde la app con «Probar como cliente» y «Probar como estudio» (la prueba 13.5 hace lo mismo en SQL: actualizar `last_sign_in_at`). Si alguna diera «Database error», mira el apartado 9.
 
 **Cuenta del estudio real** (si algún día la hay): créala igual en Authentication → Users y hazla miembro sin marca demo:
 
@@ -221,10 +221,59 @@ Supabase permite triggers sobre `auth.users`: es el patrón que documentan para 
 - **Doble seguro contra duplicados y sobreaforo.** El bloqueo de la fila de la clase hace las reservas de una en una, y un índice único parcial impide dos reservas activas con el mismo email en la misma clase.
 - **Las respuestas usan los nombres de campo de `src/data/types.ts`** (`startsAt`, `bookedCount`, `waitlistPosition`…) y las fechas van en el mismo formato que `toISOString()`, para que la fase 5 las use tal cual.
 
-## 11. Notas para la fase 5
+## 11. Cómo lo usa la app
 
-- **Rendimiento (objetivo: PageSpeed móvil 90 o más):** el horario público se pedirá con `fetch` directo a `POST /rest/v1/rpc/list_sessions`, con la cabecera `apikey: <publishable>`, **sin cargar supabase-js**. supabase-js se cargará de forma diferida (`import()`) solo al iniciar sesión o reservar.
-- **Cuentas demo en la interfaz:** la cuenta demo no debe poder cambiar su email ni su contraseña. El trigger ya lo impide, pero además hay que ocultar esas opciones en la interfaz. Con la cuenta de cliente demo, el formulario de reserva muestra el nombre, el email y el teléfono de ejemplo rellenados y bloqueados.
-- **Errores:** añadir `too_many_attempts` a `DataErrorCode`, con un mensaje como «Demasiados intentos. Espera unos minutos y vuelve a probar».
-- **`cancel_booking`** responde `{ "error": "not_found" }` en lugar de lanzar un error (apartado 6).
-- **Métricas:** `list_studio_bookings` más las clases de `list_sessions` alimentan `computeMetrics` sin duplicar la lógica en SQL.
+| Pantalla | Peticiones |
+| --- | --- |
+| Portada y `/clases` | `GET /rest/v1/class_types`, `GET /rest/v1/instructors` y `POST /rest/v1/rpc/list_sessions`, con `fetch` directo y solo la cabecera `apikey` (sin `Authorization` y sin cargar supabase-js). Se repite cada minuto con la pestaña visible, al volver a ella y al recuperar la conexión. |
+| Detalle de una clase | `rpc/get_session` (fetch). Al abrirlo se precarga supabase-js; reservar es `book_class` con supabase-js, que añade el token si hay sesión. |
+| Mis reservas sin sesión | `rpc/find_booking` y `rpc/cancel_booking` (fetch). |
+| Mis reservas con cliente | `list_my_bookings` y `cancel_my_booking` (supabase-js). |
+| Acceso y panel | `auth/v1/token` (inicio de sesión), `GET studio_members` (la fila propia, para saber si es del estudio) y las funciones del estudio. Las métricas son `list_studio_bookings` + `list_sessions` → `computeMetrics` en la app. |
+
+- supabase-js (fragmento `supabaseJs-*.js`) solo se descarga al reservar, iniciar sesión o entrar en el panel, o si ya hay una sesión guardada.
+- La sesión vive en localStorage bajo `lumbra-pilates:v1`. Cerrar sesión usa `scope: 'local'`: el modo global echaría a todos los visitantes que comparten la cuenta demo.
+- `cancel_booking` responde `{ "error": "not_found" }` en lugar de lanzar un error (apartado 6); la app lo convierte en el mismo `DataError('not_found')`.
+- Ningún error se inventa en la app: el texto de `raise exception` es el código de `src/data/errors.ts` (incluido `too_many_attempts`); la red caída es `network` y un fallo del servidor, `unavailable`.
+
+## 12. Guía de comprobación en Network
+
+Para la revisión humana de la seguridad. Abre la app, pulsa **F12 → Network** (Inspeccionar → Red) y filtra por `rest/v1` o `auth/v1`. Para ver una respuesta, pulsa la petición y abre **Response** (Respuesta).
+
+Antes de empezar:
+
+- **Una lectura bloqueada no siempre es un error.** La RLS no da «permiso denegado» por cada fila: si filtra todas, la respuesta es `200` con `[]`. Que llegue un `200` no significa que se haya saltado la regla. Hay que mirar el contenido.
+- **Para intentar romper una regla:** clic derecho en la petición → **Copy → Copy as fetch**, pégala en **Console**, cambia el id, el código o el cuerpo y pulsa Intro. Se verá una petición nueva en Network.
+- **No compartas el token.** Con sesión, las peticiones llevan `Authorization: Bearer eyJ…`. Ese token es la sesión de la cuenta: tápalo en las capturas y no lo pegues en ningún sitio. La cabecera `apikey` (publishable) sí es pública.
+
+| # | Regla | Cuenta | Acción | Petición a buscar | Respuesta que demuestra que se cumple | Cómo intentar romperla |
+| --- | --- | --- | --- | --- | --- | --- |
+| 1 | El horario no expone datos personales | Sin sesión | Abrir `/clases` | `POST rpc/list_sessions` | Lista de clases con `bookedCount` y `waitlistCount` como números; ningún nombre, email ni teléfono | Cambiar `p_to` a un rango de más de 100 días → `400` con `invalid_input` |
+| 2 | La carga pública no descarga supabase-js | Sin sesión | Recargar `/` y `/clases` con «Disable cache» | Filtro `JS` | No aparece `supabaseJs-*.js`, y las peticiones a `rest/v1` llevan `apikey` pero no `Authorization` | — |
+| 3 | Un visitante no lee reservas | Sin sesión | En Console: copiar como fetch `list_sessions` y cambiar la URL a `/rest/v1/bookings?select=*` (método `GET`, sin cuerpo) | `GET bookings` | `401` con `permission denied for table bookings` | Probar también `?select=email,phone` → igual |
+| 4 | Mis reservas solo enseña la reserva pedida | Sin sesión | Consultar `ana.lopez@correo.example` + `LUM-7K3Q` | `POST rpc/find_booking` | Solo esa reserva | Cambiar `p_code` por otro código o `p_email` por otro email → `200` con `null` |
+| 5 | Límite de intentos | Sin sesión | Repetir la petición 4 con un código falso 6 veces | `POST rpc/find_booking` | Los 5 primeros: `null`; el 6.º: `400` con `too_many_attempts`, **aunque luego pongas el código correcto** | Cambiar mayúsculas o espacios del email → cuenta como el mismo email |
+| 6 | No se cancela una reserva ajena | Sin sesión | Cancelar una reserva propia desde Mis reservas | `POST rpc/cancel_booking` | `{ "booking": …, "promoted": true/false }`, sin datos de quien sube | Repetir con el email de otra persona o un código inventado → `{"error":"not_found"}` |
+| 7 | El cliente solo ve sus reservas | Cliente demo | En Console: `GET /rest/v1/bookings?select=*` con la cabecera `Authorization` copiada de otra petición | `GET bookings` | Solo filas con su `user_id` | Añadir `&user_id=neq.<su id>` → `200` con `[]` |
+| 8 | El cliente solo cancela lo suyo | Cliente demo | Cancelar una reserva en Mis reservas | `POST rpc/cancel_my_booking` | La reserva cancelada | Cambiar `p_booking_id` por el id de una reserva ajena (o un uuid inventado) → `400` con `not_found` |
+| 9 | El cliente demo no deja datos reales | Cliente demo | Reservar una clase | `POST rpc/book_class` | La reserva sale a nombre de Ana Demo, con `cliente@lumbra.example` y `+34 600 000 900` | Cambiar `p_name`, `p_email` y `p_phone` en el cuerpo → la respuesta sigue con los datos de ejemplo |
+| 10 | El panel no se abre sin permiso | Sin sesión y cliente demo | Escribir `/estudio/resumen` en la barra | Filtro `rpc` | **No aparece ninguna petición a `list_studio_bookings` ni `get_roster`.** Sin sesión, la app va al acceso; con el cliente, muestra «Esta cuenta no tiene acceso al panel del estudio» | — |
+| 11 | Las funciones del estudio exigen ser miembro | Sin sesión y cliente demo | En Console: `POST /rest/v1/rpc/get_roster` con `{"p_session_id":"<id de una clase>"}` | `POST rpc/get_roster` | Sin sesión: `401` con `permission denied for function`. Con cliente: `400` con `unauthorized` | Probar `list_studio_bookings`, `set_attendance` o `cancel_session` → igual |
+| 12 | Las clases solo cambian con funciones | Estudio demo | En Console: `PATCH /rest/v1/sessions?id=eq.<id>` con `{"capacity":1}` | `PATCH sessions` | `401`/`403` con `permission denied for table sessions` | `POST` o `DELETE` sobre `sessions` o `bookings` → igual |
+| 13 | El estudio demo ve enmascarado lo que escriben los visitantes | Estudio demo | Abrir los asistentes de una clase en la que hayas reservado como visitante | `POST rpc/get_roster` | Tu reserva sale como `m***@dominio` y `+34 6** *** *78`; las de ejemplo (`@correo.example`) se ven enteras | `POST rpc/list_studio_bookings` → mismo enmascarado |
+| 14 | Las cuentas demo no cambian de contraseña ni de email | Cliente o estudio demo | En Console: `PUT /auth/v1/user` con `{"password":"otra1234"}` y las cabeceras `apikey` y `Authorization` | `PUT auth/v1/user` | `500` con «La cuenta demo no puede cambiar su email, su teléfono ni su contraseña.»: el trigger de blindaje lo impide | Con `{"email":"otro@correo.example"}` → igual |
+| 15 | No se pueden crear cuentas | Sin sesión | En Console: `POST /auth/v1/signup` con `{"email":"x@correo.example","password":"x1234567"}` | `POST auth/v1/signup` | `422` con «Signups not allowed for this instance» | — |
+| 16 | La clave secreta no está en la web | Sin sesión | **Sources** (Fuentes) → Ctrl + Mayús + F → buscar `sb_secret_` | — | Solo aparece dentro del código de supabase-js, como prefijo que la librería comprueba (`startsWith('sb_secret_')`), nunca seguido de una clave | Buscar también `service_role` y `eyJ` → sin resultados en los archivos de la app |
+
+## 13. Security Advisor
+
+Supabase → **Advisors → Security Advisor** muestra estos avisos. Todos son esperados:
+
+| Aviso | Cuántos | Por qué es correcto |
+| --- | --- | --- |
+| Función SECURITY DEFINER ejecutable por `anon` | 5 | Las 5 funciones públicas: `list_sessions`, `get_session`, `book_class`, `find_booking` y `cancel_booking`. Tienen que ser *definer* para contar y escribir reservas que el visitante no puede leer (apartado 1). Validan todo y devuelven solo lo justo. `health_check` es *invoker* y no aparece. |
+| Función SECURITY DEFINER ejecutable por `authenticated` | 15 | Esas 5 (también las usa quien tiene sesión) más las 10 de `0005`: `list_my_bookings`, `cancel_my_booking`, `create_session`, `update_session`, `cancel_session`, `add_manual_booking`, `cancel_booking_by_id`, `set_attendance`, `get_roster` y `list_studio_bookings`. Las del estudio comprueban `studio_members` lo primero, y las del cliente, `auth.uid()`. |
+| Leaked Password Protection desactivada | 1 | A propósito. El registro está cerrado (apartado 3) y solo existen las cuentas demo, cuya contraseña es pública por diseño. Actívala si algún día hay cuentas reales. |
+| RLS activado sin políticas | 4 | `public.lookup_attempts`, `private.demo_accounts`, `private.demo_customers` y `private.demo_slots`. Cerradas para todos a propósito: solo las tocan las funciones. |
+
+Si aparece un aviso que no está en esta tabla (por ejemplo, una tabla sin RLS o una función nueva), revísalo antes de publicar.

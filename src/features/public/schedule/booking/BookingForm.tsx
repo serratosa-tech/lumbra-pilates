@@ -8,6 +8,7 @@ import {
   type Account,
   type BookingDetails,
 } from '../../../../data/index.ts'
+import { OWNER } from '../../../../lib/site.ts'
 import { useBookingForm } from './useBookingForm.ts'
 
 const LINK = 'font-semibold text-terracota-700 underline underline-offset-4 hover:text-terracota-600'
@@ -140,6 +141,16 @@ export function BookingForm({ sessionId, waitlist, cancellable, onBooked, accoun
             </>
           }
         />
+        {/* Información básica de protección de datos (primera capa); el resto, en la política. */}
+        <p className="text-xs text-piedra">
+          Responsable: {OWNER.name}. Finalidad: demostrar el funcionamiento de la app. Las reservas se borran cada
+          noche. Tienes derecho a acceder a tus datos, rectificarlos y suprimirlos.{' '}
+          <Link to="/privacidad" target="_blank" className="underline underline-offset-2 hover:text-tinta">
+            Más información
+            <span className="sr-only"> en la política de privacidad (se abre en otra pestaña)</span>
+          </Link>
+          .
+        </p>
       </div>
 
       <Button type="submit" size="lg" loading={submitting} className="mt-5 w-full">

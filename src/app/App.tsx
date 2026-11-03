@@ -5,7 +5,8 @@ import { DesignSystemPage } from '../features/public/design-system/DesignSystemP
 import { HomePage } from '../features/public/home/HomePage.tsx'
 import { MyBookingsPage } from '../features/public/my-bookings/MyBookingsPage.tsx'
 import { NotFoundPage } from '../features/public/NotFoundPage.tsx'
-import { PrivacyPage } from '../features/public/PrivacyPage.tsx'
+import { LegalNoticePage } from '../features/public/legal/LegalNoticePage.tsx'
+import { PrivacyPage } from '../features/public/legal/PrivacyPage.tsx'
 import { SchedulePage } from '../features/public/schedule/SchedulePage.tsx'
 import { PublicLayout } from './PublicLayout.tsx'
 import { RootLayout } from './RootLayout.tsx'
@@ -39,6 +40,7 @@ export default function App() {
             <Route path="clases" element={<SchedulePage />} />
             <Route path="mis-reservas" element={<MyBookingsPage />} />
             <Route path="privacidad" element={<PrivacyPage />} />
+            <Route path="aviso-legal" element={<LegalNoticePage />} />
             <Route path="sistema" element={<DesignSystemPage />} />
             <Route path="*" element={<NotFoundPage />} />
           </Route>

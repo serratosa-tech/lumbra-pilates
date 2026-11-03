@@ -19,6 +19,12 @@ function FooterColumn({ title, children }: { title: string; children: ReactNode 
 
 const YEAR = new Date().getFullYear()
 
+const LEGAL_NAV = [
+  { to: '/aviso-legal', label: 'Aviso legal' },
+  { to: '/privacidad', label: 'Privacidad' },
+  { to: '/privacidad#cookies', label: 'Cookies' },
+]
+
 export function SiteFooter() {
   return (
     <footer className="on-dark bg-tinta text-arena-200">
@@ -75,19 +81,25 @@ export function SiteFooter() {
                 Sistema de diseño
               </Link>
             </li>
-            <li>
-              <Link to="/privacidad" className={LINK_CLASSES}>
-                Privacidad
-              </Link>
-            </li>
           </ul>
         </FooterColumn>
       </div>
 
       <div className="border-t border-arena-200/15">
-        <p className="container-page py-5 text-sm">
-          © {YEAR} Lumbra Pilates. Estudio ficticio: demo de portafolio de Helena Serratosa.
-        </p>
+        <div className="container-page flex flex-col gap-x-8 gap-y-1 py-4 text-sm md:flex-row md:items-center md:justify-between">
+          <p className="py-2">© {YEAR} Lumbra Pilates. Estudio ficticio: demo de portafolio de Helena Serratosa.</p>
+          <nav aria-label="Legal">
+            <ul className="flex flex-wrap gap-x-5">
+              {LEGAL_NAV.map((item) => (
+                <li key={item.to}>
+                  <Link to={item.to} className={LINK_CLASSES}>
+                    {item.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </nav>
+        </div>
       </div>
     </footer>
   )

@@ -53,6 +53,8 @@ export function DayPicker({ days, selected, onSelect, panelId }: DayPickerProps)
     >
       {days.map((day) => {
         const isSelected = day.weekday === selected
+        const shortLabel = day.isToday ? 'Hoy' : formatShortWeekday(day.date)
+        const count = plural(day.sessions.length, 'clase')
         return (
           <button
             key={day.weekday}
@@ -62,7 +64,9 @@ export function DayPicker({ days, selected, onSelect, panelId }: DayPickerProps)
             aria-selected={isSelected}
             aria-controls={panelId}
             tabIndex={isSelected ? 0 : -1}
-            aria-label={`${capitalize(formatDate(day.date))}${day.isToday ? ', hoy' : ''}, ${plural(day.sessions.length, 'clase')}`}
+            // El nombre empieza por lo que se ve («Lun 2, 5 clases»), para el control por voz (WCAG 2.5.3),
+            // y termina con la fecha completa para el lector de pantalla.
+            aria-label={`${capitalize(shortLabel)} ${day.date.day}, ${count}: ${formatDate(day.date)}`}
             onClick={() => onSelect(day.weekday)}
             className={cn(
               'flex min-w-[4.5rem] flex-1 shrink-0 snap-start flex-col items-center rounded-md border px-3 py-2 transition-colors duration-(--duration-fast)',
@@ -72,12 +76,10 @@ export function DayPicker({ days, selected, onSelect, panelId }: DayPickerProps)
             )}
           >
             <span className={cn('text-xs font-medium tracking-wide uppercase', !isSelected && 'text-piedra')}>
-              {day.isToday ? 'Hoy' : formatShortWeekday(day.date)}
+              {shortLabel}
             </span>
             <span className="text-2xl font-medium leading-tight tabular-nums">{day.date.day}</span>
-            <span className={cn('text-xs whitespace-nowrap', isSelected ? 'text-white/90' : 'text-piedra')}>
-              {plural(day.sessions.length, 'clase')}
-            </span>
+            <span className={cn('text-xs whitespace-nowrap', isSelected ? 'text-white/90' : 'text-piedra')}>{count}</span>
           </button>
         )
       })}

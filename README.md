@@ -2,6 +2,8 @@
 
 App de demostración de reservas para un estudio de pilates inventado en Valencia (proyecto de portafolio). Reserva sin cuenta con código, lista de espera automática, consulta y cancelación de reservas, cuentas de cliente y panel del estudio con clases, asistentes y métricas. Backend real en Supabase.
 
+**Web:** https://lumbra-pilates.pages.dev *(pendiente de publicar)*
+
 > Demo con datos inventados: se restablece automáticamente cada noche. No introduzcas datos reales.
 
 ## Rutas
@@ -21,7 +23,7 @@ App de demostración de reservas para un estudio de pilates inventado en Valenci
 
 Las rutas del panel solo se muestran a miembros del estudio: sin sesión llevan al acceso y con una cuenta de cliente muestran un aviso, sin pedir ningún dato del estudio.
 
-**Indexación.** El sitemap solo tiene `/`, `/clases`, `/privacidad` y `/aviso-legal`. Las páginas `noindex` lo llevan dos veces: en `<meta name="robots">`, que la app pone al ejecutarse, y en la cabecera `X-Robots-Tag: noindex` de `public/_headers`, que Cloudflare Pages envía con la respuesta (el HTML inicial es el de la portada y dice «index»). `robots.txt` no bloquea nada: Google tiene que poder entrar para leer el `noindex`.
+**Indexación.** El sitemap solo tiene `/`, `/clases`, `/privacidad` y `/aviso-legal`. Las páginas `noindex` lo llevan dos veces: en `<meta name="robots">`, que la app pone al ejecutarse, y en la cabecera `X-Robots-Tag: noindex` de `public/_headers`, que Cloudflare Pages envía con la respuesta (el HTML inicial es el de la portada y dice «index»). `robots.txt` no bloquea nada: Google tiene que poder entrar para leer el `noindex`. `robots.txt` y `sitemap.xml` se generan en el build a partir de `SITE_URL` (ver «Cómo desplegarlo»).
 
 ## Probar la demo
 
@@ -111,13 +113,65 @@ Las aplica la base de datos (`supabase/migrations`) con funciones de Postgres qu
 
 El backend en Supabase (esquema, seguridad RLS, funciones de reserva, datos de ejemplo, cuentas demo y pruebas) está en [`supabase/`](supabase/README.md), con una guía paso a paso, la **guía de comprobación en Network** para la revisión humana (apartado 12), el resumen del **Security Advisor** (apartado 13) y los **resultados de la comprobación** de las pruebas SQL y de las 16 reglas desde el navegador (apartado 14).
 
+## Cómo desplegarlo
+
+La web es estática (Vite) y se publica en **Cloudflare Pages**. Los datos están en **Supabase**, y dos avisos externos evitan que el proyecto gratuito se pause.
+
+### 1. Supabase
+
+Sigue [`supabase/README.md`](supabase/README.md): ajustes del proyecto (apartado 3), migraciones `0001`–`0007` en el SQL Editor (apartado 4), `seed.sql`, cuentas demo (apartado 5), `cron.sql` (apartado 8) y `tests/seguridad_y_reglas.sql`. Copia la URL del proyecto y la clave **publishable** (Project Settings → API Keys). La clave secreta no se usa en ningún sitio.
+
+### 2. Cloudflare Pages
+
+**Workers & Pages → Create → Pages → Connect to Git**, con este repositorio:
+
+| Ajuste | Valor |
+| --- | --- |
+| Project name | `lumbra-pilates` (da la URL `https://lumbra-pilates.pages.dev`) |
+| Production branch | `main` |
+| Framework preset | El de Vite o React (Vite) si aparece; si no, `None`. Lo que cuenta son las dos filas siguientes |
+| Build command | `npm run build` |
+| Build output directory | `dist` |
+| Variables de entorno (Production y Preview) | `VITE_SUPABASE_URL` y `VITE_SUPABASE_PUBLISHABLE_KEY` |
+
+Cada push a `main` publica la web, y cada rama tiene su vista previa. El build **falla a propósito** si falta `VITE_SUPABASE_URL` o si su origen no está en la CSP de `public/_headers`, para no publicar una web sin datos.
+
+### 3. Rutas, cabeceras y dominio
+
+- **`public/_redirects`** (`/* /index.html 200`): cualquier ruta devuelve la app, así que `/clases` o `/estudio/resumen` funcionan al recargar. Las rutas que no existen muestran la página 404 de la app, que lleva `noindex` (con estado HTTP 200, porque Cloudflare no permite reescribir con 404).
+- **`public/_headers`**, en todas las rutas:
+
+  | Cabecera | Valor y motivo |
+  | --- | --- |
+  | `Content-Security-Policy` | `default-src`, `script-src`, `style-src`, `img-src` y `font-src` solo `'self'`, **sin `unsafe-inline` ni `unsafe-eval`** (el `index.html` del build no tiene scripts en línea). `connect-src 'self'` más el proyecto de Supabase. `object-src 'none'`, `base-uri 'self'`, `form-action 'self'`, `frame-ancestors 'none'` (nadie puede meter la web en un iframe) y `upgrade-insecure-requests` |
+  | `X-Content-Type-Options` | `nosniff`: el navegador no «adivina» el tipo de los archivos |
+  | `Referrer-Policy` | `strict-origin-when-cross-origin`: Supabase solo ve el origen, no la ruta |
+  | `Permissions-Policy` | Cámara, micrófono, ubicación, pagos, USB y Topics apagados |
+  | `Strict-Transport-Security` | `max-age=31536000; includeSubDomains`: siempre https |
+  | `Cross-Origin-Opener-Policy` | `same-origin`: la ventana queda aislada |
+
+  `/assets/*` lleva `Cache-Control: public, max-age=31536000, immutable`, porque sus nombres llevan hash. El HTML no se guarda en caché. Los `noindex` de `/sistema`, `/mis-reservas` y `/estudio` siguen igual. Los tests `src/app/deploy.test.ts` e `indexing.test.ts` comprueban todas estas reglas.
+- **Otro proyecto de Supabase:** cambia `VITE_SUPABASE_URL` en Cloudflare y el `connect-src` de `public/_headers`. El build avisa si no coinciden.
+- **Otro dominio:** cambia solo `SITE_URL` en `src/lib/site.ts`. De ella salen el canonical y `og:url` (en `index.html`, con `%SITE_URL%`, y en cada página) y `robots.txt` y `sitemap.xml`, que genera un plugin de `vite.config.ts`. Un test comprueba que el dominio no aparece en ningún otro archivo.
+
+### 4. Avisos para que Supabase no se pause
+
+En el plan Free, Supabase pausa el proyecto tras una semana sin actividad. Dos servicios externos llaman a `health_check` (`POST /rest/v1/rpc/health_check` con la clave publishable) dos veces al día. Si la respuesta no es `{"ok": true}`, fallan:
+
+| Aviso | Cuándo (UTC) | Archivo | Configuración |
+| --- | --- | --- | --- |
+| GitHub Actions | 07:17 y 19:17, y a mano | [`.github/workflows/keepalive.yml`](.github/workflows/keepalive.yml) | Secrets del repositorio `SUPABASE_URL` y `SUPABASE_PUBLISHABLE_KEY`. `permissions: {}` |
+| Cloudflare Worker | 01:43 y 13:43 | [`keepalive-worker/`](keepalive-worker/README.md) | Paso a paso desde el panel, sin instalar nada |
+
+> **GitHub desactiva los workflows programados de los repositorios públicos tras 60 días sin actividad en el repositorio.** Si pasan dos meses sin commits, el aviso de GitHub se para y solo queda el del Worker. Para reactivarlo: **Actions → keepalive → Enable workflow**.
+
 ## Calidad y verificación
 
 Comprobado el 4 de noviembre de 2026 (fase 6), antes de publicar.
 
 ### Tests
 
-253 tests con Vitest y Testing Library, todos en verde, sin herramientas añadidas a `package.json`:
+265 tests con Vitest y Testing Library, todos en verde, sin herramientas añadidas a `package.json`:
 
 | Módulo | Tests | Qué cubren |
 | --- | --- | --- |
@@ -128,7 +182,9 @@ Comprobado el 4 de noviembre de 2026 (fase 6), antes de publicar.
 | Mis reservas | 13 | Consulta, demasiados intentos, sin conexión, cancelar y subir la lista, salir de la lista de espera, error al cancelar, cuenta de cliente |
 | Panel del estudio | 17 | Resumen (métricas, vacío, error), Clases (crear, cerrar con Esc, aforo por debajo de las reservas, error del servidor, cancelar clase), Asistentes (abrir clase, asistencia, reserva manual, subida de la lista, errores) y el formulario de clase |
 | Demo en memoria y datos de ejemplo | 36 | Persistencia en la clave única, semilla coherente en distintas fechas |
-| Componentes y utilidades | 38 | Diálogos con foco atrapado, menú de acciones con teclado, tarjetas de clase, pestañas de día, fechas en hora de Madrid, archivo `.ics`, refresco de datos, páginas legales, sitemap y `noindex` |
+| Componentes y utilidades | 35 | Diálogos con foco atrapado, menú de acciones con teclado, tarjetas de clase, pestañas de día, fechas en hora de Madrid, archivo `.ics`, refresco de datos y páginas legales |
+| Publicación (`src/app/deploy.test.ts`, `indexing.test.ts`) | 10 | `_redirects`, CSP sin `unsafe-*` y con un solo proyecto de Supabase, cabeceras de seguridad, caché solo en `/assets/*`, límites de Cloudflare, sitemap, robots, `noindex` y el dominio escrito solo en `SITE_URL` |
+| Aviso de Cloudflare (`keepalive-worker`) | 5 | Llamada a `health_check` solo con `apikey`, fallos si no responde ok, error HTTP o faltan variables, 404 desde fuera |
 
 Las pruebas SQL del backend (`supabase/tests/seguridad_y_reglas.sql`) y las reglas comprobadas desde el navegador están en [`supabase/README.md`](supabase/README.md), apartado 14.
 
@@ -159,12 +215,19 @@ Los 37 casos comprobados con Playwright (carga, vacío, error y sin conexión en
 ### Fugas invisibles
 
 - **npm audit:** 0 vulnerabilidades, tanto con todas las dependencias como solo con las de producción.
-- **gitleaks 8.30.1** (binario oficial de la release de GitHub, con el SHA256 comprobado contra `gitleaks_8.30.1_checksums.txt`) sobre todo el historial de git, con todas las ramas: **0 hallazgos** en 29 commits. `.env.local` no aparece en ningún commit y está en `.gitignore`.
+- **gitleaks 8.30.1** (binario oficial de la release de GitHub, con el SHA256 comprobado contra `gitleaks_8.30.1_checksums.txt`) sobre todo el historial de `main`, la única rama: **0 hallazgos** en 29 commits en la fase 6 y otra vez en los 39 de la fase 7, antes de hacer público el repositorio. `.env.local` no aparece en ningún commit y está en `.gitignore`.
+- **Qué no se sube:** `.env.local`, `CLAUDE.md`, `.claude/`, `dist/` y `node_modules/` están en `.gitignore`. No hay archivos de prueba ni de soporte en la raíz, y las herramientas de verificación (Playwright, gitleaks) viven fuera del proyecto. Los commits llevan el email `noreply` de GitHub.
 - **Clave secreta en la web:** en los JS del build, `sb_secret_` solo aparece dentro de supabase-js, como prefijo que la librería comprueba; `service_role` y `eyJ` no aparecen.
 
-### Pendiente para la fase 7
+### Cabeceras y rutas (antes de publicar)
 
-- Medir con **PageSpeed Insights** ya publicada en Cloudflare Pages. Si la portada baja de 90 o su LCP pasa de 2,5 s, investigar qué elemento es el LCP y cuándo se pinta.
+Con Edge headless a 1280 px, sirviendo `dist/` con las reglas de `_headers` y `_redirects` aplicadas (una simulación de Cloudflare Pages) y con las peticiones reales a Supabase: **24 de 24 comprobaciones correctas**. Portada, `/clases` al entrar directamente y al recargar, detalle de clase (supabase-js se descarga y conecta), Mis reservas con `LUM-7K3Q`, descarga del `.ics` (enlace `blob:`), acceso al panel con la cuenta demo del estudio y recarga en `/estudio/resumen`, y una ruta inexistente (404 de la app con `noindex`). **Ninguna violación de la CSP** y la consola sin errores ni avisos. Prueba de control: con Supabase fuera de `connect-src`, la portada marca enseguida la violación y el horario no carga.
+
+### Pendiente para la fase 7 (con la web publicada)
+
+- Comprobar las cabeceras reales con `curl -I` en `/`, `/clases`, `/estudio/resumen` y un archivo de `/assets/`, y revisar que el registro del despliegue no rechaza la regla de `_redirects`. Si la rechazara, se borra el archivo: sin `404.html`, Pages ya sirve la app en cualquier ruta.
+- Medir con **PageSpeed Insights**. Si la portada baja de 90 o su LCP pasa de 2,5 s, investigar qué elemento es el LCP y cuándo se pinta.
+- Lanzar a mano el workflow `keepalive` y el Worker, y confirmar que responden `ok`.
 
 ## Scripts
 

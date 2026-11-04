@@ -185,8 +185,8 @@ Las clases y las reservas se cambian **solo** con funciones, también desde el p
 | Quién | Cuándo | Qué hace | Fase |
 | --- | --- | --- | --- |
 | **pg_cron** (`lumbra-demo`) | Cada hora en punto | `private.demo_hourly()`: a las 03:00 de Madrid, `reset_demo()`; el resto de horas, `restore_demo()` | 4 (`cron.sql`) |
-| **GitHub Actions** | 07:17 y 19:17 UTC | `POST /rest/v1/rpc/health_check` con la clave publishable | 7 |
-| **Cloudflare Cron Trigger** | 01:43 y 13:43 UTC | La misma llamada desde un Worker | 7 |
+| **GitHub Actions** | 07:17 y 19:17 UTC | `POST /rest/v1/rpc/health_check` con la clave publishable | 7 (`.github/workflows/keepalive.yml`) |
+| **Cloudflare Cron Trigger** | 01:43 y 13:43 UTC | La misma llamada desde un Worker | 7 (`keepalive-worker/`) |
 
 - **`restore_demo()`** (cada hora): repone el catálogo de ejemplo, las credenciales de las cuentas demo, su fila de miembro, las reservas de ejemplo del cliente demo (borra las que se hayan hecho con esa cuenta y crea otra vez las cuatro de ejemplo) y las reservas `LUM-7K3Q` y `LUM-W8HT` si un visitante las ha cancelado.
 - **`reset_demo()`** (cada noche): borra reservas, clases e intentos, vuelve a sembrar con fechas relativas a hoy y restaura. No toca usuarios ni miembros.
@@ -194,7 +194,7 @@ Las clases y las reservas se cambian **solo** con funciones, también desde el p
 - **Activar el cron:** en Supabase → **Integrations → Cron** (o Database → Extensions → `pg_cron`), activa la extensión y después ejecuta `cron.sql`. Para ver las últimas ejecuciones: `select status, return_message, start_time from cron.job_run_details order by start_time desc limit 10;`
 - **Restablecer a mano** en cualquier momento: `select private.reset_demo();`
 
-**Por qué hay dos avisos externos.** En el plan gratuito, Supabase pausa el proyecto tras una semana sin actividad, y la actividad interna de pg_cron puede no contar. Por eso dos servicios de fuera llaman a `health_check` dos veces al día. Son dos y no uno porque **GitHub desactiva los workflows programados de los repositorios públicos tras 60 días sin actividad en el repositorio**. Si el proyecto pasa dos meses sin commits, el aviso de GitHub se para en silencio y el de Cloudflare sigue funcionando.
+**Por qué hay dos avisos externos.** En el plan gratuito, Supabase pausa el proyecto tras una semana sin actividad, y la actividad interna de pg_cron puede no contar. Por eso dos servicios de fuera llaman a `health_check` dos veces al día. Son dos y no uno porque **GitHub desactiva los workflows programados de los repositorios públicos tras 60 días sin actividad en el repositorio**. Si el proyecto pasa dos meses sin commits, el aviso de GitHub se para en silencio y el de Cloudflare sigue funcionando. Para reactivarlo: **Actions → keepalive → Enable workflow**. Cómo configurar los dos avisos: README principal, «Cómo desplegarlo», apartado 4.
 
 ## 9. Blindaje de las cuentas demo
 

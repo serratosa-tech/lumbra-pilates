@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from 'vitest'
 import { memoryStorage } from '../../test/fixtures.ts'
+import type { DataSource } from '../DataSource.ts'
 import { DEMO_ACCOUNTS } from '../demoAccounts.ts'
 import { STORAGE_KEY } from '../storage.ts'
 import { createSupabaseDataSource } from './supabaseDataSource.ts'
@@ -95,6 +96,21 @@ describe('Supabase · lo público, con fetch directo', () => {
     )
   })
 
+  it.each([
+    ['get_session', (ds: DataSource) => ds.getSession(SESSION_ID)],
+    ['find_booking', (ds: DataSource) => ds.findBooking('ana@correo.example', 'LUM-7K3Q')],
+    ['cancel_booking', (ds: DataSource) => ds.cancelBooking('ana@correo.example', 'LUM-7K3Q')],
+    ['instructors', (ds: DataSource) => ds.listInstructors()],
+  ])('%s va con fetch directo, sin Authorization y sin supabase-js', async (path, call) => {
+    const { ds, fetchImpl, supabase } = setup(vi.fn(async () => json({ booking: { id: 'b1' }, promoted: false })))
+    await call(ds)
+    const { url, headers } = request(fetchImpl)
+    expect(url).toContain(`/rest/v1/${path === 'instructors' ? path : `rpc/${path}`}`)
+    expect(headers).toMatchObject({ apikey: CONFIG.key })
+    expect(headers).not.toHaveProperty('Authorization')
+    expect(supabase.loadSupabase).not.toHaveBeenCalled()
+  })
+
   it('una clase con un id imposible es null sin preguntar al servidor', async () => {
     const { ds, fetchImpl } = setup()
     expect(await ds.getSession('no-es-un-uuid')).toBeNull()
@@ -147,6 +163,48 @@ describe('Supabase · cuentas, con supabase-js diferido', () => {
     const [url, key, options] = supabase.createClient.mock.calls[0] as [string, string, { auth: Record<string, unknown> }]
     expect([url, key]).toEqual([CONFIG.url, CONFIG.key])
     expect(options.auth).toMatchObject({ storageKey: STORAGE_KEY, persistSession: true, detectSessionInUrl: false })
+  })
+
+  const SESSION_INPUT = {
+    classTypeId: 'mat-flow',
+    instructorId: 'marta-ibanez',
+    startsAt: '2026-11-20T17:00:00.000Z',
+    durationMinutes: 55,
+    capacity: 10,
+  }
+  const SESSION_CALLS: [string, (ds: DataSource) => Promise<unknown>][] = [
+    ['listMyBookings', (ds) => ds.listMyBookings()],
+    ['cancelMyBooking', (ds) => ds.cancelMyBooking('b1')],
+    ['getRoster', (ds) => ds.getRoster(SESSION_ID)],
+    ['createSession', (ds) => ds.createSession(SESSION_INPUT)],
+    ['updateSession', (ds) => ds.updateSession(SESSION_ID, SESSION_INPUT)],
+    ['cancelSession', (ds) => ds.cancelSession(SESSION_ID)],
+    ['addManualBooking', (ds) => ds.addManualBooking({ sessionId: SESSION_ID, name: 'A B', email: 'a@b.example', phone: '612345678' })],
+    ['cancelBookingById', (ds) => ds.cancelBookingById('b1')],
+    ['setAttendance', (ds) => ds.setAttendance('b1', 'attended')],
+    ['getMetrics', (ds) => ds.getMetrics(...WEEK)],
+  ]
+
+  it.each(SESSION_CALLS)('sin sesión, %s es unauthorized sin llamar al servidor ni descargar supabase-js', async (_name, call) => {
+    const { ds, supabase } = setup()
+    await expect(call(ds)).rejects.toMatchObject({ code: 'unauthorized' })
+    expect(supabase.loadSupabase).not.toHaveBeenCalled()
+    expect(supabase.rpc).not.toHaveBeenCalled()
+  })
+
+  it.each(SESSION_CALLS)('con una sesión guardada pero caducada, %s es unauthorized sin RPC', async (_name, call) => {
+    const storage = memoryStorage({ [STORAGE_KEY]: JSON.stringify({ access_token: 'a', refresh_token: 'r' }) })
+    const { ds, supabase } = setup(undefined, storage)
+    await expect(call(ds)).rejects.toMatchObject({ code: 'unauthorized' })
+    expect(supabase.rpc).not.toHaveBeenCalled()
+  })
+
+  it('si supabase-js no se descarga (sin red), el error es network y se reintenta en la siguiente acción', async () => {
+    const { ds, supabase } = setup()
+    supabase.loadSupabase.mockRejectedValueOnce(new TypeError('Failed to fetch dynamically imported module'))
+    await expect(ds.signIn(DEMO_ACCOUNTS.client.email, 'demo1234')).rejects.toMatchObject({ code: 'network' })
+    expect(await ds.signIn(DEMO_ACCOUNTS.client.email, 'demo1234')).toMatchObject({ role: 'client' })
+    expect(supabase.loadSupabase).toHaveBeenCalledTimes(2)
   })
 
   it('una contraseña incorrecta es invalid_credentials', async () => {

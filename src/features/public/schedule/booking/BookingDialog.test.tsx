@@ -1,9 +1,9 @@
 import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router'
-import { beforeEach, describe, expect, it } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { ToastProvider } from '../../../../components/ui/index.ts'
-import { DEMO_ACCOUNTS, getDataSource, type ClassSession } from '../../../../data/index.ts'
+import { DataError, DEMO_ACCOUNTS, getDataSource, type ClassSession } from '../../../../data/index.ts'
 import { resetTestData } from '../../../../test/dataSource.ts'
 import { addDays, startOfWeek, studioDate, weekRange } from '../../../../lib/dates.ts'
 import { BookingDialog } from './BookingDialog.tsx'
@@ -38,6 +38,9 @@ async function fillForm(user: ReturnType<typeof userEvent.setup>, email = 'nora.
 describe('reserva desde el detalle de una clase', () => {
   beforeEach(async () => {
     await resetTestData()
+  })
+  afterEach(() => {
+    vi.restoreAllMocks()
   })
 
   it('valida en vivo sin perder lo escrito', async () => {
@@ -110,6 +113,56 @@ describe('reserva desde el detalle de una clase', () => {
     await user.click(screen.getByRole('button', { name: /Reservar plaza/ }))
     await screen.findByRole('dialog', { name: '¡Plaza reservada!' })
     expect(await getDataSource().listMyBookings()).toHaveLength(1)
+  })
+
+  it('con la clase completa, apunta a la lista de espera y da el puesto', async () => {
+    const user = userEvent.setup()
+    const { from, to } = weekRange(addDays(startOfWeek(studioDate(new Date())), 7))
+    const full = (await getDataSource().listSessions(from, to)).find(
+      (s) => s.status === 'scheduled' && s.bookedCount >= s.capacity,
+    )!
+    renderDialog(full)
+    expect(await screen.findByText('La clase está completa: apúntate a la lista de espera')).toBeInTheDocument()
+    await fillForm(user)
+    await user.click(screen.getByRole('button', { name: /Apuntarme a la lista de espera/ }))
+
+    const dialog = await screen.findByRole('dialog', { name: 'Estás en la lista de espera' })
+    expect(within(dialog).getByText(`Estás en el puesto ${full.waitlistCount + 1} de la lista de espera.`)).toBeInTheDocument()
+  })
+
+  it('sin conexión al reservar, avisa sin perder lo escrito y se puede volver a enviar', async () => {
+    const user = userEvent.setup()
+    const createBooking = vi.spyOn(getDataSource(), 'createBooking').mockRejectedValueOnce(new DataError('network'))
+    renderDialog(await classWithSpots())
+    await screen.findByRole('button', { name: /Reservar plaza/ })
+    await fillForm(user)
+    await user.click(screen.getByRole('button', { name: /Reservar plaza/ }))
+
+    expect(await screen.findByText('No hemos podido completar la reserva')).toBeInTheDocument()
+    expect(screen.getByText(/Sin conexión/)).toBeInTheDocument()
+    expect(screen.getByLabelText(/Nombre y apellidos/)).toHaveValue('Nora Vidal')
+    expect(screen.getByLabelText(/Teléfono/)).toHaveValue('612 345 678')
+
+    await user.click(screen.getByRole('button', { name: /Reservar plaza/ }))
+    expect(await screen.findByRole('dialog', { name: '¡Plaza reservada!' })).toBeInTheDocument()
+    expect(createBooking).toHaveBeenCalledTimes(2)
+  })
+
+  it('si no se puede cargar la clase, avisa y «Reintentar» la vuelve a pedir', async () => {
+    const user = userEvent.setup()
+    const session = await classWithSpots()
+    vi.spyOn(getDataSource(), 'getSession').mockRejectedValueOnce(new DataError('unavailable'))
+    renderDialog(session)
+    expect(await screen.findByRole('dialog', { name: 'No hemos podido cargar la clase' })).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: 'Reintentar' }))
+    expect(await screen.findByRole('button', { name: /Reservar plaza/ })).toBeInTheDocument()
+  })
+
+  it('una clase que ya no existe muestra «Clase no encontrada»', async () => {
+    const session = await classWithSpots()
+    renderDialog({ ...session, id: 'no-existe' })
+    expect(await screen.findByRole('dialog', { name: 'Clase no encontrada' })).toBeInTheDocument()
+    expect(screen.getByText('Esta clase ya no está en el horario')).toBeInTheDocument()
   })
 
   it('si la clase empieza en menos de 2 horas, avisa antes de reservar y no promete cancelar', async () => {

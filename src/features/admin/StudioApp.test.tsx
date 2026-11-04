@@ -3,7 +3,7 @@ import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Route, Routes } from 'react-router'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { ToastProvider } from '../../components/ui/index.ts'
-import { DEMO_ACCOUNTS, getDataSource } from '../../data/index.ts'
+import { DataError, DEMO_ACCOUNTS, getDataSource } from '../../data/index.ts'
 import { resetTestData } from '../../test/dataSource.ts'
 import StudioApp from './StudioApp.tsx'
 
@@ -65,6 +65,40 @@ describe('panel del estudio', () => {
 
     await user.click(screen.getByRole('link', { name: /Ir a Mis reservas/ }))
     expect(await screen.findByRole('heading', { name: 'Mis reservas' })).toBeInTheDocument()
+  })
+
+  const PANEL_ROUTES = ['/estudio/resumen', '/estudio/clases', '/estudio/asistentes', '/estudio/asistentes?clase=s1', '/estudio/otra']
+
+  it.each(PANEL_ROUTES)('sin sesión, %s lleva al acceso sin pedir datos del estudio', async (path) => {
+    const spies = spyStudioRequests()
+    renderAt(path)
+    expect(await screen.findByRole('heading', { name: 'Acceso estudio' })).toBeInTheDocument()
+    for (const spy of spies) expect(spy).not.toHaveBeenCalled()
+  })
+
+  it.each(PANEL_ROUTES)('con sesión de cliente, %s muestra el aviso sin pedir datos del estudio', async (path) => {
+    await getDataSource().signIn(CLIENT.email, CLIENT.password)
+    const spies = spyStudioRequests()
+    renderAt(path)
+    expect(await screen.findByText('Esta cuenta no tiene acceso al panel del estudio')).toBeInTheDocument()
+    for (const spy of spies) expect(spy).not.toHaveBeenCalled()
+  })
+
+  it('si no se puede comprobar la sesión, avisa sin pintar el panel y «Reintentar» lo vuelve a intentar', async () => {
+    await getDataSource().signIn(STUDIO.email, STUDIO.password)
+    const getAccount = vi.spyOn(getDataSource(), 'getAccount').mockRejectedValueOnce(new DataError('network'))
+    const spies = spyStudioRequests()
+    const user = userEvent.setup()
+    renderAt('/estudio/resumen')
+
+    expect(await screen.findByText('No hemos podido comprobar la sesión')).toBeInTheDocument()
+    expect(screen.getByText(/Sin conexión/)).toBeInTheDocument()
+    expect(screen.queryByRole('navigation', { name: 'Panel' })).not.toBeInTheDocument()
+    for (const spy of spies) expect(spy).not.toHaveBeenCalled()
+
+    await user.click(screen.getByRole('button', { name: 'Reintentar' }))
+    expect(await screen.findByRole('heading', { level: 1, name: 'Resumen' })).toBeInTheDocument()
+    expect(getAccount).toHaveBeenCalledTimes(2)
   })
 
   it('en el acceso, las credenciales de cliente muestran el aviso y mantienen la sesión', async () => {

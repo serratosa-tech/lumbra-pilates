@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { normalizePhone, validateBookingForm, validateEmail, validateName, validatePhone } from './validation.ts'
+import { normalizeEmail, normalizePhone, validateBookingForm, validateEmail, validateName, validatePhone } from './validation.ts'
 
 describe('validación del formulario de reserva', () => {
   it('pide un nombre completo', () => {
@@ -14,6 +14,10 @@ describe('validación del formulario de reserva', () => {
     expect(validateEmail('ana@')).toMatch(/Revisa el email/)
     expect(validateEmail('ana@correo')).toMatch(/Revisa el email/)
     expect(validateEmail(' ana.lopez@correo.example ')).toBeUndefined()
+  })
+
+  it('normaliza el email igual que la base de datos: sin espacios y en minúsculas', () => {
+    expect(normalizeEmail('  ANA.Lopez@Correo.Example ')).toBe('ana.lopez@correo.example')
   })
 
   it.each([

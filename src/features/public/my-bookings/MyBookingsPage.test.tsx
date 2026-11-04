@@ -1,9 +1,9 @@
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router'
-import { beforeEach, describe, expect, it } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { ToastProvider } from '../../../components/ui/index.ts'
-import { DEMO_ACCOUNTS, DEMO_EXAMPLES, getDataSource, type BookingDetails } from '../../../data/index.ts'
+import { DataError, DEMO_ACCOUNTS, DEMO_EXAMPLES, getDataSource, type BookingDetails } from '../../../data/index.ts'
 import { resetTestData } from '../../../test/dataSource.ts'
 import { addDays, formatDateTimeRange, startOfWeek, studioDate, weekRange } from '../../../lib/dates.ts'
 import { capitalize } from '../../../lib/text.ts'
@@ -34,6 +34,9 @@ function renderResult(details: BookingDetails, now: Date) {
 describe('Mis reservas', () => {
   beforeEach(async () => {
     await resetTestData()
+  })
+  afterEach(() => {
+    vi.restoreAllMocks()
   })
 
   it('«Probar como cliente» entra y muestra las reservas de la cuenta, sin opciones de cuenta', async () => {
@@ -124,6 +127,65 @@ describe('Mis reservas', () => {
     expect(screen.getByText('Ya no se puede cancelar online')).toBeInTheDocument()
     expect(screen.queryByText(/Puedes cancelar/)).not.toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Cancelar reserva' })).not.toBeInTheDocument()
+  })
+
+  async function searchExample(user: ReturnType<typeof userEvent.setup>) {
+    const [confirmed] = DEMO_EXAMPLES
+    await user.type(screen.getByLabelText(/^Email/), confirmed.email)
+    await user.type(screen.getByLabelText(/Código de reserva/), confirmed.code)
+    await user.click(screen.getByRole('button', { name: 'Consultar reserva' }))
+  }
+
+  it('con demasiados intentos lo dice claro, sin culpar a la conexión', async () => {
+    const user = userEvent.setup()
+    vi.spyOn(getDataSource(), 'findBooking').mockRejectedValue(new DataError('too_many_attempts'))
+    renderPage()
+    await searchExample(user)
+    expect(await screen.findByText('No hemos podido consultar tu reserva')).toBeInTheDocument()
+    expect(screen.getByText(/Demasiados intentos/)).toBeInTheDocument()
+    expect(screen.queryByText(/Comprueba tu conexión/)).not.toBeInTheDocument()
+  })
+
+  it('sin conexión avisa y «Reintentar» vuelve a buscar sin reescribir nada', async () => {
+    const user = userEvent.setup()
+    vi.spyOn(getDataSource(), 'findBooking').mockRejectedValueOnce(new DataError('network'))
+    renderPage()
+    await searchExample(user)
+    expect(await screen.findByText(/Sin conexión/)).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: 'Reintentar' }))
+    expect(await screen.findByText('Tu plaza está confirmada')).toBeInTheDocument()
+  })
+
+  it('si falla la cancelación, avisa y la reserva sigue igual', async () => {
+    const user = userEvent.setup()
+    vi.spyOn(getDataSource(), 'cancelBooking').mockRejectedValueOnce(new DataError('too_late'))
+    renderPage()
+    await user.click(screen.getByRole('button', { name: /Plaza confirmada/ }))
+    await user.click(await screen.findByRole('button', { name: 'Cancelar reserva' }))
+    await user.click(screen.getByRole('button', { name: 'Sí, cancelar' }))
+    expect(await screen.findByText('No se ha podido cancelar')).toBeInTheDocument()
+    expect(screen.getByText('Tu plaza está confirmada')).toBeInTheDocument()
+  })
+
+  it('sale de la lista de espera sin subir a nadie', async () => {
+    const user = userEvent.setup()
+    renderPage()
+    await user.click(screen.getByRole('button', { name: /En lista de espera/ }))
+    await user.click(await screen.findByRole('button', { name: 'Salir de la lista de espera' }))
+    expect(screen.getByRole('dialog', { name: '¿Salir de la lista de espera?' })).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: 'Salir de la lista' }))
+    expect(await screen.findByText('Cancelaste esta reserva')).toBeInTheDocument()
+    expect(screen.queryByText(/ha pasado a la primera persona/)).not.toBeInTheDocument()
+  })
+
+  it('si no se cargan las reservas de la cuenta, avisa y se puede reintentar', async () => {
+    const user = userEvent.setup()
+    await getDataSource().signIn(DEMO_ACCOUNTS.client.email, DEMO_ACCOUNTS.client.password)
+    vi.spyOn(getDataSource(), 'listMyBookings').mockRejectedValueOnce(new DataError('unavailable'))
+    renderPage()
+    expect(await screen.findByText('No hemos podido cargar tus reservas')).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: 'Reintentar' }))
+    expect(await screen.findByText('Aún no tienes reservas')).toBeInTheDocument()
   })
 
   it('muestra la posición en la lista de espera', async () => {

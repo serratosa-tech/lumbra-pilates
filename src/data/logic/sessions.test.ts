@@ -82,6 +82,12 @@ describe('gestión de clases del estudio', () => {
     expect(errorCodeOf(() => cancelSession(state, 's1', NOW))).toBe('class_cancelled')
   })
 
+  it('no cancela una clase que ya ha empezado', () => {
+    const state = stateWith(session({ startsAt: '2026-11-02T07:30:00.000Z' }))
+    expect(errorCodeOf(() => cancelSession(state, 's1', NOW))).toBe('past')
+    expect(errorCodeOf(() => cancelSession(state, 'no-existe', NOW))).toBe('session_not_found')
+  })
+
   it('las reservas ya canceladas siguen como estaban', () => {
     let state = withBookings()
     state = { ...state, bookings: state.bookings.map((b) => (b.name === 'Ana' ? { ...b, status: 'cancelled' } : b)) }

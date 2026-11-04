@@ -2,6 +2,11 @@ import { DataError, isDataErrorCode } from '../errors.ts'
 
 /** Sesión caducada o inválida (PostgREST) y permiso denegado (Postgres). */
 const UNAUTHORIZED_CODES = new Set(['PGRST301', 'PGRST302', 'PGRST303', '42501'])
+/**
+ * PostgREST sin base de datos: no conecta, error de conexión, caché del esquema o tiempo agotado.
+ * supabase-js no pasa el estado HTTP, así que estos fallos solo se reconocen por el código.
+ */
+const UNAVAILABLE_CODES = new Set(['PGRST000', 'PGRST001', 'PGRST002', 'PGRST003'])
 const NETWORK_NAMES = new Set(['TypeError', 'TimeoutError', 'AbortError', 'AuthRetryableFetchError'])
 /** Así describen los navegadores un fallo de red cuando supabase-js lo convierte en texto. */
 const NETWORK_MESSAGE = /failed to fetch|networkerror|load failed|network request failed|fetch failed/i
@@ -34,6 +39,8 @@ export function toDataError(error: unknown): Error {
   }
   // Un id con formato imposible (no es un uuid).
   if (code === '22P02') return new DataError('invalid_input')
-  if (typeof status === 'number' && status >= 500) return new DataError('unavailable')
+  if ((typeof code === 'string' && UNAVAILABLE_CODES.has(code)) || (typeof status === 'number' && status >= 500)) {
+    return new DataError('unavailable')
+  }
   return error instanceof Error ? error : new Error(typeof message === 'string' ? message : 'Error desconocido')
 }

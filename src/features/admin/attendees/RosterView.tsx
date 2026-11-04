@@ -150,17 +150,22 @@ export function RosterView({ sessionId, now }: { sessionId: string; now: Date })
         Puede que el enlace sea antiguo. Elige otra clase de la lista.
       </EmptyState>
     ) : (
-      <Alert
-        tone="error"
-        title="No hemos podido cargar los asistentes"
-        action={
-          <Button variant="secondary" onClick={retry} icon={<RotateCcw aria-hidden="true" strokeWidth={1.75} className="size-4" />}>
-            Reintentar
-          </Button>
-        }
-      >
-        Vuelve a intentarlo en un momento.
-      </Alert>
+      // Como en «Esta clase no existe»: título de la página y camino de vuelta a la lista.
+      <div className="flex flex-col gap-6">
+        <h1 className="sr-only">Asistentes de la clase</h1>
+        <div>{back}</div>
+        <Alert
+          tone="error"
+          title="No hemos podido cargar los asistentes"
+          action={
+            <Button variant="secondary" onClick={retry} icon={<RotateCcw aria-hidden="true" strokeWidth={1.75} className="size-4" />}>
+              Reintentar
+            </Button>
+          }
+        >
+          {errorMessage(state.error)}
+        </Alert>
+      </div>
     )
   }
 

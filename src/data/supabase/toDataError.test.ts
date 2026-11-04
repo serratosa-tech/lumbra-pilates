@@ -58,6 +58,12 @@ describe('traducción de los errores de Supabase', () => {
     expect(codeOf({ status: 500 })).toBe('unavailable')
   })
 
+  it('también sin estado HTTP, como llegan los errores de supabase-js', () => {
+    for (const code of ['PGRST000', 'PGRST001', 'PGRST002', 'PGRST003']) {
+      expect(codeOf({ code, message: 'Could not query the database', details: null, hint: null })).toBe('unavailable')
+    }
+  })
+
   it('un DataError pasa sin cambios y lo desconocido no se inventa un código', () => {
     const original = new DataError('duplicate')
     expect(toDataError(original)).toBe(original)

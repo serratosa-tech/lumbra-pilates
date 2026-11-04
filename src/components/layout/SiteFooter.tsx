@@ -54,14 +54,15 @@ export function SiteFooter() {
         </FooterColumn>
 
         <FooterColumn title="Horario">
+          {/* Cada grupo solo lleva <dt> y <dd> (lista válida); el icono va dentro del <dt>, en la sangría. */}
           <dl className="flex flex-col gap-2">
             {STUDIO.hours.map((h) => (
-              <div key={h.days} className="flex items-start gap-2">
-                <Clock aria-hidden="true" strokeWidth={1.75} className="mt-0.5 size-5 shrink-0 text-terracota-300" />
-                <div>
-                  <dt className="text-crema">{h.days}</dt>
-                  <dd>{h.time}</dd>
-                </div>
+              <div key={h.days} className="relative pl-7">
+                <dt className="text-crema">
+                  <Clock aria-hidden="true" strokeWidth={1.75} className="absolute top-0.5 left-0 size-5 text-terracota-300" />
+                  {h.days}
+                </dt>
+                <dd>{h.time}</dd>
               </div>
             ))}
           </dl>

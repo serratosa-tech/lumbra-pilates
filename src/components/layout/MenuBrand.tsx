@@ -8,14 +8,15 @@ export function MenuBrand() {
     <section aria-label="Sobre el estudio" className="border-t border-arena-200 pt-6 text-sm text-piedra">
       <LogoMark className="size-10 text-tinta" />
       <p className="mt-3 text-lg text-tinta-800">{SLOGAN}</p>
+      {/* Cada grupo solo lleva <dt> y <dd> (lista válida); el icono va dentro del <dt>, en la sangría. */}
       <dl className="mt-4 flex flex-col gap-2">
         {STUDIO.hours.map((h) => (
-          <div key={h.days} className="flex items-start gap-2">
-            <Clock aria-hidden="true" strokeWidth={1.75} className="mt-0.5 size-4 shrink-0 text-terracota-600" />
-            <div className="flex flex-wrap gap-x-2">
-              <dt className="font-medium text-tinta-700">{h.days}</dt>
-              <dd>{h.time}</dd>
-            </div>
+          <div key={h.days} className="relative flex flex-wrap gap-x-2 pl-6">
+            <dt className="font-medium text-tinta-700">
+              <Clock aria-hidden="true" strokeWidth={1.75} className="absolute top-0.5 left-0 size-4 text-terracota-600" />
+              {h.days}
+            </dt>
+            <dd>{h.time}</dd>
           </div>
         ))}
       </dl>

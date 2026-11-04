@@ -64,14 +64,16 @@ Build de producción (gzip):
 
 ### Tipografía
 
-Una sola familia, **Jost** variable (`@fontsource-variable/jost` 5.3.0), solo el subconjunto latino y un único woff2 que cubre los pesos usados: 300 en titulares de `text-xl` o más, 400 en el texto y 500 en botones y etiquetas. Lleva `font-display: swap`, se precarga desde `index.html` y tiene un respaldo sobre Arial con `size-adjust` por peso para que el cambio de fuente no mueva el diseño.
+Una sola familia, **Jost** variable (`@fontsource-variable/jost` 5.3.0), solo el subconjunto latino y un único woff2 que cubre los dos pesos usados: 400 en titulares, cifras grandes y texto, y 500 en la palabra destacada, botones, etiquetas y títulos de tarjeta. Lleva `font-display: swap`, se precarga desde `index.html` y tiene un respaldo sobre Arial con `size-adjust` por peso para que el cambio de fuente no mueva el diseño.
 
 | Fuentes | Archivos | Peso |
 | --- | --- | --- |
 | Antes: Fraunces 500 normal y cursiva, Figtree 400 y 600 | 4 woff2 | 63 816 B (62,3 KiB) |
-| Ahora: Jost variable 300–500 | 1 woff2 | 26 576 B (26,0 KiB), un 58 % menos |
+| Ahora: Jost variable 400–500 | 1 woff2 | 26 576 B (26,0 KiB), un 58 % menos |
 
-CLS de la portada medido en Edge: 0 a 320 y 390 px, 0,0003 a 768 px y 0,0001 a 1280 px.
+Los titulares llevan muy poco espaciado negativo (−0,01em en el display, −0,005em en `text-3xl`, nada en `text-2xl`), y el display llega como máximo a 4,5rem para que «Muévete despacio.» quepa en una línea en escritorio. El esqueleto de la tarjeta «Próxima clase» reserva el mismo alto que la tarjeta con datos.
+
+CLS de la portada medido en Edge: 0 a 390 px y a 320 px con el texto al 200 %, y 0,0001 a 1280 px.
 
 ## Reglas de negocio
 

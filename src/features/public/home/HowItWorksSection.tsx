@@ -32,7 +32,7 @@ export function HowItWorksSection() {
                   <Icon aria-hidden="true" strokeWidth={1.75} className="size-6" />
                 </span>
                 {/* Decorativo: el orden ya lo da la lista. terracota-500 sobre crema: 3,76:1. */}
-                <span aria-hidden="true" className="text-3xl font-light text-terracota-500">
+                <span aria-hidden="true" className="text-3xl text-terracota-500">
                   {i + 1}
                 </span>
               </div>

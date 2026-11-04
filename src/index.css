@@ -19,16 +19,16 @@
        una fila sin sitio podría partir el texto letra a letra, así que esas filas se apilan con el texto muy
        grande (consultas de contenedor en rem) y la verificación en Edge busca texto aplastado. */
     overflow-wrap: anywhere;
-    /* Solo se carga la fuente normal en 300–500: el navegador no debe inventar cursivas ni negritas. */
+    /* Solo se carga la fuente normal en 400–500: el navegador no debe inventar cursivas ni negritas. */
     font-synthesis: none;
   }
 
-  /* Titulares ligeros; el espaciado de letras de cada nivel va en su token de tamaño.
-     Los de text-lg o menos los sobrescriben con su propio peso (400 o 500). */
+  /* Titulares en 400; el espaciado de letras de cada nivel va en su token de tamaño.
+     Los títulos pequeños de tarjetas y listas lo sobrescriben con 500. */
   h1,
   h2,
   h3 {
-    @apply font-light text-balance;
+    @apply font-normal text-balance;
   }
 
   b,

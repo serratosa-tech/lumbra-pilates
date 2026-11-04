@@ -34,24 +34,25 @@ function Block({ id, title, children }: { id: string; title: string; children: R
   )
 }
 
-/** Jerarquía tipográfica real de la app: el peso 300 solo en text-xl o más. */
+/** Jerarquía tipográfica real de la app: dos pesos, 400 y 500. */
 const TYPE_SCALE: { name: string; spec: string; sample: ReactNode }[] = [
   {
     name: 'Display',
-    spec: 'text-display · 300 · palabra destacada 500',
+    spec: 'text-display · 400 · espaciado −0,01em · palabra destacada 500',
     sample: (
-      <p className="text-display font-light">
+      <p className="text-display">
         <span className="font-medium text-terracota-600">Hazte</span> fuerte.
       </p>
     ),
   },
-  { name: 'Titular de página', spec: 'text-3xl · 300', sample: <p className="text-3xl font-light">Horario semanal</p> },
-  { name: 'Titular de bloque', spec: 'text-2xl · 300', sample: <p className="text-2xl font-light">Plazas confirmadas</p> },
+  { name: 'Titular de página', spec: 'text-3xl · 400 · espaciado −0,005em', sample: <p className="text-3xl">Horario semanal</p> },
+  { name: 'Titular de bloque', spec: 'text-2xl · 400', sample: <p className="text-2xl">Plazas confirmadas</p> },
   {
     name: 'Subtítulo',
-    spec: 'text-2xl · 300 (text-lg o menos · 400)',
-    sample: <p className="text-2xl font-light text-tinta-700">Calma que sostiene, fuerza que ilumina.</p>,
+    spec: 'text-2xl · 400',
+    sample: <p className="text-2xl text-tinta-700">Calma que sostiene, fuerza que ilumina.</p>,
   },
+  { name: 'Cifras grandes', spec: 'text-3xl · 400 · cifras tabulares', sample: <p className="text-3xl tabular-nums">18:30</p> },
   {
     name: 'Texto',
     spec: 'text-base · 400',
@@ -152,10 +153,10 @@ export function DesignSystemPage() {
             <img src="/favicon.svg" alt="Favicon de Lumbra" width="48" height="48" className="size-12" />
           </Card>
           <Card className="flex flex-col justify-center gap-1 py-8">
-            <p className="text-3xl font-light">
+            <p className="text-3xl">
               Jost <span className="font-medium text-terracota-600">variable</span>
             </p>
-            <p className="text-piedra">Una sola familia, tres pesos: 300, 400 y 500.</p>
+            <p className="text-piedra">Una sola familia, dos pesos: 400 y 500.</p>
           </Card>
         </div>
       </Block>

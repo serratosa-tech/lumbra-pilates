@@ -31,7 +31,7 @@ function NextClassCard({ state }: { state: HomeState }) {
             {firstDay.relation === 'hoy' ? 'Próxima clase hoy' : `Próxima clase${SEP}${dayHeading(firstDay)}`}
           </p>
           <p className="mt-3 flex flex-wrap items-baseline gap-x-3">
-            <span className="text-3xl font-light">{formatTime(next.startsAt)}</span>
+            <span className="text-3xl">{formatTime(next.startsAt)}</span>
             <span className="font-medium">{next.name}</span>
           </p>
           <p className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-piedra">
@@ -60,11 +60,22 @@ function NextClassCard({ state }: { state: HomeState }) {
           </div>
         </>
       ) : (
-        <div role="status" className="flex flex-col gap-3">
+        // Mismo ritmo que la tarjeta con datos (etiqueta, hora, datos y fila de 44 px) para que no salte al cargar.
+        <div role="status">
           <span className="sr-only">Cargando la próxima clase…</span>
-          <Skeleton className="h-4 w-32" />
-          <Skeleton className="h-8 w-44" />
-          <Skeleton className="h-4 w-40" />
+          <div className="flex h-[1.1rem] items-center">
+            <Skeleton className="h-3.5 w-32" />
+          </div>
+          <div className="mt-3 flex h-[calc(var(--text-3xl)*1.18)] items-center">
+            <Skeleton className="h-8 w-44" />
+          </div>
+          <div className="mt-1 flex h-[1.45rem] items-center">
+            <Skeleton className="h-3.5 w-40" />
+          </div>
+          <div className="mt-4 flex h-11 items-center justify-between">
+            <Skeleton className="h-6 w-24 rounded-full" />
+            <Skeleton className="h-4 w-20" />
+          </div>
         </div>
       )}
     </div>
@@ -106,7 +117,7 @@ export function Hero({ state }: { state: HomeState }) {
             Muévete despacio.{' '}
             <em className="font-medium text-terracota-600 not-italic">Hazte</em> fuerte.
           </h1>
-          <p className="mt-6 max-w-xl text-2xl font-light text-tinta-700">{SLOGAN}</p>
+          <p className="mt-6 max-w-xl text-2xl text-tinta-700">{SLOGAN}</p>
           <p className="mt-4 max-w-xl text-lg text-tinta-700">
             Clases de reformer y esterilla en grupos pequeños, con instructoras que corrigen cada
             detalle. Reserva tu plaza en un minuto, sin registros.

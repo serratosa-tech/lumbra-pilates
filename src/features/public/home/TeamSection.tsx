@@ -18,7 +18,7 @@ function Avatar({ initials, tone }: { initials: string; tone: string }) {
       className={cn('relative grid h-24 w-20 shrink-0 place-items-center overflow-hidden rounded-arch', tone)}
     >
       <span className="absolute -bottom-6 size-14 rounded-full bg-current opacity-15" />
-      <span className="relative text-2xl font-light">{initials}</span>
+      <span className="relative text-2xl">{initials}</span>
     </span>
   )
 }

@@ -1,10 +1,10 @@
 /* Tipografía de la marca: Jost variable (licencia OFL), alojada en el proyecto.
-   Un solo archivo woff2 con el subconjunto latino cubre los pesos usados (300, 400 y 500).
+   Un solo archivo woff2 con el subconjunto latino cubre los pesos usados (400 y 500).
    Se precarga desde index.html (plugin en vite.config.ts). */
 @font-face {
   font-family: 'Jost';
   font-style: normal;
-  font-weight: 300 500;
+  font-weight: 400 500;
   font-display: swap;
   src: url('@fontsource-variable/jost/files/jost-latin-wght-normal.woff2') format('woff2');
   unicode-range:
@@ -13,17 +13,8 @@
 }
 
 /* Respaldo con las métricas de Jost para que el cambio de fuente al cargar no mueva el diseño.
-   Jost se estrecha al aligerarse y Arial no, así que hay una cara por peso, cada una con el ancho medio
+   Jost se ensancha con el peso y Arial no, así que hay una cara por peso, cada una con el ancho medio
    de ese peso (medido en el archivo); ascendente y descendente se compensan con el mismo factor. */
-@font-face {
-  font-family: 'Jost Fallback';
-  font-weight: 300;
-  src: local('Arial');
-  size-adjust: 92.3%;
-  ascent-override: 115.92%;
-  descent-override: 40.63%;
-  line-gap-override: 0%;
-}
 @font-face {
   font-family: 'Jost Fallback';
   font-weight: 400;

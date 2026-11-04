@@ -26,13 +26,12 @@
   --color-info-50: #e4ebf1;
 
   /* Tipografía: una sola familia, Jost.
-     Jerarquía: titulares 300 (solo en text-xl o más), texto 400, botones y etiquetas 500. */
+     Jerarquía: titulares, cifras grandes y texto 400; palabra destacada, botones y etiquetas 500. */
   --font-*: initial;
   --font-sans: 'Jost', 'Jost Fallback', system-ui, -apple-system, 'Segoe UI', sans-serif;
 
   /* Solo los pesos de la jerarquía: no existen utilidades para otros. */
   --font-weight-*: initial;
-  --font-weight-light: 300;
   --font-weight-normal: 400;
   --font-weight-medium: 500;
 
@@ -49,14 +48,14 @@
   --text-xl--line-height: 1.35;
   --text-2xl: clamp(1.5rem, 1.3rem + 0.9vw, 1.875rem);
   --text-2xl--line-height: 1.28;
-  --text-2xl--letter-spacing: -0.01em;
   --text-3xl: clamp(1.875rem, 1.5rem + 1.8vw, 2.75rem);
   --text-3xl--line-height: 1.18;
-  --text-3xl--letter-spacing: -0.015em;
+  --text-3xl--letter-spacing: -0.005em;
   /* El mínimo se limita por el ancho para que una palabra no desborde a 320 px con texto grande. */
-  --text-display: clamp(min(2.5rem, 12vw), 1rem + 6vw, 4.75rem);
+  /* El máximo deja «Muévete despacio.» en una línea dentro de la columna del hero (36 rem) con Jost 400. */
+  --text-display: clamp(min(2.5rem, 12vw), 1rem + 6vw, 4.5rem);
   --text-display--line-height: 1.08;
-  --text-display--letter-spacing: -0.02em;
+  --text-display--letter-spacing: -0.01em;
 
   --tracking-wide: 0.08em;
   --tracking-widest: 0.18em;

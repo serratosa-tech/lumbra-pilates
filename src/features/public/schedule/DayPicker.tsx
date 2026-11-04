@@ -74,7 +74,7 @@ export function DayPicker({ days, selected, onSelect, panelId }: DayPickerProps)
             <span className={cn('text-xs font-medium tracking-wide uppercase', !isSelected && 'text-piedra')}>
               {day.isToday ? 'Hoy' : formatShortWeekday(day.date)}
             </span>
-            <span className="text-2xl font-light leading-tight tabular-nums">{day.date.day}</span>
+            <span className="text-2xl leading-tight tabular-nums">{day.date.day}</span>
             <span className={cn('text-xs whitespace-nowrap', isSelected ? 'text-white/90' : 'text-piedra')}>
               {plural(day.sessions.length, 'clase')}
             </span>

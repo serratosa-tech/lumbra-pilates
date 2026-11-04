@@ -60,7 +60,7 @@ function PastSessionCard({ session, now, compact, Heading }: { session: ClassSes
   // Con el texto muy grande, si al lado de la hora no quedan 8 rem, nombre y estado bajan debajo.
   return (
     <article className={cn(card, 'flex flex-wrap items-center gap-x-4 gap-y-1 px-4 py-2.5 sm:px-5')}>
-      <p className="w-[5ch] shrink-0 text-xl font-light leading-none tabular-nums">{timeTag}</p>
+      <p className="w-[5ch] shrink-0 text-xl leading-none tabular-nums">{timeTag}</p>
       <div className="flex min-w-[min(8rem,100%)] flex-1 flex-col sm:flex-row sm:flex-wrap sm:items-center sm:justify-between sm:gap-x-4">
         {heading}
         {label}
@@ -119,7 +119,7 @@ export function SessionCard({ session, now, variant = 'row', onOpen, to, heading
       {/* Desde sm, ancho fijo en «ch» (crece con el texto) y cifras tabulares: los nombres empiezan a la misma altura. */}
       <p
         className={cn(
-          'shrink-0 font-light leading-none tabular-nums',
+          'shrink-0 leading-none tabular-nums',
           compact ? 'text-xl' : 'text-2xl sm:w-[5ch] sm:self-start sm:pt-0.5 sm:text-3xl',
           !interactive && 'text-tinta-700',
         )}

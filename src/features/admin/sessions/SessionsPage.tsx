@@ -68,7 +68,7 @@ function SessionRow({
     // Con el texto muy grande (la lista, con `@container`, mide menos de 12 rem), el menú entra en el flujo junto
     // a la hora y los datos bajan a ancho completo, sin reservar el hueco del menú.
     <li className="relative flex flex-wrap items-start gap-x-5 gap-y-3 py-4 pr-12 md:pr-0 @max-[12rem]:pr-0">
-      <p className="w-[5ch] shrink-0 text-2xl font-light leading-none tabular-nums">
+      <p className="w-[5ch] shrink-0 text-2xl leading-none tabular-nums">
         {formatTime(session.startsAt)}
       </p>
       <div className="min-w-[min(12rem,100%)] flex-1 @max-[12rem]:order-last @max-[12rem]:basis-full">

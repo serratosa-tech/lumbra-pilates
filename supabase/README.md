@@ -252,7 +252,7 @@ Antes de empezar:
 | 2 | La carga pública no descarga supabase-js | Sin sesión | Recargar `/` y `/clases` con «Disable cache» | Filtro `JS` | No aparece `supabaseJs-*.js`, y las peticiones a `rest/v1` llevan `apikey` pero no `Authorization` | — |
 | 3 | Un visitante no lee reservas | Sin sesión | En Console: copiar como fetch `list_sessions` y cambiar la URL a `/rest/v1/bookings?select=*` (método `GET`, sin cuerpo) | `GET bookings` | `401` con `permission denied for table bookings` | Probar también `?select=email,phone` → igual |
 | 4 | Mis reservas solo enseña la reserva pedida | Sin sesión | Consultar `ana.lopez@correo.example` + `LUM-7K3Q` | `POST rpc/find_booking` | Solo esa reserva | Cambiar `p_code` por otro código o `p_email` por otro email → `200` con `null` |
-| 5 | Límite de intentos | Sin sesión | Repetir la petición 4 con un código falso 6 veces | `POST rpc/find_booking` | Los 5 primeros: `null`; el 6.º: `400` con `too_many_attempts`, **aunque luego pongas el código correcto** | Cambiar mayúsculas o espacios del email → cuenta como el mismo email |
+| 5 | Límite de intentos | Sin sesión | Repetir la petición 4 con un código falso 6 veces, **con un email inventado** (con `ana.lopez@…` bloquearías 15 minutos la reserva de ejemplo para todos) | `POST rpc/find_booking` | Los 5 primeros: `null`; el 6.º: `400` con `too_many_attempts`, **aunque luego pongas el código correcto** | Cambiar mayúsculas o espacios del email → cuenta como el mismo email |
 | 6 | No se cancela una reserva ajena | Sin sesión | Cancelar una reserva propia desde Mis reservas | `POST rpc/cancel_booking` | `{ "booking": …, "promoted": true/false }`, sin datos de quien sube | Repetir con el email de otra persona o un código inventado → `{"error":"not_found"}` |
 | 7 | El cliente solo ve sus reservas | Cliente demo | En Console: `GET /rest/v1/bookings?select=*` con la cabecera `Authorization` copiada de otra petición | `GET bookings` | Solo filas con su `user_id` | Añadir `&user_id=neq.<su id>` → `200` con `[]` |
 | 8 | El cliente solo cancela lo suyo | Cliente demo | Cancelar una reserva en Mis reservas | `POST rpc/cancel_my_booking` | La reserva cancelada | Cambiar `p_booking_id` por el id de una reserva ajena (o un uuid inventado) → `400` con `not_found` |
@@ -261,7 +261,7 @@ Antes de empezar:
 | 11 | Las funciones del estudio exigen ser miembro | Sin sesión y cliente demo | En Console: `POST /rest/v1/rpc/get_roster` con `{"p_session_id":"<id de una clase>"}` | `POST rpc/get_roster` | Sin sesión: `401` con `permission denied for function`. Con cliente: `400` con `unauthorized` | Probar `list_studio_bookings`, `set_attendance` o `cancel_session` → igual |
 | 12 | Las clases solo cambian con funciones | Estudio demo | En Console: `PATCH /rest/v1/sessions?id=eq.<id>` con `{"capacity":1}` | `PATCH sessions` | `401`/`403` con `permission denied for table sessions` | `POST` o `DELETE` sobre `sessions` o `bookings` → igual |
 | 13 | El estudio demo ve enmascarado lo que escriben los visitantes | Estudio demo | Abrir los asistentes de una clase en la que hayas reservado como visitante | `POST rpc/get_roster` | Tu reserva sale como `m***@dominio` y `+34 6** *** *78`; las de ejemplo (`@correo.example`) se ven enteras | `POST rpc/list_studio_bookings` → mismo enmascarado |
-| 14 | Las cuentas demo no cambian de contraseña ni de email | Cliente o estudio demo | En Console: `PUT /auth/v1/user` con `{"password":"otra1234"}` y las cabeceras `apikey` y `Authorization` | `PUT auth/v1/user` | `500` con «La cuenta demo no puede cambiar su email, su teléfono ni su contraseña.»: el trigger de blindaje lo impide | Con `{"email":"otro@correo.example"}` → igual |
+| 14 | Las cuentas demo no cambian de contraseña ni de email | Cliente o estudio demo | En Console: `PUT /auth/v1/user` con `{"password":"otra1234"}` y las cabeceras `apikey` y `Authorization` | `PUT auth/v1/user` | `500` con «La cuenta demo no puede cambiar su email, su teléfono ni su contraseña.»: el trigger de blindaje lo impide | Con `{"email":"otro@correo.example"}` → `400` con «Email address "…@lumbra.example" is invalid»: Supabase Auth lo rechaza antes de llegar a la base de datos, porque el email actual no tiene un dominio real. El trigger sigue debajo como segunda barrera (pruebas 13.1 y 13.3) |
 | 15 | No se pueden crear cuentas | Sin sesión | En Console: `POST /auth/v1/signup` con `{"email":"x@correo.example","password":"x1234567"}` | `POST auth/v1/signup` | `422` con «Signups not allowed for this instance» | — |
 | 16 | La clave secreta no está en la web | Sin sesión | **Sources** (Fuentes) → Ctrl + Mayús + F → buscar `sb_secret_` | — | Solo aparece dentro del código de supabase-js, como prefijo que la librería comprueba (`startsWith('sb_secret_')`), nunca seguido de una clave | Buscar también `service_role` y `eyJ` → sin resultados en los archivos de la app |
 
@@ -277,3 +277,49 @@ Supabase → **Advisors → Security Advisor** muestra estos avisos. Todos son e
 | RLS activado sin políticas | 4 | `public.lookup_attempts`, `private.demo_accounts`, `private.demo_customers` y `private.demo_slots`. Cerradas para todos a propósito: solo las tocan las funciones. |
 
 Si aparece un aviso que no está en esta tabla (por ejemplo, una tabla sin RLS o una función nueva), revísalo antes de publicar.
+
+## 14. Resultados de la comprobación
+
+Comprobado el 4 de noviembre de 2026 (fase 6), con las migraciones `0001`–`0007`, `seed.sql` y las cuentas demo vinculadas.
+
+### Pruebas SQL
+
+`tests/seguridad_y_reglas.sql` en el SQL Editor: **TODAS LAS COMPROBACIONES SUPERADAS** (108 comprobaciones). En la fase 6 se añadieron 9, que cubren reglas de la guía del apartado 12:
+
+| Prueba | Qué comprueba |
+| --- | --- |
+| 1.19 | El horario no se pide para más de 100 días (`invalid_input`) |
+| 1.20 | `cancel_booking` con un código inventado responde `{"error":"not_found"}` sin lanzar error |
+| 1.21 | `get_session` de una clase que no existe es `null` |
+| 1.22 | El visitante lee el catálogo con las columnas que usa la app |
+| 7.4 y 7.5 | Una clase ya pasada no se cancela ni se edita (`past`) |
+| 8.8 | El bloqueo por intentos cuenta igual el email con mayúsculas y espacios |
+| 10.10 | `cancel_my_booking` de un id que no existe es `not_found` |
+| 12.10 | La cuenta demo del estudio ve solo su fila de `studio_members` (así la reconoce la app) |
+
+La 10.8 («ningún dato enviado por el cliente demo ha llegado a la tabla») miraba toda la tabla de reservas, y fallaba en cuanto un visitante reservaba con el teléfono que propone el formulario (`612 345 678`). Ahora mira solo las reservas de la prueba, y además exige que todas las del cliente demo de prueba lleven sus datos de ejemplo. Una consulta aparte sobre la base real confirmó que la cuenta demo de verdad no tiene ninguna reserva con otros datos.
+
+### Reglas desde el navegador
+
+Las 16 reglas del apartado 12, con Playwright y Edge headless contra la app (servidor de desarrollo) y el proyecto real, con cada cuenta. Cada cuenta demo inició sesión una sola vez desde la app, sin congelar la hora (sin errores 429), y ningún token salió del navegador. **38 de 38 comprobaciones cumplen:**
+
+| # | Regla | Cuenta | Petición | Respuesta | Resultado |
+| --- | --- | --- | --- | --- | --- |
+| 1 | El horario no expone datos personales | Sin sesión | `POST rpc/list_sessions` | `200`, solo las claves permitidas, contadores numéricos, ningún «@»; más de 100 días → `400 invalid_input` | Cumple |
+| 2 | La carga pública no descarga supabase-js | Sin sesión | `/` y `/clases` | Ningún `supabaseJs-*.js`; `apikey` sí, `Authorization` no (confirmado también en el build, con Lighthouse) | Cumple |
+| 3 | Un visitante no lee reservas | Sin sesión | `GET bookings?select=*` y `?select=email,phone` | `401 permission denied for table bookings` | Cumple |
+| 4 | Mis reservas solo enseña la reserva pedida | Sin sesión | `POST rpc/find_booking` | Solo `LUM-7K3Q`; con otro código u otro email, `200 null` | Cumple |
+| 5 | Límite de intentos | Sin sesión | 6 × `find_booking` con código falso (email inventado) | 5 × `null`, 6.º `400 too_many_attempts`, también con mayúsculas y espacios | Cumple |
+| 6 | No se cancela una reserva ajena | Sin sesión | `POST rpc/cancel_booking` | La propia: `{booking, promoted}` sin datos de nadie; ajena o inventada: `{"error":"not_found"}` | Cumple |
+| 7 | El cliente solo ve sus reservas | Cliente demo | `GET bookings?select=*` | Solo sus filas; con `user_id=neq.<su id>`, `[]` | Cumple |
+| 8 | El cliente solo cancela lo suyo | Cliente demo | `POST rpc/cancel_my_booking` | La suya, cancelada; ajena o inventada: `400 not_found` | Cumple |
+| 9 | El cliente demo no deja datos reales | Cliente demo | `POST rpc/book_class` con otros datos | A nombre de Ana Demo, `cliente@lumbra.example`, `+34 600 000 900` | Cumple |
+| 10 | El panel no se abre sin permiso | Sin sesión y cliente demo | `/estudio/resumen` | Acceso / aviso «sin acceso»; ninguna petición del estudio | Cumple |
+| 11 | Las funciones del estudio exigen ser miembro | Sin sesión y cliente demo | `get_roster`, `list_studio_bookings`, `set_attendance`, `cancel_session` | Sin sesión: `401 permission denied for function`; cliente: `400 unauthorized` | Cumple |
+| 12 | Las clases solo cambian con funciones | Estudio demo | `PATCH`/`POST`/`DELETE` en `sessions` y `POST`/`DELETE` en `bookings` | `403 permission denied for table …` | Cumple |
+| 13 | El estudio demo ve enmascarado lo de los visitantes | Estudio demo | `get_roster` y `list_studio_bookings` | `v***@lumbra-prueba.test` y `+34 6** *** *77`; las de ejemplo, enteras | Cumple |
+| 14 | Las cuentas demo no cambian de contraseña ni de email | Cliente y estudio demo | `PUT auth/v1/user` | Contraseña: `500` del trigger de blindaje. Email: `400` de Supabase Auth (ver la tabla del apartado 12) | Cumple |
+| 15 | No se pueden crear cuentas | Sin sesión | `POST auth/v1/signup` | `422 Signups not allowed for this instance` | Cumple |
+| 16 | La clave secreta no está en la web | — | Los JS de `dist/assets` | `sb_secret_` solo en supabase-js, sin clave detrás; `service_role` y `eyJ`: ninguno | Cumple |
+
+**Qué deja en el proyecto real.** Las reservas de prueba (emails `@lumbra-prueba.test`) quedan canceladas. La comprobación 8 cancela una reserva hecha en la propia prueba, no una de ejemplo. El email inventado de la regla 5 queda bloqueado 15 minutos. `restore_demo()` repone cada hora todo lo demás (apartado 8).

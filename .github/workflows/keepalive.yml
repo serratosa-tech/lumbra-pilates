@@ -1,0 +1,39 @@
+# Aviso a Supabase para que el proyecto (plan Free) no se pause tras una semana sin actividad.
+# Llama a health_check dos veces al día con la clave publishable. El mismo aviso lo hace un Worker de
+# Cloudflare (keepalive-worker/), porque GitHub desactiva los workflows programados de los
+# repositorios públicos tras 60 días sin actividad en el repositorio.
+name: keepalive
+
+on:
+  schedule:
+    - cron: '17 7,19 * * *' # 07:17 y 19:17 UTC
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  health-check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - name: Llamar a health_check
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_PUBLISHABLE_KEY: ${{ secrets.SUPABASE_PUBLISHABLE_KEY }}
+        run: |
+          set -euo pipefail
+          if [ -z "${SUPABASE_URL:-}" ] || [ -z "${SUPABASE_PUBLISHABLE_KEY:-}" ]; then
+            echo "::error::Faltan los secrets SUPABASE_URL o SUPABASE_PUBLISHABLE_KEY (Settings → Secrets and variables → Actions)."
+            exit 1
+          fi
+          body=$(curl --silent --show-error --fail-with-body --max-time 20 \
+            --retry 3 --retry-all-errors --retry-delay 15 \
+            -X POST "${SUPABASE_URL%/}/rest/v1/rpc/health_check" \
+            -H "apikey: ${SUPABASE_PUBLISHABLE_KEY}" \
+            -H "Content-Type: application/json" \
+            --data '{}')
+          echo "Respuesta: ${body}"
+          if ! jq -e '.ok == true' > /dev/null <<< "${body}"; then
+            echo "::error::health_check no ha respondido ok."
+            exit 1
+          fi

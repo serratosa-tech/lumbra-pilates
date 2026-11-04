@@ -86,7 +86,8 @@ insert into public.sessions (id, class_type_id, instructor_id, starts_at, durati
   ('bbbbbbbb-0000-4000-8000-000000000103', 'prueba-reformer', 'prueba-instructora', now() + interval '10 minutes', 50, 5), -- empieza en 10 min
   ('bbbbbbbb-0000-4000-8000-000000000104', 'prueba-reformer', 'prueba-instructora', now() + interval '1 day', 50, 10),     -- mañana
   ('bbbbbbbb-0000-4000-8000-000000000105', 'prueba-reformer', 'prueba-instructora', now() + interval '201 days', 50, 5),  -- se cancelará
-  ('bbbbbbbb-0000-4000-8000-000000000106', 'prueba-reformer', 'prueba-instructora', now() + interval '202 days', 50, 5);  -- cuentas de cliente
+  ('bbbbbbbb-0000-4000-8000-000000000106', 'prueba-reformer', 'prueba-instructora', now() + interval '202 days', 50, 5),  -- cuentas de cliente
+  ('bbbbbbbb-0000-4000-8000-000000000107', 'prueba-reformer', 'prueba-instructora', now() - interval '1 day', 50, 5);     -- ya pasada
 
 -- =====================================================================
 -- 11 · Permisos exactos (nada más queda expuesto)
@@ -301,6 +302,9 @@ select pg_temp.expect_error('8.6 al sexto intento, too_many_attempts aunque el c
 select pg_temp.expect_error('8.7 cancelar también queda bloqueado',
   format($q$ select public.cancel_booking('eva.prueba@correo.example', %L) $q$, current_setting('prueba.eva')),
   'too_many_attempts');
+select pg_temp.expect_error('8.8 el mismo email con mayúsculas y espacios también está bloqueado',
+  format($q$ select public.find_booking('  EVA.Prueba@Correo.Example ', %L) $q$, current_setting('prueba.eva')),
+  'too_many_attempts');
 
 -- =====================================================================
 -- 1 · El visitante anónimo no ve ni toca nada privado
@@ -336,6 +340,17 @@ select pg_temp.check('1.17 con el código de otra persona y otro email no se ve 
   public.find_booking('ana.prueba@correo.example', current_setting('prueba.carla')) is null);
 select pg_temp.check('1.18 la reserva propia solo trae los datos de esa persona',
   public.find_booking('ana.prueba@correo.example', current_setting('prueba.ana'))::text !~ '(carla|dani|bea)\.prueba');
+select pg_temp.expect_error('1.19 el horario no se pide para más de 100 días: invalid_input',
+  $q$ select public.list_sessions(now(), now() + interval '101 days') $q$, 'invalid_input');
+select pg_temp.check('1.20 cancelar con un código inventado responde not_found sin lanzar error',
+  public.cancel_booking('nadie.prueba@correo.example', 'LUM-ZZZZ') = '{"error": "not_found"}'::jsonb);
+select pg_temp.check('1.21 una clase que no existe es null',
+  public.get_session('bbbbbbbb-0000-4000-8000-000000000999') is null);
+select pg_temp.check('1.22 el visitante lee el catálogo con las columnas que usa la app',
+  exists (select id, name, summary, level, intensity, duration_minutes, capacity
+          from public.class_types where id = 'prueba-reformer')
+  and exists (select id, name, role, bio, specialties, initials
+              from public.instructors where id = 'prueba-instructora'));
 
 -- =====================================================================
 -- 2 · Un usuario con sesión que NO es del estudio tampoco puede
@@ -422,6 +437,11 @@ select pg_temp.expect_error('6.6 asistencia de alguien en lista de espera: not_c
 select pg_temp.expect_error('5.7 dos clases a la vez en la sala: overlap',
   $q$ select public.create_session('prueba-reformer', 'prueba-instructora', now() + interval '200 days' + interval '20 minutes', 50, 8) $q$,
   'overlap');
+select pg_temp.expect_error('7.4 no se cancela una clase que ya ha pasado: past',
+  $q$ select public.cancel_session('bbbbbbbb-0000-4000-8000-000000000107') $q$, 'past');
+select pg_temp.expect_error('7.5 ni se edita: past',
+  $q$ select public.update_session('bbbbbbbb-0000-4000-8000-000000000107', 'prueba-reformer', 'prueba-instructora',
+      now() + interval '203 days', 50, 5) $q$, 'past');
 select pg_temp.check('3.4 el miembro del estudio no lee la tabla de reservas directamente',
   (select count(*) from public.bookings) = 0);
 
@@ -476,6 +496,8 @@ end;
 $$;
 select pg_temp.expect_error('10.5 no puede cancelar la reserva de otra persona: not_found',
   format($q$ select public.cancel_my_booking(%L) $q$, current_setting('prueba.otra')), 'not_found');
+select pg_temp.expect_error('10.10 ni una que no existe: not_found',
+  $q$ select public.cancel_my_booking('cccccccc-0000-4000-8000-000000000999') $q$, 'not_found');
 select set_config('prueba.demo_pronto',
   public.book_class('bbbbbbbb-0000-4000-8000-000000000103', 'x', 'x', 'x') -> 'booking' ->> 'id', true);
 select pg_temp.expect_error('10.6 la suya respeta las 2 horas: too_late',
@@ -484,9 +506,18 @@ select pg_temp.check('10.7 y fuera de ese límite la puede cancelar',
   public.cancel_my_booking(current_setting('prueba.demo_cliente')::uuid) -> 'booking' ->> 'status' = 'cancelled');
 
 reset role;
-select pg_temp.check('10.8 ningún dato enviado por el cliente demo ha llegado a la tabla', not exists (
-  select 1 from public.bookings
-  where name = 'María Real' or email = 'maria@gmail.com' or phone = '+34 612 345 678'));
+-- Solo las reservas de esta prueba: la tabla real puede tener reservas de visitantes con el teléfono
+-- que propone el formulario (612 345 678), y no tienen nada que ver con la cuenta demo.
+select pg_temp.check('10.8 ningún dato enviado por el cliente demo ha llegado a la tabla',
+  not exists (
+    select 1 from public.bookings
+    where (user_id = 'aaaaaaaa-0000-4000-8000-000000000004' or session_id = 'bbbbbbbb-0000-4000-8000-000000000106')
+      and (name = 'María Real' or email = 'maria@gmail.com' or phone = '+34 612 345 678'))
+  and not exists (
+    select 1 from public.bookings
+    where user_id = 'aaaaaaaa-0000-4000-8000-000000000004'
+      and (name, email, phone) is distinct from
+          ('Clienta Demo Prueba', 'cliente-demo.prueba@lumbra.example', '+34 600 000 901')));
 select pg_temp.check('10.9 la reserva de la otra clienta sigue intacta',
   (select status from public.bookings where id = current_setting('prueba.otra')::uuid) = 'confirmed');
 -- Una reserva nueva del cliente demo para la prueba de enmascarado.
@@ -553,6 +584,10 @@ begin
 
   perform pg_temp.check('12.9 la cuenta demo no puede leer la tabla de reservas',
     (select count(*) from public.bookings) = 0);
+
+  -- La app sabe que la cuenta es del estudio porque la RLS le deja ver su propia fila de studio_members.
+  perform pg_temp.check('12.10 la cuenta demo del estudio ve solo su fila de miembro',
+    (select array_agg(user_id) from public.studio_members) = array['aaaaaaaa-0000-4000-8000-000000000002'::uuid]);
 end;
 $$;
 

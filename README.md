@@ -57,9 +57,9 @@ Build de producción (gzip):
 
 | Fragmento | Antes de la fase 5 | Después | Cuándo se descarga |
 | --- | --- | --- | --- |
-| `index-*.js` | 125,44 kB | 124,96 kB | Siempre |
+| `index-*.js` | 125,44 kB | 125,02 kB | Siempre |
 | `supabaseJs-*.js` (supabase-js) | — | 55,16 kB | Solo al reservar, iniciar sesión o entrar en el panel |
-| `StudioApp-*.js` | 12,51 kB | 12,12 kB | Solo en `/estudio` |
+| `StudioApp-*.js` | 12,51 kB | 12,17 kB | Solo en `/estudio` |
 | Páginas legales | (en `index`) | 0,9 + 1,2 + 2,4 kB | Solo en `/privacidad` y `/aviso-legal` |
 
 ## Reglas de negocio

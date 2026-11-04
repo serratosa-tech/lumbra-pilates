@@ -17,7 +17,7 @@ export function NotFoundPage() {
         <path d={ARCH_PATH} fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
         <path d={THRESHOLD_PATH} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
       </svg>
-      <p className="mt-6 text-xs font-semibold tracking-widest text-terracota-700 uppercase">Error 404</p>
+      <p className="mt-6 text-xs font-medium tracking-widest text-terracota-700 uppercase">Error 404</p>
       <h1 className="mt-3 max-w-xl text-3xl">Esta puerta no lleva a ninguna parte</h1>
       <p className="mt-4 max-w-md text-lg text-tinta-700">
         La página que buscas no existe o ha cambiado de sitio. Respira hondo: volvemos al inicio en un

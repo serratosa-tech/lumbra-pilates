@@ -58,7 +58,7 @@ export function MyBookingsPage() {
         noindex
       />
       <div className="max-w-2xl">
-        <p className="text-xs font-semibold tracking-widest text-terracota-700 uppercase">Mis reservas</p>
+        <p className="text-xs font-medium tracking-widest text-terracota-700 uppercase">Mis reservas</p>
         <h1 className="mt-3 text-3xl">{client ? 'Tus reservas' : 'Consulta o cancela tu reserva'}</h1>
         <p className="mt-3 text-lg text-tinta-700">
           {client ? 'Las clases que has reservado con tu cuenta. Puedes cancelarlas desde aquí.' : lookupIntro}
@@ -74,7 +74,7 @@ export function MyBookingsPage() {
       {studio && (
         <Alert tone="info" title="Has entrado con la cuenta del estudio" className="mt-8">
           Las reservas se gestionan en el{' '}
-          <Link to="/estudio/resumen" className="font-semibold text-terracota-700 underline underline-offset-4">
+          <Link to="/estudio/resumen" className="font-medium text-terracota-700 underline underline-offset-4">
             panel del estudio
           </Link>
           . Aquí puedes consultar una reserva con su email y su código.

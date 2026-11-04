@@ -19,7 +19,7 @@ const SIZES: Record<ButtonSize, string> = {
 /** Clases de botón, también para enlaces que deben parecer botones. */
 export function buttonClasses(variant: ButtonVariant = 'primary', size: ButtonSize = 'md', className?: string) {
   return cn(
-    'inline-flex max-w-full items-center justify-center gap-2 rounded-full text-center font-semibold [&>svg]:shrink-0',
+    'inline-flex max-w-full items-center justify-center gap-2 rounded-full text-center font-medium tracking-[0.01em] [&>svg]:shrink-0',
     'transition-[background-color,border-color,color,box-shadow,translate] duration-(--duration-fast) ease-(--ease-out-soft)',
     'hover:-translate-y-px active:translate-y-0',
     'disabled:pointer-events-none disabled:opacity-55 aria-busy:pointer-events-none',

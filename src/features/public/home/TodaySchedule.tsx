@@ -13,7 +13,7 @@ function DayGroup({ day, now }: { day: UpcomingDay; now: Date }) {
   const headingId = useId()
   return (
     <div className="pt-5 pb-1">
-      <h3 id={headingId} className="pb-3 font-sans text-sm font-semibold tracking-normal text-piedra">
+      <h3 id={headingId} className="pb-3 text-sm font-medium text-piedra">
         {dayHeading(day)}
       </h3>
       <ul aria-labelledby={headingId} className="flex flex-col gap-3">

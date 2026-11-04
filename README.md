@@ -57,10 +57,21 @@ Build de producción (gzip):
 
 | Fragmento | Antes de la fase 5 | Después | Cuándo se descarga |
 | --- | --- | --- | --- |
-| `index-*.js` | 125,44 kB | 125,02 kB | Siempre |
+| `index-*.js` | 125,44 kB | 125,02 kB (123,72 kB con el logotipo en Jost) | Siempre |
 | `supabaseJs-*.js` (supabase-js) | — | 55,16 kB | Solo al reservar, iniciar sesión o entrar en el panel |
-| `StudioApp-*.js` | 12,51 kB | 12,17 kB | Solo en `/estudio` |
+| `StudioApp-*.js` | 12,51 kB | 12,14 kB | Solo en `/estudio` |
 | Páginas legales | (en `index`) | 0,9 + 1,2 + 2,4 kB | Solo en `/privacidad` y `/aviso-legal` |
+
+### Tipografía
+
+Una sola familia, **Jost** variable (`@fontsource-variable/jost` 5.3.0), solo el subconjunto latino y un único woff2 que cubre los pesos usados: 300 en titulares de `text-xl` o más, 400 en el texto y 500 en botones y etiquetas. Lleva `font-display: swap`, se precarga desde `index.html` y tiene un respaldo sobre Arial con `size-adjust` por peso para que el cambio de fuente no mueva el diseño.
+
+| Fuentes | Archivos | Peso |
+| --- | --- | --- |
+| Antes: Fraunces 500 normal y cursiva, Figtree 400 y 600 | 4 woff2 | 63 816 B (62,3 KiB) |
+| Ahora: Jost variable 300–500 | 1 woff2 | 26 576 B (26,0 KiB), un 58 % menos |
+
+CLS de la portada medido en Edge: 0 a 320 y 390 px, 0,0003 a 768 px y 0,0001 a 1280 px.
 
 ## Reglas de negocio
 

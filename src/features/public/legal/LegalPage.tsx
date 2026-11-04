@@ -20,7 +20,7 @@ interface LegalPageProps {
   sections: LegalSection[]
 }
 
-export const LEGAL_LINK = 'font-semibold text-terracota-700 underline underline-offset-4 hover:text-terracota-600'
+export const LEGAL_LINK = 'font-medium text-terracota-700 underline underline-offset-4 hover:text-terracota-600'
 
 /** Estructura común de las páginas legales: título, fecha, índice con anclas y secciones. */
 export function LegalPage({ eyebrow, title, seoTitle, description, intro, sections }: LegalPageProps) {
@@ -28,7 +28,7 @@ export function LegalPage({ eyebrow, title, seoTitle, description, intro, sectio
     <div className="container-page py-10 sm:py-14 lg:py-16">
       <Seo title={seoTitle} description={description} />
       <article className="max-w-2xl">
-        <p className="text-xs font-semibold tracking-widest text-terracota-700 uppercase">{eyebrow}</p>
+        <p className="text-xs font-medium tracking-widest text-terracota-700 uppercase">{eyebrow}</p>
         <h1 className="mt-3 text-3xl">{title}</h1>
         <p className="mt-2 text-sm text-piedra">Última actualización: {LEGAL_UPDATED}</p>
         <div className="mt-5 text-lg text-tinta-700">{intro}</div>
@@ -37,7 +37,7 @@ export function LegalPage({ eyebrow, title, seoTitle, description, intro, sectio
         </Alert>
 
         <nav aria-label="En esta página" className="mt-8 rounded-md border border-arena-200 bg-white p-4 sm:p-5">
-          <h2 className="font-sans text-sm font-semibold tracking-normal">En esta página</h2>
+          <h2 className="text-sm font-medium">En esta página</h2>
           <ol className="mt-2 grid grid-cols-1 gap-x-6 sm:grid-cols-2">
             {sections.map((section, index) => (
               <li key={section.id}>

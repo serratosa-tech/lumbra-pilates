@@ -14,7 +14,7 @@ export function NoStudioAccess({ account, headingLevel: Heading = 'h2' }: { acco
       </span>
       <Heading className="mt-4 text-2xl">Esta cuenta no tiene acceso al panel del estudio</Heading>
       <p className="mt-2 text-tinta-700">
-        Has entrado como <strong className="font-semibold [overflow-wrap:anywhere]">{account.email}</strong>, una cuenta de
+        Has entrado como <strong className="font-medium [overflow-wrap:anywhere]">{account.email}</strong>, una cuenta de
         cliente. Tus reservas están en Mis reservas.
       </p>
       <div className="mt-6 flex flex-wrap justify-center gap-3">

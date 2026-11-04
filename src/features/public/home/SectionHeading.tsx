@@ -12,7 +12,7 @@ interface SectionHeadingProps {
 export function SectionHeading({ id, kicker, title, children, className }: SectionHeadingProps) {
   return (
     <div className={cn('max-w-2xl', className)}>
-      <p className="text-xs font-semibold tracking-widest text-terracota-700 uppercase">{kicker}</p>
+      <p className="text-xs font-medium tracking-widest text-terracota-700 uppercase">{kicker}</p>
       <h2 id={id} className="mt-3 text-3xl">
         {title}
       </h2>

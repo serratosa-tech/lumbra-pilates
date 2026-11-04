@@ -48,8 +48,8 @@ export const LEGAL_NOTICE_SECTIONS: LegalSection[] = [
     title: 'Propiedad intelectual',
     body: (
       <p>
-        El diseño, el código, los textos y el logotipo de Lumbra Pilates son obra de {OWNER.name}. Las tipografías
-        Fraunces y Figtree se usan bajo la licencia SIL Open Font License y los iconos de Lucide, bajo la licencia ISC.
+        El diseño, el código, los textos y el logotipo de Lumbra Pilates son obra de {OWNER.name}. La tipografía
+        Jost se usa bajo la licencia SIL Open Font License y los iconos de Lucide, bajo la licencia ISC.
       </p>
     ),
   },

@@ -29,7 +29,7 @@ function IntensityMeter({ value }: { value: ClassIntensity }) {
 function ClassTypeCard({ classType, index }: { classType: ClassType; index: number }) {
   return (
     <Card as="li" interactive className="flex flex-col">
-      <span aria-hidden="true" className="font-display text-sm text-terracota-500">
+      <span aria-hidden="true" className="text-sm font-medium text-terracota-500 tabular-nums">
         0{index + 1}
       </span>
       <h3 className="mt-3 text-xl">{classType.name}</h3>

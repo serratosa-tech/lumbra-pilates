@@ -25,31 +25,39 @@
   --color-info: #3f5e7a;
   --color-info-50: #e4ebf1;
 
-  /* Tipografía */
+  /* Tipografía: una sola familia, Jost.
+     Jerarquía: titulares 300 (solo en text-xl o más), texto 400, botones y etiquetas 500. */
   --font-*: initial;
-  --font-display: 'Fraunces', 'Fraunces Fallback', Georgia, 'Times New Roman', serif;
-  --font-sans: 'Figtree', 'Figtree Fallback', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-sans: 'Jost', 'Jost Fallback', system-ui, -apple-system, 'Segoe UI', sans-serif;
+
+  /* Solo los pesos de la jerarquía: no existen utilidades para otros. */
+  --font-weight-*: initial;
+  --font-weight-light: 300;
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
 
   --text-*: initial;
   --text-xs: 0.8125rem;
   --text-xs--line-height: 1.35;
   --text-sm: 0.9375rem;
-  --text-sm--line-height: 1.5;
+  --text-sm--line-height: 1.55;
   --text-base: 1.0625rem;
-  --text-base--line-height: 1.6;
+  --text-base--line-height: 1.65;
   --text-lg: 1.1875rem;
-  --text-lg--line-height: 1.55;
+  --text-lg--line-height: 1.6;
   --text-xl: 1.375rem;
   --text-xl--line-height: 1.35;
   --text-2xl: clamp(1.5rem, 1.3rem + 0.9vw, 1.875rem);
-  --text-2xl--line-height: 1.25;
+  --text-2xl--line-height: 1.28;
+  --text-2xl--letter-spacing: -0.01em;
   --text-3xl: clamp(1.875rem, 1.5rem + 1.8vw, 2.75rem);
-  --text-3xl--line-height: 1.15;
+  --text-3xl--line-height: 1.18;
+  --text-3xl--letter-spacing: -0.015em;
   /* El mínimo se limita por el ancho para que una palabra no desborde a 320 px con texto grande. */
   --text-display: clamp(min(2.5rem, 12vw), 1rem + 6vw, 4.75rem);
-  --text-display--line-height: 1.04;
+  --text-display--line-height: 1.08;
+  --text-display--letter-spacing: -0.02em;
 
-  --tracking-tight: -0.02em;
   --tracking-wide: 0.08em;
   --tracking-widest: 0.18em;
 

@@ -32,19 +32,19 @@ export const PRIVACY_SECTIONS: LegalSection[] = [
     body: (
       <ul>
         <li>
-          <strong className="font-semibold text-tinta">Al reservar:</strong> el nombre, el email y el teléfono que
+          <strong className="font-medium text-tinta">Al reservar:</strong> el nombre, el email y el teléfono que
           escribas en el formulario, junto con la reserva.
         </li>
         <li>
-          <strong className="font-semibold text-tinta">Si entras con una cuenta demo:</strong> la sesión, guardada en tu
+          <strong className="font-medium text-tinta">Si entras con una cuenta demo:</strong> la sesión, guardada en tu
           navegador. Las cuentas demo son públicas y no contienen datos tuyos.
         </li>
         <li>
-          <strong className="font-semibold text-tinta">Para evitar abusos en Mis reservas:</strong> cuando una consulta
+          <strong className="font-medium text-tinta">Para evitar abusos en Mis reservas:</strong> cuando una consulta
           falla se guarda una huella cifrada (hash) del email y de la dirección IP, nunca el dato en claro.
         </li>
         <li>
-          <strong className="font-semibold text-tinta">Datos técnicos:</strong> los proveedores registran datos de
+          <strong className="font-medium text-tinta">Datos técnicos:</strong> los proveedores registran datos de
           conexión (como la dirección IP) para prestar el servicio y protegerlo.
         </li>
       </ul>
@@ -95,11 +95,11 @@ export const PRIVACY_SECTIONS: LegalSection[] = [
       <>
         <ul>
           <li>
-            <strong className="font-semibold text-tinta">Supabase</strong>: base de datos y cuentas. Los datos se guardan
+            <strong className="font-medium text-tinta">Supabase</strong>: base de datos y cuentas. Los datos se guardan
             en servidores de la Unión Europea (Estocolmo, Suecia).
           </li>
           <li>
-            <strong className="font-semibold text-tinta">Cloudflare</strong>: alojamiento y entrega de la web.
+            <strong className="font-medium text-tinta">Cloudflare</strong>: alojamiento y entrega de la web.
           </li>
         </ul>
         <p>

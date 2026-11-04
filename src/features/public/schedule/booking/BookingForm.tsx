@@ -11,7 +11,7 @@ import {
 import { OWNER } from '../../../../lib/site.ts'
 import { useBookingForm } from './useBookingForm.ts'
 
-const LINK = 'font-semibold text-terracota-700 underline underline-offset-4 hover:text-terracota-600'
+const LINK = 'font-medium text-terracota-700 underline underline-offset-4 hover:text-terracota-600'
 
 interface BookingFormProps {
   sessionId: string
@@ -60,7 +60,7 @@ export function BookingForm({ sessionId, waitlist, cancellable, onBooked, accoun
         <p className="mb-5 flex items-start gap-2 rounded-md bg-arena-100/70 p-3 text-sm text-tinta-700">
           <Lock aria-hidden="true" strokeWidth={1.75} className="mt-0.5 size-4 shrink-0 text-terracota-600" />
           <span className="min-w-0 [overflow-wrap:anywhere]">
-            Reservas con tu cuenta <strong className="font-semibold text-tinta">{account.email}</strong>.{' '}
+            Reservas con tu cuenta <strong className="font-medium text-tinta">{account.email}</strong>.{' '}
             {locked.name ? 'Tus datos vienen de la cuenta demo.' : 'El email es el de la cuenta.'} La reserva aparecerá
             en Mis reservas.
           </span>

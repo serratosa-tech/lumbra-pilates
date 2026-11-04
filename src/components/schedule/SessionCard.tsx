@@ -32,13 +32,13 @@ function PastSessionCard({ session, now, compact, Heading }: { session: ClassSes
   const time = formatTime(session.startsAt)
   const timeTag = <time dateTime={session.startsAt}>{time}</time>
   const heading = (
-    <Heading className={cn('min-w-0 font-sans font-semibold tracking-normal', compact ? 'text-xs leading-snug' : 'flex-1 text-base')}>
+    <Heading className={cn('min-w-0 font-medium', compact ? 'text-xs leading-snug' : 'flex-1 text-base')}>
       {session.name}
       <span className="sr-only">{`, ${time}, ${status.label}`}</span>
     </Heading>
   )
   const label = (
-    <span aria-hidden="true" className="text-xs font-semibold [overflow-wrap:normal]">
+    <span aria-hidden="true" className="text-xs font-medium [overflow-wrap:normal]">
       {status.label}
     </span>
   )
@@ -49,7 +49,7 @@ function PastSessionCard({ session, now, compact, Heading }: { session: ClassSes
     return (
       <article className={cn(card, 'flex flex-col gap-1 px-3 py-2')}>
         <p className="flex flex-wrap items-baseline justify-between gap-x-2">
-          <span className="font-display text-base leading-tight tabular-nums">{timeTag}</span>
+          <span className="text-base leading-tight tabular-nums">{timeTag}</span>
           {label}
         </p>
         {heading}
@@ -60,7 +60,7 @@ function PastSessionCard({ session, now, compact, Heading }: { session: ClassSes
   // Con el texto muy grande, si al lado de la hora no quedan 8 rem, nombre y estado bajan debajo.
   return (
     <article className={cn(card, 'flex flex-wrap items-center gap-x-4 gap-y-1 px-4 py-2.5 sm:px-5')}>
-      <p className="w-[5ch] shrink-0 font-display text-xl leading-none tabular-nums">{timeTag}</p>
+      <p className="w-[5ch] shrink-0 text-xl font-light leading-none tabular-nums">{timeTag}</p>
       <div className="flex min-w-[min(8rem,100%)] flex-1 flex-col sm:flex-row sm:flex-wrap sm:items-center sm:justify-between sm:gap-x-4">
         {heading}
         {label}
@@ -119,7 +119,7 @@ export function SessionCard({ session, now, variant = 'row', onOpen, to, heading
       {/* Desde sm, ancho fijo en «ch» (crece con el texto) y cifras tabulares: los nombres empiezan a la misma altura. */}
       <p
         className={cn(
-          'shrink-0 font-display leading-none tabular-nums',
+          'shrink-0 font-light leading-none tabular-nums',
           compact ? 'text-xl' : 'text-2xl sm:w-[5ch] sm:self-start sm:pt-0.5 sm:text-3xl',
           !interactive && 'text-tinta-700',
         )}
@@ -128,7 +128,7 @@ export function SessionCard({ session, now, variant = 'row', onOpen, to, heading
       </p>
 
       <div className={compact ? 'min-w-0' : 'min-w-0 sm:min-w-[min(12rem,100%)] sm:flex-1'}>
-        <Heading className={cn('font-sans font-semibold tracking-normal', compact ? 'text-sm leading-snug' : 'text-lg')}>
+        <Heading className={cn('font-medium', compact ? 'text-sm leading-snug' : 'text-lg')}>
           {title}
         </Heading>
         {/* Cada dato es un bloque entero con su icono: si no cabe, baja completo a la línea siguiente. */}

@@ -11,7 +11,7 @@ const LINK_CLASSES =
 function FooterColumn({ title, children }: { title: string; children: ReactNode }) {
   return (
     <div>
-      <h2 className="font-sans text-xs font-semibold tracking-widest text-terracota-300 uppercase">{title}</h2>
+      <h2 className="text-xs font-medium tracking-widest text-terracota-300 uppercase">{title}</h2>
       <div className="mt-3">{children}</div>
     </div>
   )
@@ -31,7 +31,7 @@ export function SiteFooter() {
       <div className="container-page grid grid-cols-1 gap-8 py-10 sm:grid-cols-2 sm:gap-10 sm:py-14 lg:grid-cols-[1.4fr_1fr_1fr_1fr]">
         <div>
           <LogoFull surface="dark" title="Lumbra Pilates" className="h-11 w-auto text-crema" />
-          <p className="mt-4 max-w-xs font-display text-lg text-crema italic">{SLOGAN}</p>
+          <p className="mt-4 max-w-xs text-lg text-crema">{SLOGAN}</p>
         </div>
 
         <FooterColumn title="Visítanos">

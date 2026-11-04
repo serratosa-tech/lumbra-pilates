@@ -26,13 +26,13 @@ function NextClassCard({ state }: { state: HomeState }) {
     <div className="relative mx-auto -mt-16 w-[calc(100%-2rem)] max-w-xs rounded-lg border border-arena-200 bg-white/95 p-5 shadow-lg backdrop-blur lg:absolute lg:-bottom-8 lg:left-0 lg:mt-0 lg:w-80 lg:max-w-none animate-rise [animation-delay:200ms]">
       {firstDay && next && spots ? (
         <>
-          <p className="flex items-center gap-1.5 text-xs font-semibold tracking-wide text-terracota-700 uppercase">
+          <p className="flex items-center gap-1.5 text-xs font-medium tracking-wide text-terracota-700 uppercase">
             <Sparkles aria-hidden="true" strokeWidth={1.75} className="size-4 shrink-0" />
             {firstDay.relation === 'hoy' ? 'Próxima clase hoy' : `Próxima clase${SEP}${dayHeading(firstDay)}`}
           </p>
           <p className="mt-3 flex flex-wrap items-baseline gap-x-3">
-            <span className="font-display text-3xl">{formatTime(next.startsAt)}</span>
-            <span className="font-semibold">{next.name}</span>
+            <span className="text-3xl font-light">{formatTime(next.startsAt)}</span>
+            <span className="font-medium">{next.name}</span>
           </p>
           <p className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-piedra">
             <span className="inline-flex items-center gap-1.5">
@@ -48,7 +48,7 @@ function NextClassCard({ state }: { state: HomeState }) {
             <Badge tone={spots.tone}>{spots.label}</Badge>
             <Link
               to={scheduleLink(next)}
-              className="inline-flex min-h-11 items-center gap-1 text-sm font-semibold text-terracota-600 underline-offset-4 hover:underline"
+              className="inline-flex min-h-11 items-center gap-1 text-sm font-medium text-terracota-600 underline-offset-4 hover:underline"
             >
               Reservar
               <span className="sr-only">
@@ -93,7 +93,7 @@ export function Hero({ state }: { state: HomeState }) {
       <div className="container-page grid grid-cols-1 items-center gap-8 pt-8 pb-12 sm:gap-14 sm:pt-16 sm:pb-20 lg:grid-cols-[1.1fr_0.9fr] lg:gap-10 lg:pt-20 lg:pb-28">
         <div className="animate-rise">
           {/* En pantallas estrechas «Valencia» va en su propia línea: ninguna empieza por «·». */}
-          <p className="text-xs font-semibold tracking-widest text-terracota-700 uppercase">
+          <p className="text-xs font-medium tracking-widest text-terracota-700 uppercase">
             <span>Estudio boutique de pilates</span>
             <span aria-hidden="true" className="hidden sm:inline">
               {' '}
@@ -104,9 +104,9 @@ export function Hero({ state }: { state: HomeState }) {
           </p>
           <h1 id="hero-titulo" className="mt-4 text-display sm:mt-5">
             Muévete despacio.{' '}
-            <em className="font-display text-terracota-600">Hazte</em> fuerte.
+            <em className="font-medium text-terracota-600 not-italic">Hazte</em> fuerte.
           </h1>
-          <p className="mt-6 max-w-xl font-display text-2xl text-tinta-700 italic">{SLOGAN}</p>
+          <p className="mt-6 max-w-xl text-2xl font-light text-tinta-700">{SLOGAN}</p>
           <p className="mt-4 max-w-xl text-lg text-tinta-700">
             Clases de reformer y esterilla en grupos pequeños, con instructoras que corrigen cada
             detalle. Reserva tu plaza en un minuto, sin registros.

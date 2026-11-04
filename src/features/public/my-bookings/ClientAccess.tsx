@@ -11,7 +11,7 @@ export function ClientAccess() {
     <div className="flex flex-col gap-3">
       <DemoAccountCard kind="client" onSignedIn={stay} />
       <details className="group rounded-sm border border-arena-200 bg-white">
-        <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-2 px-3 py-2 text-sm font-semibold [&::-webkit-details-marker]:hidden">
+        <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-2 px-3 py-2 text-sm font-medium [&::-webkit-details-marker]:hidden">
           Entrar con email y contraseña
           <ChevronDown
             aria-hidden="true"

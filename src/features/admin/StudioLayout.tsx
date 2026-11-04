@@ -59,7 +59,7 @@ export function StudioLayout() {
             <Link to="/estudio/resumen" aria-label="Panel del estudio, resumen" className="-m-1 rounded-md p-1 text-tinta">
               <LogoFull title="" className="h-9 w-auto max-w-full" />
             </Link>
-            <span className="hidden border-l border-arena-400 pl-3 text-sm font-semibold text-piedra sm:inline">
+            <span className="hidden border-l border-arena-400 pl-3 text-sm font-medium text-piedra sm:inline">
               Panel del estudio
             </span>
           </div>
@@ -73,7 +73,7 @@ export function StudioLayout() {
             <Link
               to="/"
               title="Ver la web"
-              className="inline-flex min-h-11 min-w-11 items-center justify-center gap-1.5 rounded-full text-sm font-semibold text-tinta-700 hover:bg-arena-100 md:px-3"
+              className="inline-flex min-h-11 min-w-11 items-center justify-center gap-1.5 rounded-full text-sm font-medium text-tinta-700 hover:bg-arena-100 md:px-3"
             >
               <span className="sr-only md:not-sr-only">Ver la web</span>
               <ExternalLink aria-hidden="true" strokeWidth={1.75} className="size-4" />
@@ -115,7 +115,7 @@ function StudioTabs() {
             to={to}
             className={({ isActive }) =>
               cn(
-                'inline-flex min-h-11 items-center gap-2 rounded-full px-4 text-sm font-semibold whitespace-nowrap transition-colors duration-(--duration-fast)',
+                'inline-flex min-h-11 items-center gap-2 rounded-full px-4 text-sm font-medium whitespace-nowrap transition-colors duration-(--duration-fast)',
                 isActive ? 'bg-tinta text-crema' : 'text-tinta-700 hover:bg-arena-100',
               )
             }

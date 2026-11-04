@@ -26,7 +26,7 @@ export function DemoTryButtons({ className }: { className?: string }) {
           aria-busy={pending === kind || undefined}
           disabled={pending !== null && pending !== kind}
           onClick={() => signInAs(kind)}
-          className="inline-flex min-h-11 items-center gap-1.5 rounded-sm font-semibold text-terracota-700 underline decoration-terracota-700/35 underline-offset-4 transition-colors duration-(--duration-fast) hover:text-terracota-600 hover:decoration-terracota-600 disabled:opacity-55 aria-busy:pointer-events-none"
+          className="inline-flex min-h-11 items-center gap-1.5 rounded-sm font-medium text-terracota-700 underline decoration-terracota-700/35 underline-offset-4 transition-colors duration-(--duration-fast) hover:text-terracota-600 hover:decoration-terracota-600 disabled:opacity-55 aria-busy:pointer-events-none"
         >
           {pending === kind ? <Spinner /> : <Icon aria-hidden="true" strokeWidth={1.75} className="size-4 shrink-0" />}
           {label}

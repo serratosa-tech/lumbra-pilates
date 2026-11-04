@@ -130,7 +130,7 @@ export function BookingDialog({ classId, now, onClose }: { classId: string; now:
                     : 'una vez reservada no podrás cancelarla online.'}
                 </Alert>
               )}
-              <h3 className="mb-4 font-sans text-base font-semibold tracking-normal">
+              <h3 className="mb-4 text-base font-medium">
                 {waitlist ? 'La clase está completa: apúntate a la lista de espera' : 'Tus datos'}
               </h3>
               <BookingForm

@@ -54,7 +54,7 @@ function AttendanceToggle({
             // Pulsar la opción marcada la desmarca.
             onClick={() => onChange(pressed ? null : value)}
             className={cn(
-              'inline-flex min-h-11 items-center gap-1.5 rounded-full border px-3 text-sm font-semibold transition-colors duration-(--duration-fast)',
+              'inline-flex min-h-11 items-center gap-1.5 rounded-full border px-3 text-sm font-medium transition-colors duration-(--duration-fast)',
               'disabled:cursor-not-allowed disabled:opacity-55',
               pressed ? active : 'border-transparent text-tinta-700 hover:bg-white',
             )}
@@ -71,7 +71,7 @@ function AttendanceToggle({
 function PersonInfo({ booking }: { booking: Booking }) {
   return (
     <div className="min-w-[min(12rem,100%)] flex-1">
-      <p className="flex flex-wrap items-center gap-2 font-semibold">
+      <p className="flex flex-wrap items-center gap-2 font-medium">
         {booking.name}
         {booking.source === 'studio' && <Badge>Manual</Badge>}
         {booking.promotedAt && <Badge tone="terracota">Desde la lista</Badge>}
@@ -208,7 +208,7 @@ export function RosterView({ sessionId, now }: { sessionId: string; now: Date })
           <div className="flex flex-wrap items-baseline justify-between gap-2">
             <h2 id="confirmadas-titulo" className="min-w-0 text-xl">
               Plazas confirmadas{' '}
-              <span className="font-sans text-base font-normal text-piedra tabular-nums">
+              <span className="text-base font-normal text-piedra tabular-nums">
                 {confirmed.length}/{session.capacity}
               </span>
             </h2>
@@ -256,7 +256,7 @@ export function RosterView({ sessionId, now }: { sessionId: string; now: Date })
         <Card as="section" aria-labelledby="espera-titulo">
           <h2 id="espera-titulo" className="text-xl">
             Lista de espera{' '}
-            <span className="font-sans text-base font-normal text-piedra tabular-nums">{waitlist.length}</span>
+            <span className="text-base font-normal text-piedra tabular-nums">{waitlist.length}</span>
           </h2>
           {ended && waitlist.length > 0 && (
             <p className="mt-1 text-sm text-piedra">Histórico: la clase terminó sin que estas personas consiguieran plaza.</p>
@@ -267,7 +267,7 @@ export function RosterView({ sessionId, now }: { sessionId: string; now: Date })
             <ol className="mt-2 divide-y divide-arena-200">
               {waitlist.map((booking, index) => (
                 <li key={booking.id} className="flex flex-wrap items-center gap-x-4 gap-y-3 py-3">
-                  <span className="grid size-9 shrink-0 place-items-center rounded-full bg-aviso-50 font-semibold text-aviso tabular-nums">
+                  <span className="grid size-9 shrink-0 place-items-center rounded-full bg-aviso-50 font-medium text-aviso tabular-nums">
                     <span className="sr-only">Puesto </span>
                     {index + 1}
                   </span>
@@ -286,7 +286,7 @@ export function RosterView({ sessionId, now }: { sessionId: string; now: Date })
 
       {cancelled.length > 0 && (
         <details className="group rounded-lg border border-arena-200 bg-white/60 px-5 py-1 sm:px-6">
-          <summary className="flex min-h-11 cursor-pointer items-center font-semibold">
+          <summary className="flex min-h-11 cursor-pointer items-center font-medium">
             Canceladas ({cancelled.length})
           </summary>
           <ul className="divide-y divide-arena-200 pb-2">

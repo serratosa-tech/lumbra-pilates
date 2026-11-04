@@ -34,6 +34,37 @@ function Block({ id, title, children }: { id: string; title: string; children: R
   )
 }
 
+/** Jerarquía tipográfica real de la app: el peso 300 solo en text-xl o más. */
+const TYPE_SCALE: { name: string; spec: string; sample: ReactNode }[] = [
+  {
+    name: 'Display',
+    spec: 'text-display · 300 · palabra destacada 500',
+    sample: (
+      <p className="text-display font-light">
+        <span className="font-medium text-terracota-600">Hazte</span> fuerte.
+      </p>
+    ),
+  },
+  { name: 'Titular de página', spec: 'text-3xl · 300', sample: <p className="text-3xl font-light">Horario semanal</p> },
+  { name: 'Titular de bloque', spec: 'text-2xl · 300', sample: <p className="text-2xl font-light">Plazas confirmadas</p> },
+  {
+    name: 'Subtítulo',
+    spec: 'text-2xl · 300 (text-lg o menos · 400)',
+    sample: <p className="text-2xl font-light text-tinta-700">Calma que sostiene, fuerza que ilumina.</p>,
+  },
+  {
+    name: 'Texto',
+    spec: 'text-base · 400',
+    sample: <p className="max-w-prose">Clases de reformer y esterilla en grupos pequeños, con instructoras que corrigen cada detalle.</p>,
+  },
+  { name: 'Botón y etiqueta', spec: 'text-sm · 500', sample: <p className="text-sm font-medium">Reservar clase{SEP}Email</p> },
+  {
+    name: 'Etiqueta en mayúsculas',
+    spec: 'text-xs · 500 · espaciado 0,18em',
+    sample: <p className="text-xs font-medium tracking-widest text-terracota-700 uppercase">Estudio boutique de pilates</p>,
+  },
+]
+
 function DemoForm() {
   const toast = useToast()
   const [email, setEmail] = useState('')
@@ -101,7 +132,7 @@ export function DesignSystemPage() {
         description="Marca, tokens y componentes de Lumbra Pilates con todos sus estados."
         noindex
       />
-      <p className="text-xs font-semibold tracking-widest text-terracota-700 uppercase">Lumbra Pilates</p>
+      <p className="text-xs font-medium tracking-widest text-terracota-700 uppercase">Lumbra Pilates</p>
       <h1 className="mt-3 text-3xl">Sistema de diseño</h1>
       <p className="mt-4 mb-10 max-w-2xl text-lg text-tinta-700">
         Marca, tokens y componentes base con sus estados. Todo lo que ves aquí es lo que usa la app.
@@ -120,13 +151,27 @@ export function DesignSystemPage() {
             <LogoMark title="Símbolo de Lumbra" className="size-16 -translate-y-0.5 text-tinta" />
             <img src="/favicon.svg" alt="Favicon de Lumbra" width="48" height="48" className="size-12" />
           </Card>
-          <Card className="flex flex-col justify-center gap-2 py-8">
-            <p className="font-display text-2xl">Fraunces{SEP}titulares</p>
-            <p className="font-display text-2xl italic">Fraunces cursiva{SEP}acentos</p>
-            <p>Figtree normal{SEP}texto de lectura</p>
-            <p className="font-semibold">Figtree seminegrita{SEP}botones y etiquetas</p>
+          <Card className="flex flex-col justify-center gap-1 py-8">
+            <p className="text-3xl font-light">
+              Jost <span className="font-medium text-terracota-600">variable</span>
+            </p>
+            <p className="text-piedra">Una sola familia, tres pesos: 300, 400 y 500.</p>
           </Card>
         </div>
+      </Block>
+
+      <Block id="ds-tipografia" title="Tipografía">
+        <ul className="flex flex-col divide-y divide-arena-200">
+          {TYPE_SCALE.map((level) => (
+            <li key={level.name} className="flex flex-col gap-2 py-5 md:flex-row md:items-baseline md:gap-8">
+              <p className="shrink-0 text-sm text-piedra md:w-56">
+                <span className="block font-medium text-tinta">{level.name}</span>
+                {level.spec}
+              </p>
+              <div className="min-w-0">{level.sample}</div>
+            </li>
+          ))}
+        </ul>
       </Block>
 
       <Block id="ds-color" title="Color">
@@ -135,7 +180,7 @@ export function DesignSystemPage() {
             <li key={s.token} className="overflow-hidden rounded-md border border-arena-200 bg-white">
               <span aria-hidden="true" className={`block h-16 ${s.className}`} />
               <span className="block p-3 text-sm">
-                <span className="block font-semibold">{s.token}</span>
+                <span className="block font-medium">{s.token}</span>
                 <span className="block text-piedra uppercase">{s.hex}</span>
               </span>
             </li>
@@ -176,7 +221,7 @@ export function DesignSystemPage() {
         </div>
         <div className="mt-6 grid grid-cols-1 gap-5 lg:grid-cols-2">
           <Card>
-            <p className="flex items-center gap-3 font-semibold">
+            <p className="flex items-center gap-3 font-medium">
               <Spinner label="Cargando" className="text-terracota-600" /> Cargando…
             </p>
             <div className="mt-5 flex flex-col gap-3" aria-hidden="true">

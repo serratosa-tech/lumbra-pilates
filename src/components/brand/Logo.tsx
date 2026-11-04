@@ -1,5 +1,5 @@
 import { cn } from '../../lib/cn.ts'
-import { ARCH_PATH, SUBMARK_PATH, THRESHOLD_PATH, WORDMARK_PATH } from './logoPaths.ts'
+import { ARCH_PATH, LOGO_FULL_WIDTH, SUBMARK_PATH, THRESHOLD_PATH, WORDMARK_PATH } from './logoPaths.ts'
 
 type Surface = 'light' | 'dark'
 
@@ -47,7 +47,7 @@ export function LogoMark({ className, surface = 'light', title }: LogoProps) {
 /** Símbolo + logotipo «Lumbra PILATES». */
 export function LogoFull({ className, surface = 'light', title = 'Lumbra Pilates' }: LogoProps) {
   return (
-    <svg viewBox="0 0 172 48" className={cn('max-w-full shrink-0', className)} {...a11yProps(title)}>
+    <svg viewBox={`0 0 ${LOGO_FULL_WIDTH} 48`} className={cn('max-w-full shrink-0', className)} {...a11yProps(title)}>
       <MarkShapes surface={surface} />
       <g transform="translate(56 1.5)" fill="currentColor">
         <path d={WORDMARK_PATH} />

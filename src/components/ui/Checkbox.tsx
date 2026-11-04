@@ -48,7 +48,7 @@ export function Checkbox({ label, hint, error, className, id: idProp, ...rest }:
         </p>
       )}
       {error && (
-        <p id={errorId} className="pl-8 text-sm font-semibold text-error">
+        <p id={errorId} className="pl-8 text-sm font-medium text-error">
           {error}
         </p>
       )}

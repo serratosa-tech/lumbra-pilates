@@ -1,46 +1,44 @@
-/* Tipografías de la marca (licencia OFL), alojadas en el proyecto.
-   Solo subconjunto latino, solo woff2 y solo los pesos usados. */
+/* Tipografía de la marca: Jost variable (licencia OFL), alojada en el proyecto.
+   Un solo archivo woff2 con el subconjunto latino cubre los pesos usados (300, 400 y 500).
+   Se precarga desde index.html (plugin en vite.config.ts). */
 @font-face {
-  font-family: 'Fraunces';
+  font-family: 'Jost';
   font-style: normal;
-  font-weight: 500;
+  font-weight: 300 500;
   font-display: swap;
-  src: url('@fontsource/fraunces/files/fraunces-latin-500-normal.woff2') format('woff2');
-}
-@font-face {
-  font-family: 'Fraunces';
-  font-style: italic;
-  font-weight: 500;
-  font-display: swap;
-  src: url('@fontsource/fraunces/files/fraunces-latin-500-italic.woff2') format('woff2');
-}
-@font-face {
-  font-family: 'Figtree';
-  font-style: normal;
-  font-weight: 400;
-  font-display: swap;
-  src: url('@fontsource/figtree/files/figtree-latin-400-normal.woff2') format('woff2');
-}
-@font-face {
-  font-family: 'Figtree';
-  font-style: normal;
-  font-weight: 600;
-  font-display: swap;
-  src: url('@fontsource/figtree/files/figtree-latin-600-normal.woff2') format('woff2');
+  src: url('@fontsource-variable/jost/files/jost-latin-wght-normal.woff2') format('woff2');
+  unicode-range:
+    U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329,
+    U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
 }
 
-/* Respaldo con métricas aproximadas para reducir el salto al cargar. */
+/* Respaldo con las métricas de Jost para que el cambio de fuente al cargar no mueva el diseño.
+   Jost se estrecha al aligerarse y Arial no, así que hay una cara por peso, cada una con el ancho medio
+   de ese peso (medido en el archivo); ascendente y descendente se compensan con el mismo factor. */
 @font-face {
-  font-family: 'Fraunces Fallback';
-  src: local('Georgia');
-  size-adjust: 104%;
-  ascent-override: 92%;
-  descent-override: 24%;
+  font-family: 'Jost Fallback';
+  font-weight: 300;
+  src: local('Arial');
+  size-adjust: 92.3%;
+  ascent-override: 115.92%;
+  descent-override: 40.63%;
+  line-gap-override: 0%;
 }
 @font-face {
-  font-family: 'Figtree Fallback';
+  font-family: 'Jost Fallback';
+  font-weight: 400;
   src: local('Arial');
-  size-adjust: 101%;
-  ascent-override: 95%;
-  descent-override: 25%;
+  size-adjust: 94.84%;
+  ascent-override: 112.82%;
+  descent-override: 39.54%;
+  line-gap-override: 0%;
+}
+@font-face {
+  font-family: 'Jost Fallback';
+  font-weight: 500;
+  src: local('Arial');
+  size-adjust: 98.74%;
+  ascent-override: 108.36%;
+  descent-override: 37.98%;
+  line-gap-override: 0%;
 }

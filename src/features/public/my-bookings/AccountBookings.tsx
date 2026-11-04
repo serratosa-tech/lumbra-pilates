@@ -60,7 +60,7 @@ export function AccountBookings({ account, now }: { account: Account; now: Date 
         <p className="flex min-w-0 items-start gap-2 text-tinta-700">
           <UserRound aria-hidden="true" strokeWidth={1.75} className="mt-1 size-4 shrink-0 text-terracota-600" />
           <span className="min-w-0 [overflow-wrap:anywhere]">
-            Has entrado como <strong className="font-semibold text-tinta">{account.name}</strong>
+            Has entrado como <strong className="font-medium text-tinta">{account.name}</strong>
             {/* En pantallas estrechas el email va en su propia línea: ninguna empieza por «·». */}
             <span aria-hidden="true" className="hidden text-piedra sm:inline">
               {' '}

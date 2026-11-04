@@ -28,7 +28,7 @@ export function Field({ label, hint, error, required, className, children }: Fie
 
   return (
     <div className={cn('flex flex-col gap-1.5', className)}>
-      <label htmlFor={id} className="text-sm font-semibold text-tinta">
+      <label htmlFor={id} className="text-sm font-medium text-tinta">
         {label}
         {required && (
           <span className="font-normal text-piedra">
@@ -45,7 +45,7 @@ export function Field({ label, hint, error, required, className, children }: Fie
         </p>
       )}
       {error && (
-        <p id={errorId} className="flex items-start gap-1.5 text-sm font-semibold text-error">
+        <p id={errorId} className="flex items-start gap-1.5 text-sm font-medium text-error">
           <CircleAlert aria-hidden="true" strokeWidth={1.75} className="mt-0.5 size-4 shrink-0" />
           {error}
         </p>

@@ -28,7 +28,7 @@ export function SiteHeader() {
                   to={item.to}
                   className={({ isActive }) =>
                     cn(
-                      'relative inline-flex min-h-11 items-center rounded-full px-4 text-sm font-semibold transition-colors duration-(--duration-fast)',
+                      'relative inline-flex min-h-11 items-center rounded-full px-4 text-sm font-medium transition-colors duration-(--duration-fast)',
                       'hover:bg-arena-100',
                       isActive ? 'text-terracota-700' : 'text-tinta-700',
                     )
@@ -49,7 +49,7 @@ export function SiteHeader() {
           onClick={() => setMenuOpen(true)}
           aria-expanded={menuOpen}
           aria-controls={MOBILE_MENU_ID}
-          className="-mr-2 inline-flex min-h-11 items-center gap-2 rounded-full px-3 text-sm font-semibold text-tinta transition-colors hover:bg-arena-100 md:hidden"
+          className="-mr-2 inline-flex min-h-11 items-center gap-2 rounded-full px-3 text-sm font-medium text-tinta transition-colors hover:bg-arena-100 md:hidden"
         >
           <Menu aria-hidden="true" strokeWidth={1.75} className="size-6" />
           Menú
@@ -68,7 +68,7 @@ export function SiteHeader() {
                     onClick={closeMenu}
                     className={({ isActive }) =>
                       cn(
-                        'flex min-h-12 items-center gap-3 rounded-md px-3 text-base font-semibold transition-colors hover:bg-arena-100',
+                        'flex min-h-12 items-center gap-3 rounded-md px-3 text-base font-medium transition-colors hover:bg-arena-100',
                         isActive ? 'bg-arena-100 text-terracota-700' : 'text-tinta',
                       )
                     }

@@ -27,7 +27,7 @@ export function OccupancyChart({ slots }: { slots: SlotOccupancy[] }) {
                 style={{ width: `${Math.max(1, Math.round(slot.occupancy * 100))}%` }}
               />
             </span>
-            <span className="col-start-2 row-start-1 text-right text-sm font-semibold tabular-nums sm:col-start-3">
+            <span className="col-start-2 row-start-1 text-right text-sm font-medium tabular-nums sm:col-start-3">
               {percent(slot.occupancy)}
             </span>
           </li>

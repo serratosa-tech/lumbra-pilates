@@ -50,7 +50,7 @@ export function BookingConfirmation({ details, now }: { details: BookingDetails;
           <Hourglass aria-hidden="true" strokeWidth={1.75} className="size-7" />
         )}
       </span>
-      <p ref={headingRef} tabIndex={-1} className="mt-4 max-w-sm text-lg font-semibold outline-none">
+      <p ref={headingRef} tabIndex={-1} className="mt-4 max-w-sm text-lg font-medium outline-none">
         {confirmed
           ? `Te esperamos el ${formatDate(session.startsAt)} a las ${formatTime(session.startsAt)}.`
           : `Estás en el puesto ${waitlistPosition} de la lista de espera.`}
@@ -63,10 +63,10 @@ export function BookingConfirmation({ details, now }: { details: BookingDetails;
       )}
 
       <div className="mt-5 w-full rounded-md border border-dashed border-terracota-300 bg-arena-100/60 px-4 py-4">
-        <p className="text-xs font-semibold tracking-widest text-terracota-700 uppercase">Tu código de reserva</p>
+        <p className="text-xs font-medium tracking-widest text-terracota-700 uppercase">Tu código de reserva</p>
         {/* En pantallas estrechas (o con texto muy grande) baja un tamaño. Solo si ni así cabe en su línea
             (texto al 200 % en 320 px) se parte, por el guion. */}
-        <p className="mt-1 font-display text-2xl tracking-[0.06em] [overflow-wrap:normal] tabular-nums min-[22rem]:text-3xl min-[22rem]:tracking-[0.12em]">
+        <p className="mt-1 text-2xl tracking-[0.06em] [overflow-wrap:normal] tabular-nums min-[22rem]:text-3xl min-[22rem]:tracking-[0.12em]">
           {booking.code}
         </p>
         <Button variant="ghost" onClick={copyCode} className="mt-1" icon={<Copy aria-hidden="true" strokeWidth={1.75} className="size-4" />}>
@@ -78,7 +78,7 @@ export function BookingConfirmation({ details, now }: { details: BookingDetails;
         {summary.map(([term, value]) => (
           <div key={term} className="contents">
             <dt className="text-piedra">{term}</dt>
-            <dd className="mb-1 font-semibold break-words min-[22rem]:mb-0">{value}</dd>
+            <dd className="mb-1 font-medium break-words min-[22rem]:mb-0">{value}</dd>
           </div>
         ))}
       </dl>

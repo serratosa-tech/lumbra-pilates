@@ -29,7 +29,7 @@ export function Alert({ tone = 'info', title, children, action, className }: Ale
     >
       <Icon aria-hidden="true" strokeWidth={1.75} className="mt-0.5 size-5 shrink-0" />
       <div className="min-w-0 flex-1 basis-48">
-        <p className="font-semibold">{title}</p>
+        <p className="font-medium">{title}</p>
         {children && <div className="mt-1 text-sm text-tinta-700">{children}</div>}
       </div>
       {action && <div className="shrink-0">{action}</div>}

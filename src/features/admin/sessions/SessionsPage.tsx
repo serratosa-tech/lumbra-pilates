@@ -68,11 +68,11 @@ function SessionRow({
     // Con el texto muy grande (la lista, con `@container`, mide menos de 12 rem), el menú entra en el flujo junto
     // a la hora y los datos bajan a ancho completo, sin reservar el hueco del menú.
     <li className="relative flex flex-wrap items-start gap-x-5 gap-y-3 py-4 pr-12 md:pr-0 @max-[12rem]:pr-0">
-      <p className="w-[5ch] shrink-0 font-display text-2xl leading-none tabular-nums">
+      <p className="w-[5ch] shrink-0 text-2xl font-light leading-none tabular-nums">
         {formatTime(session.startsAt)}
       </p>
       <div className="min-w-[min(12rem,100%)] flex-1 @max-[12rem]:order-last @max-[12rem]:basis-full">
-        <h3 className="flex flex-wrap items-center gap-2 font-sans text-base font-semibold tracking-normal">
+        <h3 className="flex flex-wrap items-center gap-2 text-base font-medium">
           {session.name}
           {state === 'cancelled' && <Badge tone="error">Cancelada</Badge>}
         </h3>
@@ -227,7 +227,7 @@ export function SessionsPage() {
                 {/* El número de clases va a la derecha, sin separador: ninguna línea empieza por «·». */}
                 <h2
                   id={`dia-${day.date.day}`}
-                  className="flex flex-wrap items-center gap-x-2 gap-y-1 border-b border-arena-200 py-3 font-sans text-base font-semibold tracking-normal"
+                  className="flex flex-wrap items-center gap-x-2 gap-y-1 border-b border-arena-200 py-3 text-base font-medium"
                 >
                   {capitalize(formatDate(day.date))}
                   {isSameDate(day.date, today) && <Badge tone="terracota">Hoy</Badge>}

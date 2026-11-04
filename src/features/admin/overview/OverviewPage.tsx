@@ -22,13 +22,13 @@ function MetricCard({ icon: Icon, label, value, detail }: { icon: LucideIcon; la
   return (
     <Card as="li" className="flex min-w-0 flex-col gap-1 p-4 sm:p-5">
       {/* En tarjetas estrechas el icono va encima de la etiqueta para que el texto tenga todo el ancho. */}
-      <p className="flex flex-col items-start gap-2 text-sm font-semibold text-tinta-700 sm:flex-row sm:items-center">
+      <p className="flex flex-col items-start gap-2 text-sm font-medium text-tinta-700 sm:flex-row sm:items-center">
         <span className="grid size-8 shrink-0 place-items-center rounded-full bg-arena-100 text-terracota-600">
           <Icon aria-hidden="true" strokeWidth={1.75} className="size-4" />
         </span>
         {label}
       </p>
-      <p className="mt-2 font-display text-3xl tabular-nums">{value}</p>
+      <p className="mt-2 text-3xl font-light tabular-nums">{value}</p>
       <p className="text-sm text-piedra">{detail}</p>
     </Card>
   )
@@ -158,11 +158,11 @@ export function OverviewPage() {
               <ul className="divide-y divide-arena-200">
                 {today.state.data.map((session) => (
                   <li key={session.id} className="flex flex-wrap items-center gap-x-4 gap-y-2 py-3">
-                    <span className="w-[5ch] shrink-0 font-display text-xl tabular-nums">{formatTime(session.startsAt)}</span>
+                    <span className="w-[5ch] shrink-0 text-xl font-light tabular-nums">{formatTime(session.startsAt)}</span>
                     <div className="min-w-[min(10rem,100%)] flex-1">
                       <Link
                         to={`/estudio/asistentes?clase=${session.id}`}
-                        className="font-semibold underline decoration-arena-400 underline-offset-4 hover:decoration-terracota-600"
+                        className="font-medium underline decoration-arena-400 underline-offset-4 hover:decoration-terracota-600"
                       >
                         {session.name}
                         <span className="sr-only">: ver asistentes</span>

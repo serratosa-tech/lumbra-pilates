@@ -90,11 +90,11 @@ export function LookupForm({ initial, searching, onSearch, accountAccess }: Look
       </form>
 
       <section aria-labelledby="demo-ejemplos" className="rounded-md border border-dashed border-arena-400 bg-arena-100/50 p-4">
-        <h2 id="demo-ejemplos" className="flex items-center gap-2 font-sans text-sm font-semibold tracking-normal">
+        <h2 id="demo-ejemplos" className="flex items-center gap-2 text-sm font-medium">
           <Sparkles aria-hidden="true" strokeWidth={1.75} className="size-4 text-terracota-600" />
           Prueba la demo
         </h2>
-        <h3 className="mt-3 font-sans text-sm font-semibold tracking-normal">Reservas de ejemplo</h3>
+        <h3 className="mt-3 text-sm font-medium">Reservas de ejemplo</h3>
         <p className="mt-1 text-sm text-piedra">Consulta una de estas reservas sin cuenta con un clic.</p>
         <ul className="mt-3 flex flex-col gap-2">
           {DEMO_EXAMPLES.map((example) => (
@@ -104,7 +104,7 @@ export function LookupForm({ initial, searching, onSearch, accountAccess }: Look
                 onClick={() => tryExample({ email: example.email, code: example.code })}
                 className="flex min-h-11 w-full flex-col items-start rounded-sm border border-arena-200 bg-white px-3 py-2 text-left text-sm transition-colors hover:border-arena-400 hover:bg-crema"
               >
-                <span className="font-semibold">{example.label}</span>
+                <span className="font-medium">{example.label}</span>
                 {/* Si no caben en una línea, el código baja entero a la siguiente (con el texto muy grande, si ni así cabe, se parte por el guion). */}
                 <span className="flex max-w-full flex-wrap gap-x-1 text-piedra">
                   <span className="min-w-0 break-all">{example.email}{' ·'}</span>

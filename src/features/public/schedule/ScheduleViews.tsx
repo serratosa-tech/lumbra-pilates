@@ -45,7 +45,7 @@ function NoResults({ onClearFilters, compact = false }: { onClearFilters: () => 
 export function DayList({ day, now, onOpen, onClearFilters, panelId, labelledBy }: ViewProps & { day: ScheduleDay; panelId: string; labelledBy: string }) {
   return (
     <div id={panelId} role="tabpanel" aria-labelledby={labelledBy} className="mt-5">
-      <h2 className="mb-4 font-sans text-base font-semibold tracking-normal text-tinta-700">
+      <h2 className="mb-4 text-base font-medium text-tinta-700">
         {capitalize(formatDate(day.date))}
       </h2>
       {day.sessions.length > 0 ? (
@@ -85,13 +85,13 @@ function DayColumn({ day, now, onOpen, onClearFilters }: ViewProps & { day: Sche
       <h2
         id={headingId}
         className={cn(
-          'flex items-baseline justify-between gap-2 rounded-md px-3 py-2 font-sans text-sm font-semibold tracking-normal',
+          'flex items-baseline justify-between gap-2 rounded-md px-3 py-2 text-sm font-medium',
           day.isToday ? 'bg-terracota-600 text-white' : 'bg-arena-100 text-tinta-700',
         )}
       >
         <span aria-hidden="true">
           <span className="capitalize">{formatShortWeekday(day.date)}</span>{' '}
-          <span className="font-display text-lg tabular-nums">{day.date.day}</span>
+          <span className="text-lg tabular-nums">{day.date.day}</span>
         </span>
         <span className="sr-only">
           {capitalize(formatDate(day.date))}

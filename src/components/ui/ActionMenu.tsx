@@ -21,7 +21,7 @@ interface ActionMenuProps {
 const menuItemsOf = (menu: HTMLElement | null) => [...(menu?.querySelectorAll<HTMLElement>('[role="menuitem"]') ?? [])]
 
 const ITEM =
-  'flex min-h-11 w-full items-center gap-3 rounded-sm px-3 py-2 text-left text-sm font-semibold text-tinta hover:bg-arena-100 focus-visible:bg-arena-100 focus-visible:outline-offset-0'
+  'flex min-h-11 w-full items-center gap-3 rounded-sm px-3 py-2 text-left text-sm font-medium text-tinta hover:bg-arena-100 focus-visible:bg-arena-100 focus-visible:outline-offset-0'
 
 /**
  * Botón de tres puntos que abre un menú (patrón «menu button»): flechas, Inicio y Fin

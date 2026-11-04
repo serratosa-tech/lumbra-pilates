@@ -42,7 +42,7 @@ function ToastCard({ toast, onDismiss }: { toast: ToastItem; onDismiss: (id: num
     >
       <Icon aria-hidden="true" strokeWidth={1.75} className={cn('mt-0.5 size-5 shrink-0', color)} />
       <div className="min-w-0 flex-1 @max-[14rem]:order-last @max-[14rem]:basis-full">
-        <p className="font-semibold">{toast.title}</p>
+        <p className="font-medium">{toast.title}</p>
         {toast.description && <p className="mt-0.5 text-sm text-piedra">{toast.description}</p>}
       </div>
       <button

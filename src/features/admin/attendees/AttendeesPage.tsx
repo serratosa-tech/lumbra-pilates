@@ -67,7 +67,7 @@ function SessionPicker({ now }: { now: Date }) {
               >
                 <h2
                   id={`asist-${day.date.day}`}
-                  className="flex flex-wrap items-center gap-x-2 gap-y-1 border-b border-arena-200 py-3 font-sans text-base font-semibold tracking-normal"
+                  className="flex flex-wrap items-center gap-x-2 gap-y-1 border-b border-arena-200 py-3 text-base font-medium"
                 >
                   {capitalize(formatDate(day.date))}
                   {isSameDate(day.date, today) && <Badge tone="terracota">Hoy</Badge>}
@@ -90,14 +90,14 @@ function SessionPicker({ now }: { now: Date }) {
                         >
                           <span
                             className={cn(
-                              'w-[5ch] shrink-0 font-display text-lg tabular-nums',
+                              'w-[5ch] shrink-0 text-lg tabular-nums',
                               (past || state === 'cancelled') && 'text-piedra',
                             )}
                           >
                             {formatTime(session.startsAt)}
                           </span>
                           <span className="min-w-0 flex-1 @max-[12rem]:order-last @max-[12rem]:basis-full">
-                            <span className={cn('flex flex-wrap items-center gap-x-2 gap-y-1 font-semibold', past && 'text-tinta-700')}>
+                            <span className={cn('flex flex-wrap items-center gap-x-2 gap-y-1 font-medium', past && 'text-tinta-700')}>
                               {session.name}
                               {state === 'cancelled' && <Badge tone="error">Cancelada</Badge>}
                             </span>

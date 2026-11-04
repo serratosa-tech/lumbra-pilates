@@ -71,10 +71,10 @@ export function DayPicker({ days, selected, onSelect, panelId }: DayPickerProps)
                 : 'border-arena-200 bg-white text-tinta hover:border-arena-400 hover:bg-arena-100',
             )}
           >
-            <span className={cn('text-xs font-semibold tracking-wide uppercase', !isSelected && 'text-piedra')}>
+            <span className={cn('text-xs font-medium tracking-wide uppercase', !isSelected && 'text-piedra')}>
               {day.isToday ? 'Hoy' : formatShortWeekday(day.date)}
             </span>
-            <span className="font-display text-2xl leading-tight tabular-nums">{day.date.day}</span>
+            <span className="text-2xl font-light leading-tight tabular-nums">{day.date.day}</span>
             <span className={cn('text-xs whitespace-nowrap', isSelected ? 'text-white/90' : 'text-piedra')}>
               {plural(day.sessions.length, 'clase')}
             </span>

@@ -46,6 +46,21 @@ describe('tarjeta de clase', () => {
     expect(screen.getByText(/^Completa.+lista de espera$/)).toHaveClass('hidden', 'sm:inline')
   })
 
+  it('«Reservar» y «Lista de espera» miden lo mismo: los dos textos comparten celda y solo se ve el que toca', () => {
+    const { unmount } = renderCard(base)
+    const [reserve, waitlist] = ['Reservar', 'Lista de espera'].map((text) => screen.getByText(text, { exact: true }))
+    expect(reserve.parentElement).toBe(waitlist.parentElement)
+    expect(reserve.parentElement).toHaveClass('grid')
+    for (const el of [reserve, waitlist]) expect(el).toHaveClass('col-start-1', 'row-start-1')
+    expect(reserve).not.toHaveClass('invisible')
+    expect(waitlist).toHaveClass('invisible')
+    unmount()
+
+    renderCard({ ...base, bookedCount: 12, waitlistCount: 2 })
+    expect(screen.getByText('Reservar', { exact: true })).toHaveClass('invisible')
+    expect(screen.getByText('Lista de espera', { exact: true })).not.toHaveClass('invisible')
+  })
+
   it('una clase pasada va en versión compacta, sin datos ni enlace', () => {
     renderCard({ ...base, startsAt: EARLIER })
     expect(screen.queryByRole('link')).not.toBeInTheDocument()

@@ -152,7 +152,14 @@ export function SessionCard({ session, now, variant = 'row', onOpen, to, heading
           {/* En móvil, la flecha va en la fila de la hora: no resta ancho al nombre ni a los datos. */}
           <ChevronRight aria-hidden="true" strokeWidth={1.75} className="absolute top-4 right-3 size-6 text-piedra sm:hidden" />
           <span aria-hidden="true" className="hidden self-center sm:block">
-            <span className={buttonClasses('secondary', 'md')}>{full ? 'Lista de espera' : 'Reservar'}</span>
+            {/* Los dos textos ocupan la misma celda: todos los botones miden lo que «Lista de espera»,
+                con cualquier tamaño de letra, y la columna queda alineada. */}
+            <span className={buttonClasses('secondary', 'md')}>
+              <span className="grid text-center">
+                <span className={cn('col-start-1 row-start-1', full && 'invisible')}>Reservar</span>
+                <span className={cn('col-start-1 row-start-1', !full && 'invisible')}>Lista de espera</span>
+              </span>
+            </span>
           </span>
         </>
       )}

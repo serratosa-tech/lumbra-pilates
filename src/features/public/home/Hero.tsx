@@ -31,7 +31,7 @@ function NextClassCard({ state }: { state: HomeState }) {
             {firstDay.relation === 'hoy' ? 'Próxima clase hoy' : `Próxima clase${SEP}${dayHeading(firstDay)}`}
           </p>
           <p className="mt-3 flex flex-wrap items-baseline gap-x-3">
-            <span className="text-3xl">{formatTime(next.startsAt)}</span>
+            <span className="text-3xl font-medium">{formatTime(next.startsAt)}</span>
             <span className="font-medium">{next.name}</span>
           </p>
           <p className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-piedra">
@@ -115,10 +115,10 @@ export function Hero({ state }: { state: HomeState }) {
           </p>
           <h1 id="hero-titulo" className="mt-4 text-display sm:mt-5">
             Muévete despacio.{' '}
-            <em className="font-medium text-terracota-600 not-italic">Hazte</em> fuerte.
+            <em className="text-terracota-600 not-italic">Hazte</em> fuerte.
           </h1>
-          <p className="mt-6 max-w-xl text-2xl text-tinta-700">{SLOGAN}</p>
-          <p className="mt-4 max-w-xl text-lg text-tinta-700">
+          <p className="mt-6 max-w-xl text-2xl font-medium text-tinta-800">{SLOGAN}</p>
+          <p className="mt-4 max-w-xl text-lg text-tinta-800">
             Clases de reformer y esterilla en grupos pequeños, con instructoras que corrigen cada
             detalle. Reserva tu plaza en un minuto, sin registros.
           </p>

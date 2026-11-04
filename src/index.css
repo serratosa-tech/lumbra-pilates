@@ -23,12 +23,11 @@
     font-synthesis: none;
   }
 
-  /* Titulares en 400; el espaciado de letras de cada nivel va en su token de tamaño.
-     Los títulos pequeños de tarjetas y listas lo sobrescriben con 500. */
+  /* Titulares en 500; el espaciado de letras de cada nivel va en su token de tamaño. */
   h1,
   h2,
   h3 {
-    @apply font-normal text-balance;
+    @apply font-medium text-balance;
   }
 
   b,

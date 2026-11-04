@@ -58,7 +58,7 @@ export function SchedulePage() {
         <div className="max-w-2xl">
           <p className="text-xs font-medium tracking-widest text-terracota-700 uppercase">Horario semanal</p>
           <h1 className="mt-3 text-3xl">Reserva tu clase</h1>
-          <p className="mt-3 text-lg text-tinta-700" aria-live="polite">
+          <p className="mt-3 text-lg text-tinta-800" aria-live="polite">
             Semana del {formatWeekRange(monday)}
           </p>
         </div>

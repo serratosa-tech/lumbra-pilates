@@ -2,7 +2,7 @@ import { FlaskConical } from 'lucide-react'
 
 export function DemoBanner() {
   return (
-    <aside aria-label="Aviso de demostración" className="overflow-x-clip bg-arena-200 text-tinta-700">
+    <aside aria-label="Aviso de demostración" className="overflow-x-clip bg-arena-200 text-tinta-800">
       <p className="container-page flex items-center justify-center gap-2 py-1.5 text-center text-xs">
         <FlaskConical aria-hidden="true" strokeWidth={1.75} className="size-4 shrink-0" />
         <span>

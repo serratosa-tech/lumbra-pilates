@@ -57,7 +57,7 @@ export function BookingForm({ sessionId, waitlist, cancellable, onBooked, accoun
       )}
 
       {account && (
-        <p className="mb-5 flex items-start gap-2 rounded-md bg-arena-100/70 p-3 text-sm text-tinta-700">
+        <p className="mb-5 flex items-start gap-2 rounded-md bg-arena-100/70 p-3 text-sm text-tinta-800">
           <Lock aria-hidden="true" strokeWidth={1.75} className="mt-0.5 size-4 shrink-0 text-terracota-600" />
           <span className="min-w-0 [overflow-wrap:anywhere]">
             Reservas con tu cuenta <strong className="font-medium text-tinta">{account.email}</strong>.{' '}

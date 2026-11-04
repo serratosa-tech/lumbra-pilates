@@ -16,7 +16,7 @@ export function SectionHeading({ id, kicker, title, children, className }: Secti
       <h2 id={id} className="mt-3 text-3xl">
         {title}
       </h2>
-      {children && <div className="mt-4 text-lg text-tinta-700">{children}</div>}
+      {children && <div className="mt-4 text-lg text-tinta-800">{children}</div>}
     </div>
   )
 }

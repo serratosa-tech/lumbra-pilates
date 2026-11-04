@@ -26,7 +26,7 @@ function SessionSummary({ session, now }: { session: ClassSession; now: Date }) 
   ]
   return (
     <div className="mb-6 rounded-md bg-arena-100/70 p-4">
-      <ul className="flex flex-col gap-2 text-sm text-tinta-700">
+      <ul className="flex flex-col gap-2 text-sm text-tinta-800">
         {items.map(({ icon: Icon, text }) => (
           <li key={text} className="flex items-center gap-2">
             <Icon aria-hidden="true" strokeWidth={1.75} className="size-4 shrink-0 text-terracota-600" />

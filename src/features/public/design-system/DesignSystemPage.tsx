@@ -34,29 +34,41 @@ function Block({ id, title, children }: { id: string; title: string; children: R
   )
 }
 
-/** Jerarquía tipográfica real de la app: dos pesos, 400 y 500. */
+/** Jerarquía tipográfica real de la app: titulares y etiquetas en 500, párrafos en 400. */
 const TYPE_SCALE: { name: string; spec: string; sample: ReactNode }[] = [
   {
     name: 'Display',
-    spec: 'text-display · 400 · espaciado −0,01em · palabra destacada 500',
+    spec: 'text-display · 500 · espaciado −0,01em · palabra destacada en terracota-600',
     sample: (
-      <p className="text-display">
-        <span className="font-medium text-terracota-600">Hazte</span> fuerte.
+      <p className="text-display font-medium">
+        <span className="text-terracota-600">Hazte</span> fuerte.
       </p>
     ),
   },
-  { name: 'Titular de página', spec: 'text-3xl · 400 · espaciado −0,005em', sample: <p className="text-3xl">Horario semanal</p> },
-  { name: 'Titular de bloque', spec: 'text-2xl · 400', sample: <p className="text-2xl">Plazas confirmadas</p> },
+  {
+    name: 'Titular de página',
+    spec: 'text-3xl · 500 · espaciado −0,005em',
+    sample: <p className="text-3xl font-medium">Horario semanal</p>,
+  },
+  { name: 'Titular de bloque', spec: 'text-2xl · 500', sample: <p className="text-2xl font-medium">Plazas confirmadas</p> },
   {
     name: 'Subtítulo',
-    spec: 'text-2xl · 400',
-    sample: <p className="text-2xl text-tinta-700">Calma que sostiene, fuerza que ilumina.</p>,
+    spec: 'text-2xl · 500 · tinta-800',
+    sample: <p className="text-2xl font-medium text-tinta-800">Calma que sostiene, fuerza que ilumina.</p>,
   },
-  { name: 'Cifras grandes', spec: 'text-3xl · 400 · cifras tabulares', sample: <p className="text-3xl tabular-nums">18:30</p> },
   {
-    name: 'Texto',
-    spec: 'text-base · 400',
-    sample: <p className="max-w-prose">Clases de reformer y esterilla en grupos pequeños, con instructoras que corrigen cada detalle.</p>,
+    name: 'Cifras grandes',
+    spec: 'text-3xl · 500 · cifras tabulares',
+    sample: <p className="text-3xl font-medium tabular-nums">18:30</p>,
+  },
+  {
+    name: 'Párrafo',
+    spec: 'text-base · 400 · tinta-800 (contraste 12,3:1 sobre crema)',
+    sample: (
+      <p className="max-w-prose text-tinta-800">
+        Clases de reformer y esterilla en grupos pequeños, con instructoras que corrigen cada detalle.
+      </p>
+    ),
   },
   { name: 'Botón y etiqueta', spec: 'text-sm · 500', sample: <p className="text-sm font-medium">Reservar clase{SEP}Email</p> },
   {
@@ -135,7 +147,7 @@ export function DesignSystemPage() {
       />
       <p className="text-xs font-medium tracking-widest text-terracota-700 uppercase">Lumbra Pilates</p>
       <h1 className="mt-3 text-3xl">Sistema de diseño</h1>
-      <p className="mt-4 mb-10 max-w-2xl text-lg text-tinta-700">
+      <p className="mt-4 mb-10 max-w-2xl text-lg text-tinta-800">
         Marca, tokens y componentes base con sus estados. Todo lo que ves aquí es lo que usa la app.
       </p>
 
@@ -153,8 +165,8 @@ export function DesignSystemPage() {
             <img src="/favicon.svg" alt="Favicon de Lumbra" width="48" height="48" className="size-12" />
           </Card>
           <Card className="flex flex-col justify-center gap-1 py-8">
-            <p className="text-3xl">
-              Jost <span className="font-medium text-terracota-600">variable</span>
+            <p className="text-3xl font-medium">
+              Jost <span className="text-terracota-600">variable</span>
             </p>
             <p className="text-piedra">Una sola familia, dos pesos: 400 y 500.</p>
           </Card>

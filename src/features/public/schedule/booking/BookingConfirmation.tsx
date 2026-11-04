@@ -56,7 +56,7 @@ export function BookingConfirmation({ details, now }: { details: BookingDetails;
           : `Estás en el puesto ${waitlistPosition} de la lista de espera.`}
       </p>
       {!confirmed && (
-        <p className="mt-2 max-w-sm text-sm text-tinta-700">
+        <p className="mt-2 max-w-sm text-sm text-tinta-800">
           Si alguien cancela, la primera persona de la lista pasa a tener plaza automáticamente. Consulta tu
           posición cuando quieras en «Mis reservas».
         </p>
@@ -66,7 +66,7 @@ export function BookingConfirmation({ details, now }: { details: BookingDetails;
         <p className="text-xs font-medium tracking-widest text-terracota-700 uppercase">Tu código de reserva</p>
         {/* En pantallas estrechas (o con texto muy grande) baja un tamaño. Solo si ni así cabe en su línea
             (texto al 200 % en 320 px) se parte, por el guion. */}
-        <p className="mt-1 text-2xl tracking-[0.06em] [overflow-wrap:normal] tabular-nums min-[22rem]:text-3xl min-[22rem]:tracking-[0.12em]">
+        <p className="mt-1 text-2xl font-medium tracking-[0.06em] [overflow-wrap:normal] tabular-nums min-[22rem]:text-3xl min-[22rem]:tracking-[0.12em]">
           {booking.code}
         </p>
         <Button variant="ghost" onClick={copyCode} className="mt-1" icon={<Copy aria-hidden="true" strokeWidth={1.75} className="size-4" />}>

@@ -34,7 +34,7 @@ import { SessionFormDialog } from './SessionFormDialog.tsx'
 function CancelSummary({ session }: { session: ClassSession }) {
   const affected = session.bookedCount + session.waitlistCount
   return (
-    <p className="text-tinta-700">
+    <p className="text-tinta-800">
       {session.name}, {formatDateTime(session.startsAt)}.{' '}
       {affected === 0
         ? 'No tiene reservas.'
@@ -68,7 +68,7 @@ function SessionRow({
     // Con el texto muy grande (la lista, con `@container`, mide menos de 12 rem), el menú entra en el flujo junto
     // a la hora y los datos bajan a ancho completo, sin reservar el hueco del menú.
     <li className="relative flex flex-wrap items-start gap-x-5 gap-y-3 py-4 pr-12 md:pr-0 @max-[12rem]:pr-0">
-      <p className="w-[5ch] shrink-0 text-2xl leading-none tabular-nums">
+      <p className="w-[5ch] shrink-0 text-2xl font-medium leading-none tabular-nums">
         {formatTime(session.startsAt)}
       </p>
       <div className="min-w-[min(12rem,100%)] flex-1 @max-[12rem]:order-last @max-[12rem]:basis-full">
@@ -81,7 +81,7 @@ function SessionRow({
           {SEP}
           {formatTimeRange(session.startsAt, session.durationMinutes)}
         </p>
-        <p className="mt-1 text-sm text-tinta-700">
+        <p className="mt-1 text-sm text-tinta-800">
           {session.bookedCount} de {session.capacity} plazas
           {/* Como en Asistentes: terminada la clase, nadie sigue esperando plaza. */}
           {!ended && session.waitlistCount > 0 && `${SEP}${session.waitlistCount} en espera`}

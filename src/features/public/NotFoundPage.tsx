@@ -19,7 +19,7 @@ export function NotFoundPage() {
       </svg>
       <p className="mt-6 text-xs font-medium tracking-widest text-terracota-700 uppercase">Error 404</p>
       <h1 className="mt-3 max-w-xl text-3xl">Esta puerta no lleva a ninguna parte</h1>
-      <p className="mt-4 max-w-md text-lg text-tinta-700">
+      <p className="mt-4 max-w-md text-lg text-tinta-800">
         La página que buscas no existe o ha cambiado de sitio. Respira hondo: volvemos al inicio en un
         momento.
       </p>

@@ -7,7 +7,7 @@ export function MenuBrand() {
   return (
     <section aria-label="Sobre el estudio" className="border-t border-arena-200 pt-6 text-sm text-piedra">
       <LogoMark className="size-10 text-tinta" />
-      <p className="mt-3 text-lg text-tinta-700">{SLOGAN}</p>
+      <p className="mt-3 text-lg text-tinta-800">{SLOGAN}</p>
       <dl className="mt-4 flex flex-col gap-2">
         {STUDIO.hours.map((h) => (
           <div key={h.days} className="flex items-start gap-2">

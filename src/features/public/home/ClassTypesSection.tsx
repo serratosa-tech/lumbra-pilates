@@ -33,7 +33,7 @@ function ClassTypeCard({ classType, index }: { classType: ClassType; index: numb
         0{index + 1}
       </span>
       <h3 className="mt-3 text-xl">{classType.name}</h3>
-      <p className="mt-2 flex-1 text-tinta-700">{classType.summary}</p>
+      <p className="mt-2 flex-1 text-tinta-800">{classType.summary}</p>
       <div className="mt-5 flex flex-wrap items-center gap-x-4 gap-y-3 border-t border-arena-200 pt-4">
         <Badge tone="terracota">{LEVEL_LABELS[classType.level]}</Badge>
         <IntensityMeter value={classType.intensity} />

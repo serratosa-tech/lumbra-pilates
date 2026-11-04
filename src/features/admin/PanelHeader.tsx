@@ -17,7 +17,7 @@ export function PanelHeader({ title, week, subtitle, actions }: PanelHeaderProps
     <header className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
       <div className="min-w-0">
         <h1 className="text-3xl">{title}</h1>
-        <p className="mt-2 text-tinta-700" aria-live="polite">
+        <p className="mt-2 text-tinta-800" aria-live="polite">
           {week ? `Semana del ${formatWeekRange(week.monday)}` : subtitle}
         </p>
       </div>

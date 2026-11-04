@@ -28,7 +28,7 @@ function MetricCard({ icon: Icon, label, value, detail }: { icon: LucideIcon; la
         </span>
         {label}
       </p>
-      <p className="mt-2 text-3xl tabular-nums">{value}</p>
+      <p className="mt-2 text-3xl font-medium tabular-nums">{value}</p>
       <p className="text-sm text-piedra">{detail}</p>
     </Card>
   )
@@ -158,7 +158,7 @@ export function OverviewPage() {
               <ul className="divide-y divide-arena-200">
                 {today.state.data.map((session) => (
                   <li key={session.id} className="flex flex-wrap items-center gap-x-4 gap-y-2 py-3">
-                    <span className="w-[5ch] shrink-0 text-xl tabular-nums">{formatTime(session.startsAt)}</span>
+                    <span className="w-[5ch] shrink-0 text-xl font-medium tabular-nums">{formatTime(session.startsAt)}</span>
                     <div className="min-w-[min(10rem,100%)] flex-1">
                       <Link
                         to={`/estudio/asistentes?clase=${session.id}`}

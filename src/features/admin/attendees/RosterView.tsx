@@ -181,7 +181,7 @@ export function RosterView({ sessionId, now }: { sessionId: string; now: Date })
             {session.name}
             {isCancelled && <Badge tone="error">Cancelada</Badge>}
           </h1>
-          <p className="mt-2 text-tinta-700">
+          <p className="mt-2 text-tinta-800">
             {capitalize(formatDateTimeRange(session.startsAt, session.durationMinutes))}
             {SEP}
             {session.instructor}
@@ -318,7 +318,7 @@ export function RosterView({ sessionId, now }: { sessionId: string; now: Date })
         }
       >
         {cancelling && (
-          <p className="text-tinta-700">
+          <p className="text-tinta-800">
             {cancelling.name}
             {SEP}
             {session.name}, {formatDateTime(session.startsAt)}.{' '}

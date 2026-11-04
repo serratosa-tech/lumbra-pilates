@@ -9,6 +9,7 @@ export const SWATCHES = [
   { token: 'terracota-600', hex: '#a84f2e', className: 'bg-terracota-600' },
   { token: 'terracota-700', hex: '#8a3f24', className: 'bg-terracota-700' },
   { token: 'tinta', hex: '#2a201b', className: 'bg-tinta' },
+  { token: 'tinta-800', hex: '#3a2d26', className: 'bg-tinta-800' },
   { token: 'tinta-700', hex: '#4a3b32', className: 'bg-tinta-700' },
   { token: 'piedra', hex: '#6e5b4e', className: 'bg-piedra' },
   { token: 'éxito', hex: '#3d6b4f', className: 'bg-exito' },

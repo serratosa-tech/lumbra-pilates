@@ -60,7 +60,7 @@ export function MyBookingsPage() {
       <div className="max-w-2xl">
         <p className="text-xs font-medium tracking-widest text-terracota-700 uppercase">Mis reservas</p>
         <h1 className="mt-3 text-3xl">{client ? 'Tus reservas' : 'Consulta o cancela tu reserva'}</h1>
-        <p className="mt-3 text-lg text-tinta-700">
+        <p className="mt-3 text-lg text-tinta-800">
           {client ? 'Las clases que has reservado con tu cuenta. Puedes cancelarlas desde aquí.' : lookupIntro}
         </p>
       </div>
@@ -84,7 +84,7 @@ export function MyBookingsPage() {
       {client && (
         <div className="mt-12 max-w-2xl border-t border-arena-200 pt-10">
           <h2 className="text-2xl">¿Reservaste sin cuenta?</h2>
-          <p className="mt-2 text-tinta-700">{lookupIntro}</p>
+          <p className="mt-2 text-tinta-800">{lookupIntro}</p>
         </div>
       )}
 

@@ -18,7 +18,7 @@ function Avatar({ initials, tone }: { initials: string; tone: string }) {
       className={cn('relative grid h-24 w-20 shrink-0 place-items-center overflow-hidden rounded-arch', tone)}
     >
       <span className="absolute -bottom-6 size-14 rounded-full bg-current opacity-15" />
-      <span className="relative text-2xl">{initials}</span>
+      <span className="relative text-2xl font-medium">{initials}</span>
     </span>
   )
 }
@@ -30,7 +30,7 @@ function InstructorCard({ instructor, index }: { instructor: Instructor; index: 
       <div>
         <h3 className="text-xl">{instructor.name}</h3>
         <p className="mt-0.5 text-sm font-medium text-terracota-700">{instructor.role}</p>
-        <p className="mt-3 text-tinta-700">{instructor.bio}</p>
+        <p className="mt-3 text-tinta-800">{instructor.bio}</p>
         <ul className="mt-4 flex flex-wrap gap-2" aria-label="Especialidades">
           {instructor.specialties.map((s) => (
             <li key={s}>

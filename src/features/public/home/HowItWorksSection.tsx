@@ -32,7 +32,7 @@ export function HowItWorksSection() {
                   <Icon aria-hidden="true" strokeWidth={1.75} className="size-6" />
                 </span>
                 {/* Decorativo: el orden ya lo da la lista. terracota-500 sobre crema: 3,76:1. */}
-                <span aria-hidden="true" className="text-3xl text-terracota-500">
+                <span aria-hidden="true" className="text-3xl font-medium text-terracota-500">
                   {i + 1}
                 </span>
               </div>
@@ -40,7 +40,7 @@ export function HowItWorksSection() {
                 <span className="sr-only">Paso {i + 1}: </span>
                 {title}
               </h3>
-              <p className="mt-2 text-tinta-700">{text}</p>
+              <p className="mt-2 text-tinta-800">{text}</p>
             </li>
           ))}
         </ol>

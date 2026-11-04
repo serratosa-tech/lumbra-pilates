@@ -57,7 +57,7 @@ export function AccountBookings({ account, now }: { account: Account; now: Date 
   return (
     <div className="flex flex-col gap-8">
       <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-3 rounded-lg border border-arena-200 bg-white p-4 sm:px-5">
-        <p className="flex min-w-0 items-start gap-2 text-tinta-700">
+        <p className="flex min-w-0 items-start gap-2 text-tinta-800">
           <UserRound aria-hidden="true" strokeWidth={1.75} className="mt-1 size-4 shrink-0 text-terracota-600" />
           <span className="min-w-0 [overflow-wrap:anywhere]">
             Has entrado como <strong className="font-medium text-tinta">{account.name}</strong>

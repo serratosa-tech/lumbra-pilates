@@ -171,7 +171,7 @@ export function BookingResult({ details, now, onCancel = cancelWithCode, heading
         </Heading>
         <Badge tone={status.tone}>{status.label}</Badge>
       </div>
-      <ul className="mt-4 flex flex-col gap-2 text-tinta-700">
+      <ul className="mt-4 flex flex-col gap-2 text-tinta-800">
         {facts.map(({ key, icon: Icon, text }) => (
           <li key={key} className="flex items-start gap-2">
             <Icon aria-hidden="true" strokeWidth={1.75} className="mt-1 size-4 shrink-0 text-terracota-600" />
@@ -217,7 +217,7 @@ export function BookingResult({ details, now, onCancel = cancelWithCode, heading
           </>
         }
       >
-        <p className="text-tinta-700">
+        <p className="text-tinta-800">
           {session.name}, {formatDateTime(session.startsAt)}.{' '}
           {isWaitlist
             ? 'Perderás tu puesto en la lista.'

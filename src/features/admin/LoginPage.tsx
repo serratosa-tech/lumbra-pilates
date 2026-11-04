@@ -30,7 +30,7 @@ export function LoginPage() {
         <div className="text-center">
           <LogoMark className="mx-auto size-12 text-tinta" />
           <h1 className="mt-4 text-3xl">Acceso estudio</h1>
-          <p className="mt-2 text-tinta-700">Gestiona clases, asistentes y métricas.</p>
+          <p className="mt-2 text-tinta-800">Gestiona clases, asistentes y métricas.</p>
         </div>
 
         {session.state.status === 'loading' ? (

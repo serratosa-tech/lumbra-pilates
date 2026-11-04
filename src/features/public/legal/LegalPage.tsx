@@ -31,7 +31,7 @@ export function LegalPage({ eyebrow, title, seoTitle, description, intro, sectio
         <p className="text-xs font-medium tracking-widest text-terracota-700 uppercase">{eyebrow}</p>
         <h1 className="mt-3 text-3xl">{title}</h1>
         <p className="mt-2 text-sm text-piedra">Última actualización: {LEGAL_UPDATED}</p>
-        <div className="mt-5 text-lg text-tinta-700">{intro}</div>
+        <div className="mt-5 text-lg text-tinta-800">{intro}</div>
         <Alert tone="info" title="Esto es una demo" className="mt-6">
           No introduzcas datos reales: usa nombres, emails y teléfonos inventados.
         </Alert>
@@ -55,7 +55,7 @@ export function LegalPage({ eyebrow, title, seoTitle, description, intro, sectio
           </ol>
         </nav>
 
-        <div className="mt-10 flex flex-col gap-10 text-tinta-700">
+        <div className="mt-10 flex flex-col gap-10 text-tinta-800">
           {sections.map((section) => (
             <section key={section.id} id={section.id} aria-labelledby={`${section.id}-titulo`} className="scroll-mt-24">
               <h2 id={`${section.id}-titulo`} className="text-xl text-tinta">

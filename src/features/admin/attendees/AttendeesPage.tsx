@@ -29,7 +29,7 @@ function SessionPicker({ now }: { now: Date }) {
   return (
     <>
       <PanelHeader title="Asistentes" week={week} />
-      <p className="mt-2 text-tinta-700">Elige una clase para ver sus reservas, la lista de espera y marcar la asistencia.</p>
+      <p className="mt-2 text-tinta-800">Elige una clase para ver sus reservas, la lista de espera y marcar la asistencia.</p>
       <div className="mt-6">
         {state.status === 'loading' && (
           <div role="status" className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">

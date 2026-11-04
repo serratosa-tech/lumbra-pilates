@@ -64,14 +64,14 @@ Build de producción (gzip):
 
 ### Tipografía
 
-Una sola familia, **Jost** variable (`@fontsource-variable/jost` 5.3.0), solo el subconjunto latino y un único woff2 que cubre los dos pesos usados: 400 en titulares, cifras grandes y texto, y 500 en la palabra destacada, botones, etiquetas y títulos de tarjeta. Lleva `font-display: swap`, se precarga desde `index.html` y tiene un respaldo sobre Arial con `size-adjust` por peso para que el cambio de fuente no mueva el diseño.
+Una sola familia, **Jost** variable (`@fontsource-variable/jost` 5.3.0), solo el subconjunto latino y un único woff2 que cubre los dos pesos usados: 500 en titulares, cifras grandes, botones, etiquetas y títulos de tarjeta (la palabra destacada se distingue solo por el color terracota-600), y 400 en los párrafos, en `tinta-800` (#3a2d26, contraste mínimo de 9,5:1 sobre los fondos de la paleta). Lleva `font-display: swap`, se precarga desde `index.html` y tiene un respaldo sobre Arial con `size-adjust` por peso para que el cambio de fuente no mueva el diseño.
 
 | Fuentes | Archivos | Peso |
 | --- | --- | --- |
 | Antes: Fraunces 500 normal y cursiva, Figtree 400 y 600 | 4 woff2 | 63 816 B (62,3 KiB) |
 | Ahora: Jost variable 400–500 | 1 woff2 | 26 576 B (26,0 KiB), un 58 % menos |
 
-Los titulares llevan muy poco espaciado negativo (−0,01em en el display, −0,005em en `text-3xl`, nada en `text-2xl`), y el display llega como máximo a 4,5rem para que «Muévete despacio.» quepa en una línea en escritorio. El esqueleto de la tarjeta «Próxima clase» reserva el mismo alto que la tarjeta con datos.
+Los titulares llevan muy poco espaciado negativo (−0,01em en el display, −0,005em en `text-3xl`, nada en `text-2xl`), y el display llega como máximo a 4,25rem para que «Muévete despacio.» quepa en una línea en escritorio con Jost 500. El esqueleto de la tarjeta «Próxima clase» reserva el mismo alto que la tarjeta con datos.
 
 CLS de la portada medido en Edge: 0 a 390 px y a 320 px con el texto al 200 %, y 0,0001 a 1280 px.
 

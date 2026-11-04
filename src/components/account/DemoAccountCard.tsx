@@ -42,7 +42,7 @@ export function DemoAccountCard({ kind, onSignedIn, headingLevel: Heading = 'h3'
       </Heading>
       <p className="mt-1 text-sm text-piedra">{copy.text}</p>
       {/* Si el email no cabe junto a su etiqueta, baja entero a la línea siguiente; solo se parte si ni así cabe. */}
-      <dl className="mt-2 flex flex-col gap-1 text-sm text-tinta-700">
+      <dl className="mt-2 flex flex-col gap-1 text-sm text-tinta-800">
         <div className="flex flex-wrap gap-x-2">
           <dt>Email</dt>
           <dd className="min-w-0 font-medium [overflow-wrap:anywhere]">{email}</dd>

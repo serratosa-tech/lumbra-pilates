@@ -1,4 +1,19 @@
 # Cabeceras de Cloudflare Pages.
+
+# Seguridad, en todas las respuestas. La CSP solo permite la propia web y el proyecto de Supabase
+# (connect-src). Si cambia VITE_SUPABASE_URL, el build falla hasta que se cambie aquí también.
+/*
+  Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self'; font-src 'self'; connect-src 'self' https://qjpayidwxhilvqsbhwyn.supabase.co; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; upgrade-insecure-requests
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=(), usb=(), browsing-topics=()
+  Strict-Transport-Security: max-age=31536000; includeSubDomains
+  Cross-Origin-Opener-Policy: same-origin
+
+# Los archivos del build llevan un hash en el nombre: se pueden guardar un año sin volver a pedirlos.
+/assets/*
+  Cache-Control: public, max-age=31536000, immutable
+
 # Páginas que no deben aparecer en buscadores. La app ya pone <meta name="robots" content="noindex">
 # en ellas, pero solo después de ejecutar JavaScript: el HTML inicial es el de la portada («index»).
 # Esta cabecera llega en la propia respuesta. No se bloquean en robots.txt: Google tiene que poder

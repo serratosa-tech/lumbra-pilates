@@ -1,0 +1,3 @@
+# Cloudflare Pages: las rutas de la app (BrowserRouter) devuelven index.html al recargar o al entrar
+# directamente. Las rutas que no existen las resuelve la app con su página 404 (lleva noindex).
+/* /index.html 200

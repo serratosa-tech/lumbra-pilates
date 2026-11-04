@@ -17,8 +17,9 @@ dist-ssr
 .env.*
 !.env.example
 
-# Instrucciones locales para Claude Code
+# Instrucciones y ajustes locales de Claude Code
 CLAUDE.md
+.claude/
 
 # Editor directories and files
 .vscode/*

@@ -3,20 +3,15 @@ import headers from '../../public/_headers?raw'
 import robots from '../../public/robots.txt?raw'
 import sitemap from '../../public/sitemap.xml?raw'
 import { SITE_URL } from '../lib/site.ts'
+import { headerValue, parseHeaders } from '../lib/siteFiles.ts'
 
 const PRIVATE_PATHS = ['/sistema', '/mis-reservas', '/estudio']
 const sitemapPaths = [...sitemap.matchAll(/<loc>([^<]+)<\/loc>/g)].map(([, loc]) => loc.replace(SITE_URL, '') || '/')
 
 /** Rutas con la cabecera X-Robots-Tag: noindex en public/_headers. */
 function noindexPaths(): string[] {
-  const paths: string[] = []
-  let current: string | null = null
-  for (const line of headers.split(/\r?\n/)) {
-    if (!line.trim() || line.trimStart().startsWith('#')) continue
-    if (!/^\s/.test(line)) current = line.trim()
-    else if (current && /^X-Robots-Tag:\s*noindex$/i.test(line.trim())) paths.push(current)
-  }
-  return paths
+  const rules = parseHeaders(headers)
+  return [...rules.keys()].filter((path) => headerValue(rules, path, 'X-Robots-Tag') === 'noindex')
 }
 
 describe('indexación', () => {

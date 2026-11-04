@@ -35,12 +35,13 @@ export function DemoAccountCard({ kind, onSignedIn, headingLevel: Heading = 'h3'
 
   return (
     <section aria-labelledby={headingId} className={className}>
-      <Heading id={headingId} className="flex items-center gap-2 font-sans text-sm font-semibold tracking-normal">
+      {/* flex-wrap: con el texto muy grande el título baja bajo el icono en vez de quedarse sin ancho. */}
+      <Heading id={headingId} className="flex flex-wrap items-center gap-2 font-sans text-sm font-semibold tracking-normal">
         <KeyRound aria-hidden="true" strokeWidth={1.75} className="size-4 shrink-0 text-terracota-600" />
         <span className="min-w-0 [overflow-wrap:anywhere]">{copy.title}</span>
       </Heading>
       <p className="mt-1 text-sm text-piedra">{copy.text}</p>
-      {/* Si el email no cabe junto a su etiqueta, baja entero a la línea siguiente: nunca se parte. */}
+      {/* Si el email no cabe junto a su etiqueta, baja entero a la línea siguiente; solo se parte si ni así cabe. */}
       <dl className="mt-2 flex flex-col gap-1 text-sm text-tinta-700">
         <div className="flex flex-wrap gap-x-2">
           <dt>Email</dt>

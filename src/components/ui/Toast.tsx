@@ -36,10 +36,12 @@ function ToastCard({ toast, onDismiss }: { toast: ToastItem; onDismiss: (id: num
       onMouseLeave={() => setPaused(false)}
       onFocus={() => setPaused(true)}
       onBlur={() => setPaused(false)}
-      className="pointer-events-auto flex w-full items-start gap-3 rounded-md border border-arena-200 bg-white p-4 shadow-lg animate-toast-in"
+      // Con el texto muy grande (la lista, con `@container`, mide menos de 14 rem), icono y botón de cerrar
+      // quedan arriba y el texto baja a ancho completo, en vez de quedarse sin sitio entre los dos.
+      className="pointer-events-auto flex w-full items-start gap-3 rounded-md border border-arena-200 bg-white p-4 shadow-lg animate-toast-in @max-[14rem]:flex-wrap"
     >
       <Icon aria-hidden="true" strokeWidth={1.75} className={cn('mt-0.5 size-5 shrink-0', color)} />
-      <div className="min-w-0 flex-1">
+      <div className="min-w-0 flex-1 @max-[14rem]:order-last @max-[14rem]:basis-full">
         <p className="font-semibold">{toast.title}</p>
         {toast.description && <p className="mt-0.5 text-sm text-piedra">{toast.description}</p>}
       </div>
@@ -47,7 +49,7 @@ function ToastCard({ toast, onDismiss }: { toast: ToastItem; onDismiss: (id: num
         type="button"
         onClick={() => onDismiss(toast.id)}
         aria-label="Cerrar aviso"
-        className="-m-2 grid size-11 shrink-0 place-items-center rounded-full text-tinta-700 transition-colors hover:bg-arena-100"
+        className="-m-2 grid size-11 shrink-0 place-items-center rounded-full text-tinta-700 transition-colors hover:bg-arena-100 @max-[14rem]:ml-auto"
       >
         <X aria-hidden="true" strokeWidth={1.75} className="size-5" />
       </button>
@@ -79,7 +81,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
         role="region"
         className="pointer-events-none fixed inset-x-0 bottom-0 z-50 flex justify-center p-4 sm:justify-end sm:p-6"
       >
-        <ol className="flex w-full max-w-sm flex-col gap-3">
+        <ol className="@container flex w-full max-w-sm flex-col gap-3">
           {toasts.map((toast) => (
             <ToastCard key={toast.id} toast={toast} onDismiss={dismiss} />
           ))}

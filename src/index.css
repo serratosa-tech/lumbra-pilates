@@ -14,7 +14,10 @@
     @apply bg-crema font-sans text-base text-tinta antialiased;
     min-height: 100dvh;
     /* Una palabra que no cabe en ninguna línea (texto al 200 % en 320 px) se parte en vez de desbordar.
-       «anywhere» y no «break-word»: también deja estrecharse a las cajas flex y grid por debajo de su palabra más larga. */
+       «anywhere» y no «break-word»: también deja estrecharse a las cajas flex y grid por debajo de su palabra
+       más larga. Comparado con «break-word» en la fase 5: este evita una docena de desbordes de texto; a cambio,
+       una fila sin sitio podría partir el texto letra a letra, así que esas filas se apilan con el texto muy
+       grande (consultas de contenedor en rem) y la verificación en Edge busca texto aplastado. */
     overflow-wrap: anywhere;
   }
 

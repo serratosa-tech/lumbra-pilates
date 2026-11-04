@@ -67,12 +67,14 @@ function SessionPicker({ now }: { now: Date }) {
               >
                 <h2
                   id={`asist-${day.date.day}`}
-                  className="flex items-center gap-2 border-b border-arena-200 py-3 font-sans text-base font-semibold tracking-normal"
+                  className="flex flex-wrap items-center gap-x-2 gap-y-1 border-b border-arena-200 py-3 font-sans text-base font-semibold tracking-normal"
                 >
                   {capitalize(formatDate(day.date))}
                   {isSameDate(day.date, today) && <Badge tone="terracota">Hoy</Badge>}
                 </h2>
-                <ul className="divide-y divide-arena-200">
+                {/* @container: si la lista mide menos de 12 rem (solo con el texto muy grande; a 320 px con el
+                    texto normal mide 16 rem), hora y flecha quedan arriba y el nombre baja a su propia línea. */}
+                <ul className="@container divide-y divide-arena-200">
                   {day.sessions.map((session) => {
                     const { state } = spotsStatus(session, now)
                     // Las terminadas se atenúan con colores más suaves (sin opacidad, para mantener el contraste AA).
@@ -82,7 +84,7 @@ function SessionPicker({ now }: { now: Date }) {
                         <Link
                           to={`/estudio/asistentes?clase=${session.id}`}
                           className={cn(
-                            '-mx-2 flex min-h-12 items-center gap-3 rounded-sm px-2 py-2 hover:bg-arena-100',
+                            '-mx-2 flex min-h-12 items-center gap-3 rounded-sm px-2 py-2 hover:bg-arena-100 @max-[12rem]:flex-wrap @max-[12rem]:gap-y-1',
                             past && 'bg-arena-100/40',
                           )}
                         >
@@ -94,7 +96,7 @@ function SessionPicker({ now }: { now: Date }) {
                           >
                             {formatTime(session.startsAt)}
                           </span>
-                          <span className="min-w-0 flex-1">
+                          <span className="min-w-0 flex-1 @max-[12rem]:order-last @max-[12rem]:basis-full">
                             <span className={cn('flex flex-wrap items-center gap-x-2 gap-y-1 font-semibold', past && 'text-tinta-700')}>
                               {session.name}
                               {state === 'cancelled' && <Badge tone="error">Cancelada</Badge>}
@@ -108,7 +110,7 @@ function SessionPicker({ now }: { now: Date }) {
                               </span>
                             )}
                           </span>
-                          <ChevronRight aria-hidden="true" strokeWidth={1.75} className="size-5 shrink-0 text-piedra" />
+                          <ChevronRight aria-hidden="true" strokeWidth={1.75} className="size-5 shrink-0 text-piedra @max-[12rem]:ml-auto" />
                         </Link>
                       </li>
                     )

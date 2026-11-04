@@ -65,11 +65,13 @@ function SessionRow({
   const attendeesLink = `/estudio/asistentes?clase=${session.id}`
   return (
     // En móvil las acciones van en un menú de tres puntos, arriba a la derecha y a la altura de la hora.
-    <li className="relative flex flex-wrap items-start gap-x-5 gap-y-3 py-4 pr-12 md:pr-0">
+    // Con el texto muy grande (la lista, con `@container`, mide menos de 12 rem), el menú entra en el flujo junto
+    // a la hora y los datos bajan a ancho completo, sin reservar el hueco del menú.
+    <li className="relative flex flex-wrap items-start gap-x-5 gap-y-3 py-4 pr-12 md:pr-0 @max-[12rem]:pr-0">
       <p className="w-[5ch] shrink-0 font-display text-2xl leading-none tabular-nums">
         {formatTime(session.startsAt)}
       </p>
-      <div className="min-w-[min(12rem,100%)] flex-1">
+      <div className="min-w-[min(12rem,100%)] flex-1 @max-[12rem]:order-last @max-[12rem]:basis-full">
         <h3 className="flex flex-wrap items-center gap-2 font-sans text-base font-semibold tracking-normal">
           {session.name}
           {state === 'cancelled' && <Badge tone="error">Cancelada</Badge>}
@@ -86,7 +88,7 @@ function SessionRow({
         </p>
         {state !== 'cancelled' && <SpotsMeter session={session} now={now} className="mt-2" />}
       </div>
-      <div className="absolute top-1.5 right-0 md:hidden">
+      <div className="absolute top-1.5 right-0 md:hidden @max-[12rem]:static @max-[12rem]:ml-auto">
         <ActionMenu
           label={`Acciones de ${session.name}, ${formatTime(session.startsAt)}`}
           items={[
@@ -234,7 +236,7 @@ export function SessionsPage() {
                     {plural(day.sessions.length, 'clase')}
                   </span>
                 </h2>
-                <ul className="divide-y divide-arena-200">
+                <ul className="@container divide-y divide-arena-200">
                   {day.sessions.map((session) => (
                     <SessionRow
                       key={session.id}

@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from 'react'
 import { Link, useLocation } from 'react-router'
 import { Seo } from '../../../components/Seo.tsx'
 import { Alert, Button, EmptyState, Skeleton } from '../../../components/ui/index.ts'
+import { errorMessage } from '../../../data/index.ts'
 import { useAsyncData } from '../../../lib/useAsyncData.ts'
 import { useNow } from '../../../lib/useNow.ts'
 import { AccountBookings } from './AccountBookings.tsx'
@@ -121,7 +122,7 @@ export function MyBookingsPage() {
                 </Button>
               }
             >
-              Comprueba tu conexión y vuelve a intentarlo.
+              {errorMessage(state.error)}
             </Alert>
           )}
           {query && state.status === 'ready' && !state.data && (

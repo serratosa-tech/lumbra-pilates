@@ -3,9 +3,36 @@ import { readFileSync } from 'node:fs'
 import tailwindcss from '@tailwindcss/vite'
 import react from '@vitejs/plugin-react'
 import { defineConfig, loadEnv, type Plugin } from 'vite'
-import { cspConnectSources } from './src/lib/siteFiles.ts'
+import { SITE_URL } from './src/lib/site.ts'
+import { cspConnectSources, robotsTxt, sitemapXml } from './src/lib/siteFiles.ts'
 
 const PORT = 5176
+
+/**
+ * La URL del sitio sale solo de SITE_URL: rellena %SITE_URL% en index.html (canonical, og:url,
+ * og:image) y genera robots.txt y sitemap.xml, en el build y en el servidor de desarrollo.
+ */
+function siteFiles(): Plugin {
+  const files = new Map([
+    ['robots.txt', { type: 'text/plain; charset=utf-8', source: robotsTxt(SITE_URL) }],
+    ['sitemap.xml', { type: 'application/xml; charset=utf-8', source: sitemapXml(SITE_URL) }],
+  ])
+  return {
+    name: 'lumbra:site-files',
+    transformIndexHtml: { order: 'pre', handler: (html) => html.replaceAll('%SITE_URL%', SITE_URL) },
+    configureServer(server) {
+      server.middlewares.use((req, res, next) => {
+        const file = files.get((req.url ?? '').split('?')[0].replace(/^\//, ''))
+        if (!file) return next()
+        res.setHeader('Content-Type', file.type)
+        res.end(file.source)
+      })
+    },
+    generateBundle() {
+      for (const [fileName, { source }] of files) this.emitFile({ type: 'asset', fileName, source })
+    },
+  }
+}
 
 /**
  * Para el build si falta la URL de Supabase o si la CSP de public/_headers no la permite en
@@ -57,6 +84,7 @@ export default defineConfig(({ mode }) => {
     plugins: [
       react(),
       tailwindcss(),
+      siteFiles(),
       preloadFont(/jost-latin-wght-normal-[\w-]+\.woff2$/),
       checkCsp(env.VITE_SUPABASE_URL),
     ],

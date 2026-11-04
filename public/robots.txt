@@ -1,4 +1,0 @@
-User-agent: *
-Allow: /
-
-Sitemap: https://lumbra-pilates.pages.dev/sitemap.xml

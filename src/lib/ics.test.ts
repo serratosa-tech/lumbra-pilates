@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { buildIcs } from './ics.ts'
 
 const ics = buildIcs({
-  uid: 'LUM-7K3Q@lumbra-pilates.pages.dev',
+  uid: 'LUM-7K3Q@lumbra.example',
   title: 'Mat Flow · Lumbra Pilates',
   description: 'Código de reserva: LUM-7K3Q\nCancela hasta 2 h antes, en Mis reservas; gracias.',
   location: 'Plaza del Umbral 7, bajo, 46003 Valencia',
@@ -18,7 +18,7 @@ describe('archivo de calendario', () => {
     expect(lines).toContain('DTSTART:20261104T173000Z')
     expect(lines).toContain('DTEND:20261104T182500Z')
     expect(lines).toContain('DTSTAMP:20261101T091530Z')
-    expect(lines).toContain('UID:LUM-7K3Q@lumbra-pilates.pages.dev')
+    expect(lines).toContain('UID:LUM-7K3Q@lumbra.example')
   })
 
   it('usa saltos CRLF y termina en uno', () => {

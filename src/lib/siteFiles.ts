@@ -1,7 +1,28 @@
 /**
  * Archivos de publicación (Cloudflare Pages). Funciones puras que usan vite.config.ts (en el build)
- * y los tests.
+ * y los tests. La URL del sitio llega de SITE_URL (src/lib/site.ts), el único sitio donde se escribe.
  */
+
+/** Páginas indexables: las únicas del sitemap. Las demás llevan noindex (public/_headers). */
+export const INDEXED_PAGES = [
+  { path: '/', changefreq: 'weekly', priority: '1.0' },
+  { path: '/clases', changefreq: 'daily', priority: '0.9' },
+  { path: '/privacidad', changefreq: 'yearly', priority: '0.3' },
+  { path: '/aviso-legal', changefreq: 'yearly', priority: '0.3' },
+] as const
+
+/** robots.txt: no bloquea nada (Google tiene que poder entrar para leer los noindex). */
+export function robotsTxt(siteUrl: string): string {
+  return `User-agent: *\nAllow: /\n\nSitemap: ${siteUrl}/sitemap.xml\n`
+}
+
+export function sitemapXml(siteUrl: string): string {
+  const urls = INDEXED_PAGES.map(
+    ({ path, changefreq, priority }) =>
+      `  <url>\n    <loc>${siteUrl}${path}</loc>\n    <changefreq>${changefreq}</changefreq>\n    <priority>${priority}</priority>\n  </url>\n`,
+  ).join('')
+  return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls}</urlset>\n`
+}
 
 /** Reglas de public/_headers: ruta → cabeceras («Nombre: valor»), en el orden del archivo. */
 export function parseHeaders(text: string): Map<string, string[]> {

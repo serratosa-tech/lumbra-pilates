@@ -276,9 +276,7 @@ Comprobado el 5 de noviembre de 2026 contra https://lumbra-pilates.pages.dev.
 
 **Claves en los JS publicados.** Los 6 archivos JS (`index`, `StudioApp`, `supabaseJs` y las tres páginas legales): `sb_secret_` seguido de caracteres, **0**; `service_role`, **0**; `eyJ`, **0**. El prefijo `sb_secret_` aparece una vez, en supabase-js, sin nada detrás (`startsWith('sb_secret_')`).
 
-### Pendiente
-
-- Avisos para que Supabase no se pause: el de GitHub Actions ya funciona; el Worker `lumbra-keepalive` está creado y falta confirmar en su registro una ejecución con `ok`.
+**Avisos para que Supabase no se pause.** Los dos responden: el workflow de GitHub Actions y el Worker `lumbra-keepalive`, que se ejecutó con su Cron Trigger el 5 de noviembre a las 13:43 UTC y respondió `health_check ok`, sin errores.
 
 ## Scripts
 

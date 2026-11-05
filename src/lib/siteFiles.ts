@@ -26,10 +26,10 @@ export function sitemapXml(siteUrl: string): string {
 
 const EMPTY_ROOT = '<div id="root"></div>'
 
-/** Mete el HTML del shell estático dentro de #root (vacío en index.html); falla si no lo encuentra una sola vez. */
-export function injectRootMarkup(html: string, markup: string): string {
+/** Escribe el HTML del shell estático justo delante de #root, que sigue vacío; falla si no hay un único #root vacío. */
+export function injectStaticShell(html: string, markup: string): string {
   if (html.split(EMPTY_ROOT).length !== 2) throw new Error(`index.html debe tener un único ${EMPTY_ROOT} vacío`)
-  return html.replace(EMPTY_ROOT, `<div id="root">${markup}</div>`)
+  return html.replace(EMPTY_ROOT, `${markup}${EMPTY_ROOT}`)
 }
 
 /** Reglas de public/_headers: ruta → cabeceras («Nombre: valor»), en el orden del archivo. */

@@ -1,13 +1,13 @@
 import { Outlet } from 'react-router'
 import { ToastProvider } from '../components/ui/index.ts'
-import { StaticShell } from './StaticShell.tsx'
 
-/** Común a la web pública y al panel: avisos, enlace de salto y banda de demo. */
+/**
+ * Común a la web pública y al panel: los avisos. El enlace de salto y la banda de demo no los pinta
+ * React: van como HTML estático en index.html, delante de #root (ver StaticShell.tsx).
+ */
 export function RootLayout() {
   return (
     <ToastProvider>
-      {/* Primero, igual que el HTML estático de index.html: React lo sustituye sin que se mueva nada. */}
-      <StaticShell />
       <Outlet />
     </ToastProvider>
   )

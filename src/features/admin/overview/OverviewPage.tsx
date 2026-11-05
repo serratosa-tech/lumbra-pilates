@@ -1,9 +1,9 @@
-import { CalendarCheck, CalendarX2, Gauge, Hourglass, RotateCcw, Undo2, type LucideIcon } from 'lucide-react'
+import { CalendarCheck, CalendarX2, Gauge, Hourglass, Undo2, type LucideIcon } from 'lucide-react'
 import { Link } from 'react-router'
 import { plural } from '../../../components/schedule/labels.ts'
 import { SpotsMeter } from '../../../components/schedule/SpotsMeter.tsx'
 import { Seo } from '../../../components/Seo.tsx'
-import { Alert, Button, Card, EmptyState, Skeleton } from '../../../components/ui/index.ts'
+import { Card, EmptyState, Skeleton } from '../../../components/ui/index.ts'
 import type { WeekMetrics } from '../../../data/index.ts'
 import { dayRange, formatTime, studioDate } from '../../../lib/dates.ts'
 import { useAsyncData } from '../../../lib/useAsyncData.ts'
@@ -12,6 +12,8 @@ import { PanelHeader } from '../PanelHeader.tsx'
 import { useStudioUser } from '../studioUser.ts'
 import { useStudioWeek } from '../useStudioWeek.ts'
 import { OccupancyChart } from './OccupancyChart.tsx'
+import { RetryAlert } from './RetryAlert.tsx'
+import { WaitlistCard } from './WaitlistCard.tsx'
 
 const percent = (value: number) => `${Math.round(value * 100)} %`
 
@@ -58,22 +60,6 @@ function metricCards(m: WeekMetrics) {
   ]
 }
 
-function RetryAlert({ onRetry }: { onRetry: () => void }) {
-  return (
-    <Alert
-      tone="error"
-      title="No hemos podido cargar los datos"
-      action={
-        <Button variant="secondary" onClick={onRetry} icon={<RotateCcw aria-hidden="true" strokeWidth={1.75} className="size-4" />}>
-          Reintentar
-        </Button>
-      }
-    >
-      Vuelve a intentarlo en un momento.
-    </Alert>
-  )
-}
-
 export function OverviewPage() {
   const now = useNow()
   const user = useStudioUser()
@@ -118,25 +104,32 @@ export function OverviewPage() {
           ))}
       </section>
 
-      <div className="mt-6 grid grid-cols-1 items-start gap-6 lg:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)]">
-        <Card as="section" aria-labelledby="franjas-titulo">
-          <h2 id="franjas-titulo" className="text-xl">
-            Ocupación por franja horaria
-          </h2>
-          <div className="mt-5">
-            {metrics.state.status === 'ready' && metrics.state.data.slots.length > 0 ? (
-              <OccupancyChart slots={metrics.state.data.slots} />
-            ) : metrics.state.status === 'ready' ? (
-              <p className="text-piedra">Sin clases programadas esta semana.</p>
-            ) : (
-              <div className="flex flex-col gap-3" aria-hidden="true">
-                {Array.from({ length: 6 }, (_, i) => (
-                  <Skeleton key={i} className="h-7 w-full" />
-                ))}
-              </div>
-            )}
-          </div>
-        </Card>
+      {/* Las dos columnas terminan a la misma altura: la tarjeta de esperas ocupa lo que sobre a la izquierda
+          (su contenido queda arriba y solo el enlace baja al pie) y «Hoy» se estira si la izquierda es más alta. */}
+      <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)]">
+        <div className="flex min-w-0 flex-col gap-6">
+          <Card as="section" aria-labelledby="franjas-titulo">
+            <h2 id="franjas-titulo" className="text-xl">
+              Ocupación por franja horaria
+            </h2>
+            <div className="mt-5">
+              {metrics.state.status === 'ready' && metrics.state.data.slots.length > 0 ? (
+                <OccupancyChart slots={metrics.state.data.slots} />
+              ) : metrics.state.status === 'ready' ? (
+                <p className="text-piedra">Sin clases programadas esta semana.</p>
+              ) : metrics.state.status === 'error' ? (
+                <p className="text-piedra">No se han podido cargar las franjas. Usa «Reintentar» arriba.</p>
+              ) : (
+                <div className="flex flex-col gap-3" aria-hidden="true">
+                  {Array.from({ length: 6 }, (_, i) => (
+                    <Skeleton key={i} className="h-7 w-full" />
+                  ))}
+                </div>
+              )}
+            </div>
+          </Card>
+          <WaitlistCard week={week} now={now} className="flex flex-1 flex-col" />
+        </div>
 
         <Card as="section" aria-labelledby="hoy-titulo">
           <h2 id="hoy-titulo" className="text-xl">

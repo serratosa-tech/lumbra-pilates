@@ -89,8 +89,68 @@ describe('páginas del panel', () => {
       vi.spyOn(getDataSource(), 'getMetrics').mockRejectedValueOnce(new DataError('unavailable'))
       renderAt('/estudio/resumen')
       expect(await screen.findByText('No hemos podido cargar los datos')).toBeInTheDocument()
+      expect(screen.getByText('No se han podido cargar las franjas. Usa «Reintentar» arriba.')).toBeInTheDocument()
       await user.click(screen.getByRole('button', { name: 'Reintentar' }))
       expect(await screen.findByText('Ocupación media')).toBeInTheDocument()
+    })
+
+    it('las franjas se escriben con dos cifras y guion medio', async () => {
+      const { from, to } = weekRange(mondayIn(0))
+      const metrics = await getDataSource().getMetrics(from, to)
+      vi.spyOn(getDataSource(), 'getMetrics').mockResolvedValue({
+        ...metrics,
+        slots: [{ fromHour: 7, toHour: 9, sessions: 2, occupancy: 0.5 }],
+      })
+      renderAt('/estudio/resumen')
+      expect((await screen.findAllByText('07–09 h')).length).toBeGreaterThan(0)
+    })
+
+    it('«Listas de espera» enseña las próximas clases con gente esperando y enlaza a sus asistentes', async () => {
+      // Clases de la semana que viene: todas son futuras, sea cual sea la hora del test.
+      const upcoming = (await sessionsIn(1)).filter((s) => s.status === 'scheduled')
+      const [full, other] = upcoming
+      vi.spyOn(getDataSource(), 'listSessions').mockResolvedValue([
+        { ...full, bookedCount: full.capacity, waitlistCount: 3 },
+        { ...other, waitlistCount: 0 },
+      ])
+      renderAt('/estudio/resumen')
+
+      const card = await screen.findByRole('region', { name: 'Listas de espera' })
+      const link = await within(card).findByRole('link', { name: `${full.name}: ver asistentes` })
+      expect(link).toHaveAttribute('href', `/estudio/asistentes?clase=${full.id}`)
+      expect(within(card).getByText('3 en espera')).toBeInTheDocument()
+      expect(within(card).queryByRole('link', { name: `${other.name}: ver asistentes` })).not.toBeInTheDocument()
+      expect(within(card).getByRole('link', { name: 'Ver todas en Asistentes' })).toHaveAttribute('href', '/estudio/asistentes')
+    })
+
+    it('sin nadie esperando, «Listas de espera» lo dice', async () => {
+      const upcoming = (await sessionsIn(1)).map((s) => ({ ...s, waitlistCount: 0 }))
+      vi.spyOn(getDataSource(), 'listSessions').mockResolvedValue(upcoming)
+      renderAt('/estudio/resumen')
+      const card = await screen.findByRole('region', { name: 'Listas de espera' })
+      expect(await within(card).findByText('Nadie espera plaza esta semana.')).toBeInTheDocument()
+    })
+
+    it('si fallan las listas de espera, avisa y «Reintentar» las carga', async () => {
+      const user = userEvent.setup()
+      const ds = getDataSource()
+      const original = ds.listSessions.bind(ds)
+      const weekFrom = weekRange(mondayIn(0)).from
+      let failed = false
+      // Solo falla la primera carga de la semana (la de las esperas), no la de «Hoy».
+      vi.spyOn(ds, 'listSessions').mockImplementation((from, to) => {
+        if (from === weekFrom && !failed) {
+          failed = true
+          return Promise.reject(new DataError('unavailable'))
+        }
+        return original(from, to)
+      })
+      renderAt('/estudio/resumen')
+
+      const card = await screen.findByRole('region', { name: 'Listas de espera' })
+      expect(await within(card).findByText('No hemos podido cargar los datos')).toBeInTheDocument()
+      await user.click(within(card).getByRole('button', { name: 'Reintentar' }))
+      expect(await within(card).findByRole('link', { name: 'Ver todas en Asistentes' })).toBeInTheDocument()
     })
   })
 

@@ -2,9 +2,9 @@
 import { readFileSync } from 'node:fs'
 import tailwindcss from '@tailwindcss/vite'
 import react from '@vitejs/plugin-react'
-import { defineConfig, loadEnv, type Plugin } from 'vite'
+import { createServer, defineConfig, loadEnv, type Plugin } from 'vite'
 import { SITE_URL } from './src/lib/site.ts'
-import { cspConnectSources, robotsTxt, sitemapXml } from './src/lib/siteFiles.ts'
+import { cspConnectSources, injectRootMarkup, robotsTxt, sitemapXml } from './src/lib/siteFiles.ts'
 
 const PORT = 5176
 
@@ -77,6 +77,38 @@ function preloadFont(pattern: RegExp): Plugin {
   }
 }
 
+/**
+ * Escribe en #root el HTML del shell común (enlace de salto y banda de demo), renderizado en el build
+ * con react-dom/server desde los mismos componentes que usa la app (src/app/StaticShell.tsx). Así la
+ * banda, que es el LCP, se pinta con el HTML y el CSS, sin esperar al JavaScript; React la sustituye al
+ * arrancar por un marcado idéntico. Se carga con un servidor de Vite efímero solo para SSR (sin puerto).
+ */
+function staticShell(): Plugin {
+  return {
+    name: 'lumbra:static-shell',
+    apply: 'build',
+    transformIndexHtml: {
+      order: 'pre',
+      async handler(html) {
+        const server = await createServer({
+          configFile: false,
+          root: process.cwd(),
+          logLevel: 'error',
+          appType: 'custom',
+          plugins: [react()],
+          server: { middlewareMode: true, hmr: false, ws: false },
+        })
+        try {
+          const { staticShellMarkup } = await server.ssrLoadModule('/src/app/staticShellMarkup.tsx')
+          return injectRootMarkup(html, staticShellMarkup())
+        } finally {
+          await server.close()
+        }
+      },
+    },
+  }
+}
+
 // https://vite.dev/config/
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), 'VITE_')
@@ -85,6 +117,7 @@ export default defineConfig(({ mode }) => {
       react(),
       tailwindcss(),
       siteFiles(),
+      staticShell(),
       preloadFont(/jost-latin-wght-normal-[\w-]+\.woff2$/),
       checkCsp(env.VITE_SUPABASE_URL),
     ],

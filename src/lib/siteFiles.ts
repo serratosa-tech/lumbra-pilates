@@ -24,6 +24,14 @@ export function sitemapXml(siteUrl: string): string {
   return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls}</urlset>\n`
 }
 
+const EMPTY_ROOT = '<div id="root"></div>'
+
+/** Mete el HTML del shell estático dentro de #root (vacío en index.html); falla si no lo encuentra una sola vez. */
+export function injectRootMarkup(html: string, markup: string): string {
+  if (html.split(EMPTY_ROOT).length !== 2) throw new Error(`index.html debe tener un único ${EMPTY_ROOT} vacío`)
+  return html.replace(EMPTY_ROOT, `<div id="root">${markup}</div>`)
+}
+
 /** Reglas de public/_headers: ruta → cabeceras («Nombre: valor»), en el orden del archivo. */
 export function parseHeaders(text: string): Map<string, string[]> {
   const rules = new Map<string, string[]>()

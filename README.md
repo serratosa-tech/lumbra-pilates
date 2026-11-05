@@ -69,10 +69,6 @@ Lighthouse 12.2.1 con su perfil móvil por defecto (Moto G Power y red lenta sim
 
 ¹ A propósito: la página lleva `noindex` y Lighthouse lo cuenta como «no indexable».
 
-**Capturas de PageSpeed Insights:** *(pendientes; las añade Helena)*
-
-<!-- Capturas de PageSpeed Insights (móvil) de /, /clases y /mis-reservas -->
-
 **Por qué el LCP de la portada pasaba de 2,5 s y cómo se arregló.** Con la web ya publicada, la portada daba 95 de mediana y un LCP de 2,90 s (2,47–3,17 s). En carga real (Edge con Slow 4G y CPU 4×), el elemento LCP es el texto de la banda «Demo», y no el titular, que entra animado desde opacidad 0. Esa banda se pintaba junto con todo lo demás cuando el JavaScript terminaba de ejecutarse, porque `#root` llegaba vacío, y Lighthouse sumaba ese JavaScript al LCP simulado. Ahora el build renderiza con `react-dom/server` el enlace de salto y la banda a partir de sus componentes (`src/app/StaticShell.tsx`, plugin `lumbra:static-shell` de `vite.config.ts`) y los escribe en `index.html` delante de `#root`. Se pintan con el HTML y el CSS, y React no los toca. Un primer intento los ponía *dentro* de `#root`, y React los sustituía por un nodo igual: el navegador volvía a contar la banda como LCP al ejecutarse el JavaScript (mediana de 2,56 s). Con el shell fuera de `#root`, el LCP observado coincide con el primer pintado en todas las pasadas. Es igual en todas las rutas, así que no hay parpadeo: en `/`, `/clases`, `/estudio/resumen` y la 404, a 390 y 1280 px, la banda es el mismo nodo antes y después de arrancar la app, no se mueve y el CLS es 0.
 
 | Portada, mediana de 5 pasadas | Rendimiento | LCP |
@@ -83,6 +79,19 @@ Lighthouse 12.2.1 con su perfil móvil por defecto (Moto G Power y red lenta sim
 
 - **supabase-js no se descarga** en la portada ni en el horario: comprobado en las peticiones de cada pasada y en Edge contra producción.
 - **Preconnect a Supabase: probado y descartado.** Lighthouse lo sugiere (unos 90 ms), pero en una comparación A/B de 5 pasadas no mejoró la portada (91 frente a 91–92) y empeoró `/clases` (LCP 2,82 s frente a 2,25 s; rendimiento 93 frente a 97). Con la red lenta simulada, la conexión anticipada compite con la descarga del JavaScript y de la fuente.
+
+### PageSpeed Insights
+
+Portada en https://pagespeed.web.dev, medido el 5 de noviembre de 2026 (una pasada por dispositivo): **100 en Rendimiento, Accesibilidad, Prácticas recomendadas y SEO**, en móvil y en ordenador. La categoría experimental «Navegación agéntica» (2/4) no forma parte de esas cuatro.
+
+| Dispositivo | FCP | LCP | TBT | CLS | Speed Index |
+| --- | --- | --- | --- | --- | --- |
+| Móvil | 0,9 s | 0,9 s | 30 ms | 0 | 1,3 s |
+| Ordenador | 0,2 s | 0,2 s | 10 ms | 0 | 0,6 s |
+
+| Móvil | Ordenador |
+| --- | --- |
+| ![PageSpeed Insights en móvil: 100 en las cuatro categorías](docs/capturas/pagespeed-movil.png) | ![PageSpeed Insights en ordenador: 100 en las cuatro categorías](docs/capturas/pagespeed-ordenador.png) |
 
 ### Tamaño del build
 
@@ -269,7 +278,6 @@ Comprobado el 5 de noviembre de 2026 contra https://lumbra-pilates.pages.dev.
 
 ### Pendiente
 
-- Añadir las capturas de **PageSpeed Insights** (apartado «Rendimiento»).
 - Avisos para que Supabase no se pause: el de GitHub Actions ya funciona; el Worker `lumbra-keepalive` está creado y falta confirmar en su registro una ejecución con `ok`.
 
 ## Scripts

@@ -2,7 +2,7 @@
 
 App de demostración de reservas para un estudio de pilates inventado en Valencia (proyecto de portafolio). Reserva sin cuenta con código, lista de espera automática, consulta y cancelación de reservas, cuentas de cliente y panel del estudio con clases, asistentes y métricas. Backend real en Supabase.
 
-**Web:** https://lumbra-pilates.pages.dev *(pendiente de publicar)*
+**Web:** https://lumbra-pilates.pages.dev
 
 > Demo con datos inventados: se restablece automáticamente cada noche. No introduzcas datos reales.
 
@@ -17,7 +17,7 @@ App de demostración de reservas para un estudio de pilates inventado en Valenci
 | `/aviso-legal` | Aviso legal |
 | `/sistema` | Sistema de diseño (`noindex`, fuera del sitemap) |
 | `/estudio` | Acceso al panel (`noindex`) |
-| `/estudio/resumen` | Métricas de la semana y ocupación por franja horaria |
+| `/estudio/resumen` | Métricas de la semana, ocupación por franja horaria, listas de espera de las próximas clases y clases de hoy |
 | `/estudio/clases` | Crear, editar y cancelar clases |
 | `/estudio/asistentes` | Reservas, lista de espera, asistencia y reservas manuales por clase |
 
@@ -57,20 +57,31 @@ Solo la clave **publishable**. La secreta (`sb_secret_…`, antes `service_role`
 
 ## Rendimiento
 
-### Lighthouse móvil
+### Lighthouse móvil, en producción
 
-Lighthouse 12.2.1 con su perfil móvil por defecto (Moto G Power y red lenta simulada), contra el build servido con `vite preview`, en Edge headless. Mediana de 5 pasadas, medido el 4 de noviembre de 2026:
+Lighthouse 12.2.1 con su perfil móvil por defecto (Moto G Power y red lenta simulada), contra **https://lumbra-pilates.pages.dev**, en Edge headless. Mediana de 5 pasadas (entre paréntesis, la mínima y la máxima), medido el 5 de noviembre de 2026:
 
-| Página | Rendimiento | Accesibilidad | Buenas prácticas | SEO | FCP | LCP | TBT | CLS | Transferido |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| `/` | 91 (91–97) | 100 | 100 | 100 | 1,5 s | 2,4–2,9 s | 24–210 ms | 0 | 166 KB |
-| `/clases` | 97 (96–99) | 100 | 100 | 100 | 1,5 s | 1,8–2,3 s | 12–146 ms | 0 | 165 KB |
-| `/mis-reservas` | 99 | 100 | 100 | 66 ¹ | 1,5 s | 1,8 s | 4–44 ms | 0 | 161 KB |
+| Página | Rendimiento | Accesibilidad | Buenas prácticas | SEO | FCP | LCP | TBT | CLS |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| `/` | 98 (93–100) | 100 | 100 | 100 | 1,9 s | 2,1 s (1,4–3,0) | 21 ms | 0 |
+| `/clases` | 100 (98–100) | 100 | 100 | 100 | 1,0 s | 1,5 s (1,4–2,1) | 11 ms | 0 |
+| `/mis-reservas` | 99 (98–100) | 100 | 100 | 66 ¹ | 1,5 s | 1,6 s (1,5–2,2) | 1 ms | 0 |
 
 ¹ A propósito: la página lleva `noindex` y Lighthouse lo cuenta como «no indexable».
 
-- **La portada varía entre 91 y 97 con el mismo build**, sobre todo por la carga del equipo durante la medición: el TBT se mide con la CPU real y pasó de 24 a 210 ms sin cambiar nada (el de `/clases`, de 12 a 146 ms). Su LCP sale unas veces cerca de 2,2 s y otras cerca de 2,9 s. Que eso se deba a qué elemento acaba siendo el LCP (las clases de «Hoy en Lumbra» llegan después y cambian a lo largo del día) está sin confirmar. Queda para la fase 7 (ver «Pendiente»).
-- **supabase-js no se descarga** en ninguna de las tres páginas (comprobado en las peticiones de cada pasada).
+**Capturas de PageSpeed Insights:** *(pendientes; las añade Helena)*
+
+<!-- Capturas de PageSpeed Insights (móvil) de /, /clases y /mis-reservas -->
+
+**Por qué el LCP de la portada pasaba de 2,5 s y cómo se arregló.** Con la web ya publicada, la portada daba 95 de mediana y un LCP de 2,90 s (2,47–3,17 s). En carga real (Edge con Slow 4G y CPU 4×), el elemento LCP es el texto de la banda «Demo», y no el titular, que entra animado desde opacidad 0. Esa banda se pintaba junto con todo lo demás cuando el JavaScript terminaba de ejecutarse, porque `#root` llegaba vacío, y Lighthouse sumaba ese JavaScript al LCP simulado. Ahora el build renderiza con `react-dom/server` el enlace de salto y la banda a partir de sus componentes (`src/app/StaticShell.tsx`, plugin `lumbra:static-shell` de `vite.config.ts`) y los escribe en `index.html` delante de `#root`. Se pintan con el HTML y el CSS, y React no los toca. Un primer intento los ponía *dentro* de `#root`, y React los sustituía por un nodo igual: el navegador volvía a contar la banda como LCP al ejecutarse el JavaScript (mediana de 2,56 s). Con el shell fuera de `#root`, el LCP observado coincide con el primer pintado en todas las pasadas. Es igual en todas las rutas, así que no hay parpadeo: en `/`, `/clases`, `/estudio/resumen` y la 404, a 390 y 1280 px, la banda es el mismo nodo antes y después de arrancar la app, no se mueve y el CLS es 0.
+
+| Portada, mediana de 5 pasadas | Rendimiento | LCP |
+| --- | --- | --- |
+| Antes (sin shell) | 95 | 2,90 s |
+| Shell dentro de `#root` | 96 | 2,56 s |
+| Shell delante de `#root` (actual) | 98 | 2,14 s |
+
+- **supabase-js no se descarga** en la portada ni en el horario: comprobado en las peticiones de cada pasada y en Edge contra producción.
 - **Preconnect a Supabase: probado y descartado.** Lighthouse lo sugiere (unos 90 ms), pero en una comparación A/B de 5 pasadas no mejoró la portada (91 frente a 91–92) y empeoró `/clases` (LCP 2,82 s frente a 2,25 s; rendimiento 93 frente a 97). Con la red lenta simulada, la conexión anticipada compite con la descarga del JavaScript y de la fuente.
 
 ### Tamaño del build
@@ -167,11 +178,11 @@ En el plan Free, Supabase pausa el proyecto tras una semana sin actividad. Dos s
 
 ## Calidad y verificación
 
-Comprobado el 4 de noviembre de 2026 (fase 6), antes de publicar.
+Comprobado el 4 de noviembre de 2026 (fase 6), antes de publicar, y el 5 de noviembre contra la web publicada (fase 7, apartado «En producción»).
 
 ### Tests
 
-265 tests con Vitest y Testing Library, todos en verde, sin herramientas añadidas a `package.json`:
+272 tests con Vitest y Testing Library, todos en verde, sin herramientas añadidas a `package.json`:
 
 | Módulo | Tests | Qué cubren |
 | --- | --- | --- |
@@ -180,10 +191,10 @@ Comprobado el 4 de noviembre de 2026 (fase 6), antes de publicar.
 | RequireStudio y rutas del panel | 17 | Las 5 rutas del panel, sin sesión y con cliente, sin pedir datos del estudio; error al comprobar la sesión con «Reintentar»; acceso, contraseña incorrecta y cierre de sesión |
 | Formulario de reserva | 9 | Validación en vivo, confirmación con código, lista de espera, menos de 2 h, cuenta demo, sin conexión sin perder lo escrito, clase que no carga o no existe |
 | Mis reservas | 13 | Consulta, demasiados intentos, sin conexión, cancelar y subir la lista, salir de la lista de espera, error al cancelar, cuenta de cliente |
-| Panel del estudio | 17 | Resumen (métricas, vacío, error), Clases (crear, cerrar con Esc, aforo por debajo de las reservas, error del servidor, cancelar clase), Asistentes (abrir clase, asistencia, reserva manual, subida de la lista, errores) y el formulario de clase |
+| Panel del estudio | 21 | Resumen (métricas, vacío, error, franjas «07–09 h», listas de espera con enlace a Asistentes, sin esperas y error con «Reintentar»), Clases (crear, cerrar con Esc, aforo por debajo de las reservas, error del servidor, cancelar clase), Asistentes (abrir clase, asistencia, reserva manual, subida de la lista, errores) y el formulario de clase |
 | Demo en memoria y datos de ejemplo | 36 | Persistencia en la clave única, semilla coherente en distintas fechas |
 | Componentes y utilidades | 35 | Diálogos con foco atrapado, menú de acciones con teclado, tarjetas de clase, pestañas de día, fechas en hora de Madrid, archivo `.ics`, refresco de datos y páginas legales |
-| Publicación (`src/app/deploy.test.ts`, `indexing.test.ts`) | 10 | `_redirects`, CSP sin `unsafe-*` y con un solo proyecto de Supabase, cabeceras de seguridad, caché solo en `/assets/*`, límites de Cloudflare, sitemap, robots, `noindex` y el dominio escrito solo en `SITE_URL` |
+| Publicación (`src/app/deploy.test.ts`, `indexing.test.ts`, `StaticShell.test.tsx`) | 13 | `_redirects`, CSP sin `unsafe-*` y con un solo proyecto de Supabase, cabeceras de seguridad, caché solo en `/assets/*`, límites de Cloudflare, sitemap, robots, `noindex`, el dominio escrito solo en `SITE_URL` y el shell estático (delante de `#root`, una sola vez y sin que React lo repita) |
 | Aviso de Cloudflare (`keepalive-worker`) | 5 | Llamada a `health_check` solo con `apikey`, fallos si no responde ok, error HTTP o faltan variables, 404 desde fuera |
 
 Las pruebas SQL del backend (`supabase/tests/seguridad_y_reglas.sql`) y las reglas comprobadas desde el navegador están en [`supabase/README.md`](supabase/README.md), apartado 14.
@@ -219,15 +230,47 @@ Los 37 casos comprobados con Playwright (carga, vacío, error y sin conexión en
 - **Qué no se sube:** `.env.local`, `CLAUDE.md`, `.claude/`, `dist/` y `node_modules/` están en `.gitignore`. No hay archivos de prueba ni de soporte en la raíz, y las herramientas de verificación (Playwright, gitleaks) viven fuera del proyecto. Los commits llevan el email `noreply` de GitHub.
 - **Clave secreta en la web:** en los JS del build, `sb_secret_` solo aparece dentro de supabase-js, como prefijo que la librería comprueba; `service_role` y `eyJ` no aparecen.
 
-### Cabeceras y rutas (antes de publicar)
+### En producción (fase 7)
 
-Con Edge headless a 1280 px, sirviendo `dist/` con las reglas de `_headers` y `_redirects` aplicadas (una simulación de Cloudflare Pages) y con las peticiones reales a Supabase: **24 de 24 comprobaciones correctas**. Portada, `/clases` al entrar directamente y al recargar, detalle de clase (supabase-js se descarga y conecta), Mis reservas con `LUM-7K3Q`, descarga del `.ics` (enlace `blob:`), acceso al panel con la cuenta demo del estudio y recarga en `/estudio/resumen`, y una ruta inexistente (404 de la app con `noindex`). **Ninguna violación de la CSP** y la consola sin errores ni avisos. Prueba de control: con Supabase fuera de `connect-src`, la portada marca enseguida la violación y el horario no carga.
+Comprobado el 5 de noviembre de 2026 contra https://lumbra-pilates.pages.dev.
 
-### Pendiente para la fase 7 (con la web publicada)
+**Cabeceras reales** (`curl -I`). Las seis de seguridad llegan en todas las rutas, sin duplicados: CSP (con `frame-ancestors 'none'`), `Strict-Transport-Security: max-age=31536000; includeSubDomains`, `X-Content-Type-Options: nosniff`, `Referrer-Policy: strict-origin-when-cross-origin`, `Permissions-Policy` y `Cross-Origin-Opener-Policy: same-origin`. Cloudflare Pages añade por su cuenta `Access-Control-Allow-Origin: *`.
 
-- Comprobar las cabeceras reales con `curl -I` en `/`, `/clases`, `/estudio/resumen` y un archivo de `/assets/`, y revisar que el registro del despliegue no rechaza la regla de `_redirects`. Si la rechazara, se borra el archivo: sin `404.html`, Pages ya sirve la app en cualquier ruta.
-- Medir con **PageSpeed Insights**. Si la portada baja de 90 o su LCP pasa de 2,5 s, investigar qué elemento es el LCP y cuándo se pinta.
-- Lanzar a mano el workflow `keepalive` y el Worker, y confirmar que responden `ok`.
+| Ruta | Estado | Seguridad (6) | `X-Robots-Tag` | `Cache-Control` | `Content-Type` |
+| --- | --- | --- | --- | --- | --- |
+| `/` | 200 | Sí | — | `public, max-age=0, must-revalidate` | `text/html` |
+| `/clases` | 200 | Sí | — | `max-age=0` | `text/html` |
+| `/mis-reservas` | 200 | Sí | `noindex` | `max-age=0` | `text/html` |
+| `/sistema` | 200 | Sí | `noindex` | `max-age=0` | `text/html` |
+| `/estudio/resumen` | 200 | Sí | `noindex` | `max-age=0` | `text/html` |
+| `/no-existe` | 200 ² | Sí | — ² | `max-age=0` | `text/html` |
+| `/robots.txt` | 200 | Sí | — | `max-age=0` | `text/plain` |
+| `/sitemap.xml` | 200 | Sí | — | `max-age=0` | `application/xml` |
+| `/assets/index-*.js` | 200 | Sí | — | `public, max-age=31536000, immutable` | `application/javascript` |
+
+² La app muestra su 404 y pone `noindex` en la página; Cloudflare no permite reescribir con estado 404.
+
+**Rutas.** `/clases`, `/mis-reservas` y `/estudio/resumen` cargadas directamente dan 200 con la app, así que la regla de `_redirects` funciona. `robots.txt` apunta a `https://lumbra-pilates.pages.dev/sitemap.xml`, y el sitemap lista `/`, `/clases`, `/privacidad` y `/aviso-legal` con esa URL.
+
+**Recorrido en Edge** (una tanda a 1280 px y otra a 390 px, un inicio de sesión por cuenta demo y tanda, sin congelar la hora): portada, horario, detalle, reserva sin sesión, Mis reservas con su código y cancelación, cliente demo y estudio demo. **Ninguna violación de la CSP**, la consola sin errores ni avisos y supabase-js sin descargar en la portada. Las reservas de prueba usan emails `@lumbra-prueba.test` y quedaron canceladas.
+
+**Reglas de la guía de Network** ([`supabase/README.md`](supabase/README.md), apartado 12), repetidas contra producción sin sacar ningún token del navegador:
+
+| # | Regla | Resultado |
+| --- | --- | --- |
+| 3 | Sin sesión no se leen reservas | `GET bookings?select=*` y `?select=email,phone`: `401 permission denied` |
+| 15 | El registro está cerrado | `POST auth/v1/signup`: `422 Signups not allowed` |
+| 10 | `/estudio/resumen` sin permiso | Sin sesión, el acceso; con el cliente, «Esta cuenta no tiene acceso». **Ninguna petición del estudio** en los dos casos |
+| 11 | Las funciones del estudio exigen ser miembro | `get_roster`: sin sesión, `401`; con el cliente, `400 unauthorized` |
+| 7 | El cliente solo ve lo suyo | Mis reservas y `GET bookings`: solo sus 4 filas (un único `user_id`, todas con su email); con `user_id=neq.<su id>`, `[]` |
+| 13 | El estudio ve enmascarados los datos de los visitantes | En `get_roster`, la reserva de prueba sale como `***@lumbra-prueba.test`, con el teléfono enmascarado |
+
+**Claves en los JS publicados.** Los 6 archivos JS (`index`, `StudioApp`, `supabaseJs` y las tres páginas legales): `sb_secret_` seguido de caracteres, **0**; `service_role`, **0**; `eyJ`, **0**. El prefijo `sb_secret_` aparece una vez, en supabase-js, sin nada detrás (`startsWith('sb_secret_')`).
+
+### Pendiente
+
+- Añadir las capturas de **PageSpeed Insights** (apartado «Rendimiento»).
+- Avisos para que Supabase no se pause: el de GitHub Actions ya funciona; el Worker `lumbra-keepalive` está creado y falta confirmar en su registro una ejecución con `ok`.
 
 ## Scripts
 

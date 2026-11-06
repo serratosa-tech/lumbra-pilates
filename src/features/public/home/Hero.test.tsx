@@ -85,6 +85,19 @@ describe('tarjeta «Próxima clase» del héroe', () => {
     expect(screen.getByText(label)).toBeInTheDocument()
   })
 
+  it('el esqueleto se ve desde el primer pintado: ni la caja ni su envoltorio tienen animación de entrada', () => {
+    renderHero(LOADING)
+    const box = cardBox()
+    expect(box.className).not.toMatch(/animate-/)
+    expect(box.parentElement!.className).not.toMatch(/animate-/)
+  })
+
+  it('con la clase llena, la insignia dice solo «Completa»', () => {
+    renderHero(ready([{ ...session, bookedCount: 12 }]))
+    expect(screen.getByText('Completa')).toBeInTheDocument()
+    expect(screen.queryByText(/lista de espera/)).toBeNull()
+  })
+
   it('un refresco con otra clase no vuelve a montar el contenido (no repite el fundido)', () => {
     const { rerender } = renderHero(ready([session]))
     const reveal = reserveLink()!.closest('.animate-reveal')

@@ -87,6 +87,9 @@ function NextClassContent({ next }: { next: NonNullable<ReturnType<typeof nextOf
   const now = useNow()
   const { day: firstDay, session } = next
   const spots = spotsStatus(session, now)
+  // Llena: solo «Completa». «Completa · lista de espera» no cabe en una línea junto a «Reservar» en 320 px
+  // (la tarjeta crecería respecto al esqueleto); la lista de espera se ve al reservar y en el horario.
+  const spotsLabel = spots.state === 'full' ? 'Completa' : spots.label
   return (
     <>
       <p className="flex items-center gap-1.5 text-xs font-medium tracking-wide text-terracota-700 uppercase">
@@ -108,7 +111,7 @@ function NextClassContent({ next }: { next: NonNullable<ReturnType<typeof nextOf
         </span>
       </p>
       <div className="mt-4 flex flex-wrap items-center justify-between gap-2">
-        <Badge tone={spots.tone}>{spots.label}</Badge>
+        <Badge tone={spots.tone}>{spotsLabel}</Badge>
         <Link
           to={scheduleLink(session)}
           className="inline-flex min-h-11 items-center gap-1 text-sm font-medium text-terracota-600 underline-offset-4 hover:underline"
@@ -127,7 +130,8 @@ function NextClassContent({ next }: { next: NonNullable<ReturnType<typeof nextOf
 
 /**
  * Tarjeta «Próxima clase» del héroe. Mientras carga, el esqueleto ocupa el mismo sitio con la misma
- * forma; los datos entran con un fundido sin mover la caja. Si falla o no quedan clases, la tarjeta
+ * forma y se ve desde el primer pintado del héroe (la caja no tiene animación de entrada); el único
+ * fundido es el de los datos al llegar, sin mover la caja. Si falla o no quedan clases, la tarjeta
  * se desvanece y se retira (sin movimiento con prefers-reduced-motion: la regla global lo anula).
  */
 function NextClassCard({ state }: { state: HomeState }) {
@@ -146,7 +150,7 @@ function NextClassCard({ state }: { state: HomeState }) {
     // Ancho: 2rem menos que la columna, pero nunca menos de 18rem (sin pasar de la columna). En 320 px y
     // con el texto del navegador muy grande ocupa toda la columna: así no parte palabras y la hora y el
     // nombre de la clase caben en una línea, igual que en el esqueleto.
-    <div className="relative mx-auto -mt-16 w-[min(100%,max(calc(100%-2rem),18rem))] max-w-xs lg:absolute lg:-bottom-8 lg:left-0 lg:mt-0 lg:w-80 lg:max-w-none animate-rise [animation-delay:200ms]">
+    <div className="relative mx-auto -mt-16 w-[min(100%,max(calc(100%-2rem),18rem))] max-w-xs lg:absolute lg:-bottom-8 lg:left-0 lg:mt-0 lg:w-80 lg:max-w-none">
       <div
         className={cn('rounded-lg border border-arena-200 bg-white/95 p-5 shadow-lg backdrop-blur', leaving && 'animate-fade-out')}
         onAnimationEnd={(event) => {

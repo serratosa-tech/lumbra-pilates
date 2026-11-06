@@ -119,13 +119,6 @@
     --fade-end: 2.5rem;
   }
 
-  /* Paso de la entrada del héroe: la misma animación que animate-rise, retrasada según su orden
-     (--step). Así el texto, el arco y la tarjeta «Próxima clase» entran como una sola secuencia. */
-  .hero-step {
-    animation: var(--animate-rise);
-    animation-delay: calc(var(--step, 0) * 60ms);
-  }
-
   .container-page {
     width: 100%;
     max-width: var(--container-page);
@@ -152,7 +145,6 @@
   *::before,
   *::after {
     animation-duration: 0.01ms !important;
-    animation-delay: 0s !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;

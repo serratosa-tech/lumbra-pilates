@@ -2,7 +2,8 @@ import { Badge, Card, Skeleton } from '../../../components/ui/index.ts'
 import type { Instructor } from '../../../data/index.ts'
 import { cn } from '../../../lib/cn.ts'
 import { SectionHeading } from './SectionHeading.tsx'
-import type { HomeState } from './useHomeData.ts'
+import { SectionError } from './SectionError.tsx'
+import type { CatalogState } from './useHomeData.ts'
 
 /** Combinaciones de fondo y texto del avatar (todas con contraste AA). */
 const AVATAR_TONES = [
@@ -43,7 +44,7 @@ function InstructorCard({ instructor, index }: { instructor: Instructor; index: 
   )
 }
 
-export function TeamSection({ state }: { state: HomeState }) {
+export function TeamSection({ state, onRetry }: { state: CatalogState; onRetry: () => void }) {
   return (
     <section aria-labelledby="equipo-titulo" className="bg-arena-100 py-12 sm:py-20 lg:py-24">
       <div className="container-page">
@@ -67,6 +68,7 @@ export function TeamSection({ state }: { state: HomeState }) {
             </div>
           )
         )}
+        {state.status === 'error' && <SectionError title="No hemos podido cargar el equipo" onRetry={onRetry} />}
       </div>
     </section>
   )

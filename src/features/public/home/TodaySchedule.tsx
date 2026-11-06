@@ -7,7 +7,7 @@ import { useNow } from '../../../lib/useNow.ts'
 import { scheduleLink } from '../schedule/useScheduleParams.ts'
 import { SectionHeading } from './SectionHeading.tsx'
 import { dayHeading, UPCOMING_LIMIT, type UpcomingDay } from './upcoming.ts'
-import type { HomeState } from './useHomeData.ts'
+import type { UpcomingState } from './useHomeData.ts'
 
 function DayGroup({ day, now }: { day: UpcomingDay; now: Date }) {
   const headingId = useId()
@@ -47,9 +47,9 @@ function subtitleFor(days: UpcomingDay[] | undefined): string {
   return 'Las clases que quedan hoy, con las plazas libres actualizadas cada minuto.'
 }
 
-export function TodaySchedule({ state, onRetry }: { state: HomeState; onRetry: () => void }) {
+export function TodaySchedule({ state, onRetry }: { state: UpcomingState; onRetry: () => void }) {
   const now = useNow()
-  const days = state.status === 'ready' ? state.data.upcoming : undefined
+  const days = state.status === 'ready' ? state.data : undefined
   const title = days && days.length > 0 && days[0].relation !== 'hoy' ? 'Próximas clases' : 'Hoy en Lumbra'
 
   return (

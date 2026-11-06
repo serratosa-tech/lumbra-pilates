@@ -8,18 +8,18 @@ import { TodaySchedule } from './TodaySchedule.tsx'
 import { useHomeData } from './useHomeData.ts'
 
 export function HomePage() {
-  const { state, retry } = useHomeData()
+  const { upcoming, catalog } = useHomeData()
   return (
     <>
       <Seo
         title="Lumbra Pilates · Estudio de pilates boutique en Valencia"
         description="Reformer y pilates en esterilla en grupos reducidos en Valencia. Consulta el horario, mira las plazas libres y reserva tu clase en un minuto, sin crear cuenta."
       />
-      <Hero state={state} />
-      <TodaySchedule state={state} onRetry={retry} />
-      <ClassTypesSection state={state} />
+      <Hero state={upcoming.state} />
+      <TodaySchedule state={upcoming.state} onRetry={upcoming.retry} />
+      <ClassTypesSection state={catalog.state} onRetry={catalog.retry} />
       <HowItWorksSection />
-      <TeamSection state={state} />
+      <TeamSection state={catalog.state} onRetry={catalog.retry} />
       <ClosingCta />
     </>
   )

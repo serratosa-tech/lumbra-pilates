@@ -32,16 +32,19 @@ export async function loadUpcoming(ds: DataSource, now: Date, limit = UPCOMING_L
   const scheduled = async (from: string, to: string) =>
     (await ds.listSessions(from, to)).filter((s) => s.status === 'scheduled')
 
-  const todaySessions = (await scheduled(now.toISOString(), dayRange(today).to)).slice(0, limit)
+  // Hoy y los días siguientes, a la vez: si hoy quedan menos de `limit`, no se espera a una segunda
+  // petición en serie (la tarjeta «Próxima clase» y este bloque se pintan antes). Si hoy basta, la
+  // segunda respuesta no se usa.
+  const [todayAll, ahead] = await Promise.all([
+    scheduled(now.toISOString(), dayRange(today).to),
+    scheduled(studioDateTime(tomorrow).toISOString(), studioDateTime(addDays(tomorrow, LOOKAHEAD_DAYS)).toISOString()),
+  ])
+  const todaySessions = todayAll.slice(0, limit)
   if (todaySessions.length > 0) days.push({ relation: 'hoy', sessions: todaySessions })
 
   const missing = limit - todaySessions.length
   if (missing === 0) return days
 
-  const ahead = await scheduled(
-    studioDateTime(tomorrow).toISOString(),
-    studioDateTime(addDays(tomorrow, LOOKAHEAD_DAYS)).toISOString(),
-  )
   if (ahead.length === 0) return days
 
   const nextDate = studioDate(new Date(ahead[0].startsAt))

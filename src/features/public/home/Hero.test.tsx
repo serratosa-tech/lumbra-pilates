@@ -4,8 +4,8 @@ import { describe, expect, it } from 'vitest'
 import { ToastProvider } from '../../../components/ui/index.ts'
 import type { ClassSession } from '../../../data/index.ts'
 import { Hero } from './Hero.tsx'
-import type { DayRelation } from './upcoming.ts'
-import type { HomeData, HomeState } from './useHomeData.ts'
+import type { DayRelation, UpcomingDay } from './upcoming.ts'
+import type { UpcomingState } from './useHomeData.ts'
 
 const session: ClassSession = {
   id: 's1',
@@ -21,15 +21,11 @@ const session: ClassSession = {
   waitlistCount: 0,
   status: 'scheduled',
 }
-const data = (sessions: ClassSession[], relation: DayRelation = 'hoy'): HomeData => ({
-  classTypes: [],
-  instructors: [],
-  upcoming: sessions.length ? [{ relation, sessions }] : [],
-})
-const LOADING: HomeState = { status: 'loading' }
-const ready = (sessions: ClassSession[], relation?: DayRelation): HomeState => ({ status: 'ready', data: data(sessions, relation) })
+const data = (sessions: ClassSession[], relation: DayRelation = 'hoy'): UpcomingDay[] => (sessions.length ? [{ relation, sessions }] : [])
+const LOADING: UpcomingState = { status: 'loading' }
+const ready = (sessions: ClassSession[], relation?: DayRelation): UpcomingState => ({ status: 'ready', data: data(sessions, relation) })
 
-const page = (state: HomeState) => (
+const page = (state: UpcomingState) => (
   <MemoryRouter>
     <ToastProvider>
       <Hero state={state} />
@@ -37,9 +33,9 @@ const page = (state: HomeState) => (
   </MemoryRouter>
 )
 
-function renderHero(state: HomeState) {
+function renderHero(state: UpcomingState) {
   const view = render(page(state))
-  return { ...view, rerender: (next: HomeState) => view.rerender(page(next)) }
+  return { ...view, rerender: (next: UpcomingState) => view.rerender(page(next)) }
 }
 
 // jsdom no cuenta el espacio inicial del texto oculto («ReservarMat Flow…»); el navegador, sí.
@@ -106,7 +102,7 @@ describe('tarjeta «Próxima clase» del héroe', () => {
   })
 
   it.each([
-    ['si falla', { status: 'error', error: new Error('red') } as HomeState],
+    ['si falla', { status: 'error', error: new Error('red') } as UpcomingState],
     ['si no quedan clases', ready([])],
   ])('%s, el esqueleto se desvanece y después se retira', (_, end) => {
     const { rerender } = renderHero(LOADING)

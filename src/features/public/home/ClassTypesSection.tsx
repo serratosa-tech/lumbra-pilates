@@ -4,7 +4,8 @@ import type { ClassIntensity, ClassType } from '../../../data/index.ts'
 import { cn } from '../../../lib/cn.ts'
 import { INTENSITY_LABELS, LEVEL_LABELS } from '../../../components/schedule/labels.ts'
 import { SectionHeading } from './SectionHeading.tsx'
-import type { HomeState } from './useHomeData.ts'
+import { SectionError } from './SectionError.tsx'
+import type { CatalogState } from './useHomeData.ts'
 
 function IntensityMeter({ value }: { value: ClassIntensity }) {
   return (
@@ -47,7 +48,7 @@ function ClassTypeCard({ classType, index }: { classType: ClassType; index: numb
   )
 }
 
-export function ClassTypesSection({ state }: { state: HomeState }) {
+export function ClassTypesSection({ state, onRetry }: { state: CatalogState; onRetry: () => void }) {
   return (
     <section aria-labelledby="clases-titulo" className="py-12 sm:py-20 lg:py-24">
       <div className="container-page">
@@ -71,6 +72,7 @@ export function ClassTypesSection({ state }: { state: HomeState }) {
             </div>
           )
         )}
+        {state.status === 'error' && <SectionError title="No hemos podido cargar las clases" onRetry={onRetry} />}
       </div>
     </section>
   )

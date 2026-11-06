@@ -10,14 +10,14 @@ import { SLOGAN } from '../../../lib/site.ts'
 import { useNow } from '../../../lib/useNow.ts'
 import { scheduleLink } from '../schedule/useScheduleParams.ts'
 import type { UpcomingDay } from './upcoming.ts'
-import type { HomeState } from './useHomeData.ts'
+import type { UpcomingState } from './useHomeData.ts'
 
 const HIGHLIGHTS = ['Grupos reducidos de 8 a 12', 'Reserva sin crear cuenta', 'Lista de espera automática']
 
 /** Primera clase de las próximas, si la hay. */
-function nextOf(state: HomeState) {
+function nextOf(state: UpcomingState) {
   if (state.status !== 'ready') return undefined
-  const day = state.data.upcoming[0]
+  const day = state.data[0]
   const session = day?.sessions[0]
   return day && session ? { day, session } : undefined
 }
@@ -134,12 +134,12 @@ function NextClassContent({ next }: { next: NonNullable<ReturnType<typeof nextOf
  * fundido es el de los datos al llegar, sin mover la caja. Si falla o no quedan clases, la tarjeta
  * se desvanece y se retira (sin movimiento con prefers-reduced-motion: la regla global lo anula).
  */
-function NextClassCard({ state }: { state: HomeState }) {
+function NextClassCard({ state }: { state: UpcomingState }) {
   const next = nextOf(state)
   // Lo último que se mostró con datos: si después no quedan clases, se desvanece eso y no un esqueleto.
-  const [lastShown, setLastShown] = useState<HomeState | null>(null)
+  const [lastShown, setLastShown] = useState<UpcomingState | null>(null)
   // El estado (error o sin clases) cuyo fundido de salida ya terminó.
-  const [goneFor, setGoneFor] = useState<HomeState | null>(null)
+  const [goneFor, setGoneFor] = useState<UpcomingState | null>(null)
   if (next && lastShown !== state) setLastShown(state)
 
   const leaving = state.status === 'error' || (state.status === 'ready' && !next)
@@ -185,7 +185,7 @@ function ArchArt() {
   )
 }
 
-export function Hero({ state }: { state: HomeState }) {
+export function Hero({ state }: { state: UpcomingState }) {
   return (
     <section aria-labelledby="hero-titulo" className="hero-backdrop overflow-hidden">
       <div className="container-page grid grid-cols-1 items-center gap-8 pt-8 pb-12 sm:gap-14 sm:pt-16 sm:pb-20 lg:grid-cols-[1.1fr_0.9fr] lg:gap-10 lg:pt-20 lg:pb-28">

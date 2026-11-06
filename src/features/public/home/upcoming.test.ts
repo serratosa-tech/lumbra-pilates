@@ -39,6 +39,23 @@ describe('loadUpcoming', () => {
     expect(dayHeading(days[0])).toBe('Lunes 2 de noviembre')
   })
 
+  it('pide hoy y los días siguientes a la vez, sin esperar a la primera respuesta', async () => {
+    const calls: string[] = []
+    const pending: Array<() => void> = []
+    const slow = {
+      ...ds,
+      listSessions: (from: string, to: string) => {
+        calls.push(from)
+        return new Promise<Awaited<ReturnType<typeof ds.listSessions>>>((resolve) => pending.push(() => resolve(ds.listSessions(from, to))))
+      },
+    }
+    const result = loadUpcoming(slow, new Date('2026-10-29T18:00:00.000Z'))
+    await Promise.resolve()
+    expect(calls).toHaveLength(2) // las dos salen antes de que responda ninguna
+    pending.forEach((resolve) => resolve())
+    expect((await result).map((d) => d.relation)).toEqual(['hoy', 'manana'])
+  })
+
   it('sin clases en el horizonte devuelve una lista vacía', async () => {
     const empty = createDemoDataSource({ seed: () => ({ sessions: [], bookings: [] }) })
     expect(await loadUpcoming(empty, new Date('2026-10-29T10:00:00.000Z'))).toEqual([])

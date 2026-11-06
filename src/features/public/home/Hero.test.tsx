@@ -41,15 +41,24 @@ function renderHero(state: UpcomingState) {
 // jsdom no cuenta el espacio inicial del texto oculto («ReservarMat Flow…»); el navegador, sí.
 const reserveLink = () => screen.queryByRole('link', { name: /^Reservar\s*Mat Flow a las/ })
 /**
- * Fin de una animación CSS. jsdom no tiene AnimationEvent y React escucha allí «webkitAnimationEnd»
- * (en el navegador, «animationend»): se envían los dos.
+ * Inicio y fin de una animación CSS. jsdom no tiene AnimationEvent y React escucha allí
+ * «webkitAnimationStart/End» (en el navegador, «animationstart/end»): se envían los dos.
  */
+const startAnimation = (element: Element) => {
+  fireEvent(element, new Event('webkitAnimationStart', { bubbles: true }))
+  fireEvent(element, new Event('animationstart', { bubbles: true }))
+}
 const endAnimation = (element: Element) => {
   fireEvent(element, new Event('webkitAnimationEnd', { bubbles: true }))
   fireEvent(element, new Event('animationend', { bubbles: true }))
 }
-/** La caja de la tarjeta (borde, sombra): la que se desvanece al retirarse. */
+/** La caja de la tarjeta (borde, sombra): la que entra con el héroe y se desvanece al retirarse. */
 const cardBox = () => screen.getByText('Cargando la próxima clase…').closest('.rounded-lg') as HTMLElement
+/** Completa la entrada de la caja (su paso de hero-step). */
+const enter = (box: Element) => {
+  startAnimation(box)
+  endAnimation(box)
+}
 
 describe('tarjeta «Próxima clase» del héroe', () => {
   it('mientras carga, anuncia la carga y el texto de ejemplo del esqueleto no se lee', () => {
@@ -60,9 +69,10 @@ describe('tarjeta «Próxima clase» del héroe', () => {
     expect(screen.queryByRole('link', { name: /^Reservar\s*\S+.* a las/ })).toBeNull()
   })
 
-  it('con datos, el contenido sustituye al esqueleto con un fundido y en la misma caja', () => {
+  it('con datos tras la entrada, el contenido sustituye al esqueleto con un fundido y en la misma caja', () => {
     const { rerender } = renderHero(LOADING)
     const box = cardBox()
+    enter(box)
     rerender(ready([session]))
     expect(screen.queryByText('Cargando la próxima clase…')).toBeNull()
     const link = reserveLink()
@@ -81,11 +91,54 @@ describe('tarjeta «Próxima clase» del héroe', () => {
     expect(screen.getByText(label)).toBeInTheDocument()
   })
 
-  it('el esqueleto se ve desde el primer pintado: ni la caja ni su envoltorio tienen animación de entrada', () => {
-    renderHero(LOADING)
+  it('la caja, con el esqueleto dentro, es el último paso de la entrada del héroe', () => {
+    const { container } = renderHero(LOADING)
+    const steps = [...container.querySelectorAll('.hero-step')].map((el) => Number(/\[--step:(\d+)\]/.exec(el.className)?.[1]))
+    expect(steps).toEqual(steps.map((_, index) => index))
+    expect(container.querySelectorAll('.hero-step')[steps.length - 1]).toBe(cardBox())
+    expect(container.querySelector('.animate-rise')).toBeNull()
+  })
+
+  it('si los datos llegan antes de que la caja se vea, el contenido entra con ella, sin fundido propio', () => {
+    const { rerender } = renderHero(LOADING)
     const box = cardBox()
-    expect(box.className).not.toMatch(/animate-/)
-    expect(box.parentElement!.className).not.toMatch(/animate-/)
+    rerender(ready([session]))
+    expect(reserveLink()!.closest('.rounded-lg')).toBe(box)
+    expect(reserveLink()!.closest('.animate-reveal')).toBeNull()
+    enter(box)
+    expect(reserveLink()!.closest('.animate-reveal')).toBeNull()
+  })
+
+  it('si los datos llegan mientras la caja entra, el esqueleto sigue hasta el final y luego se funde el contenido', () => {
+    const { rerender } = renderHero(LOADING)
+    const box = cardBox()
+    startAnimation(box)
+    rerender(ready([session]))
+    expect(reserveLink()).toBeNull()
+    expect(screen.getByText('Cargando la próxima clase…')).toBeInTheDocument()
+    endAnimation(box)
+    expect(reserveLink()!.closest('.animate-reveal')).not.toBeNull()
+    expect(reserveLink()!.closest('.rounded-lg')).toBe(box)
+  })
+
+  it('si falla antes de que la caja se vea, se retira sin fundido', () => {
+    const { rerender, container } = renderHero(LOADING)
+    rerender({ status: 'error', error: new Error('red') })
+    expect(container.querySelector('.animate-fade-out')).toBeNull()
+    expect(screen.queryByText('Cargando la próxima clase…')).toBeNull()
+  })
+
+  it('si falla mientras la caja entra, termina la entrada y después se desvanece', () => {
+    const { rerender } = renderHero(LOADING)
+    const box = cardBox()
+    startAnimation(box)
+    rerender({ status: 'error', error: new Error('red') })
+    expect(box).toHaveClass('hero-step')
+    endAnimation(box)
+    expect(box).toHaveClass('animate-fade-out')
+    expect(box).not.toHaveClass('hero-step')
+    endAnimation(box)
+    expect(box).not.toBeInTheDocument()
   })
 
   it('con la clase llena, la insignia dice solo «Completa»', () => {
@@ -95,8 +148,11 @@ describe('tarjeta «Próxima clase» del héroe', () => {
   })
 
   it('un refresco con otra clase no vuelve a montar el contenido (no repite el fundido)', () => {
-    const { rerender } = renderHero(ready([session]))
+    const { rerender } = renderHero(LOADING)
+    enter(cardBox())
+    rerender(ready([session]))
     const reveal = reserveLink()!.closest('.animate-reveal')
+    expect(reveal).not.toBeNull()
     rerender(ready([{ ...session, bookedCount: 11 }]))
     expect(reserveLink()!.closest('.animate-reveal')).toBe(reveal)
   })
@@ -107,6 +163,7 @@ describe('tarjeta «Próxima clase» del héroe', () => {
   ])('%s, el esqueleto se desvanece y después se retira', (_, end) => {
     const { rerender } = renderHero(LOADING)
     const box = cardBox()
+    enter(box)
     rerender(end)
     expect(box).toHaveClass('animate-fade-out')
     expect(box).toBeInTheDocument()
@@ -116,7 +173,9 @@ describe('tarjeta «Próxima clase» del héroe', () => {
   })
 
   it('si deja de haber clases tras mostrar una, se desvanece la que se veía', () => {
-    const { rerender } = renderHero(ready([session]))
+    const { rerender } = renderHero(LOADING)
+    enter(cardBox())
+    rerender(ready([session]))
     const box = reserveLink()!.closest('.rounded-lg') as HTMLElement
     rerender(ready([]))
     expect(box).toHaveClass('animate-fade-out')

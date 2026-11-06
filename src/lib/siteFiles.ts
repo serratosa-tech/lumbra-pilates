@@ -29,7 +29,28 @@ const EMPTY_ROOT = '<div id="root"></div>'
 /** Escribe el HTML del shell estático justo delante de #root, que sigue vacío; falla si no hay un único #root vacío. */
 export function injectStaticShell(html: string, markup: string): string {
   if (html.split(EMPTY_ROOT).length !== 2) throw new Error(`index.html debe tener un único ${EMPTY_ROOT} vacío`)
-  return html.replace(EMPTY_ROOT, `${markup}${EMPTY_ROOT}`)
+  return html.replace(EMPTY_ROOT, () => `${markup}${EMPTY_ROOT}`)
+}
+
+/** #root con una ruta prerenderizada dentro; main.tsx solo la hidrata si coincide con la ruta visitada. */
+function prerenderedRoot(path: string, markup: string): string {
+  return `<div id="root" data-prerendered="${path}">${markup}</div>`
+}
+
+/** Escribe dentro de #root el HTML prerenderizado de una ruta; falla si no hay un único #root vacío. */
+export function injectPrerendered(html: string, path: string, markup: string): string {
+  if (html.split(EMPTY_ROOT).length !== 2) throw new Error(`index.html debe tener un único ${EMPTY_ROOT} vacío`)
+  return html.replace(EMPTY_ROOT, () => prerenderedRoot(path, markup))
+}
+
+/**
+ * Lo contrario de injectPrerendered: el mismo HTML con #root vacío (app.html, para las demás rutas).
+ * Falla si el HTML prerenderizado no está exactamente una vez (el build lo habría cambiado).
+ */
+export function stripPrerendered(html: string, path: string, markup: string): string {
+  const root = prerenderedRoot(path, markup)
+  if (html.split(root).length !== 2) throw new Error(`No se encuentra una única vez el HTML prerenderizado de ${path}`)
+  return html.replace(root, () => EMPTY_ROOT)
 }
 
 /** Reglas de public/_headers: ruta → cabeceras («Nombre: valor»), en el orden del archivo. */

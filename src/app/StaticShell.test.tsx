@@ -2,7 +2,7 @@ import { render } from '@testing-library/react'
 import { MemoryRouter, Route, Routes } from 'react-router'
 import { describe, expect, it } from 'vitest'
 import indexHtml from '../../index.html?raw'
-import { injectStaticShell } from '../lib/siteFiles.ts'
+import { injectPrerendered, injectStaticShell, stripPrerendered } from '../lib/siteFiles.ts'
 import { RootLayout } from './RootLayout.tsx'
 import { staticShellMarkup } from './staticShellMarkup.tsx'
 
@@ -21,6 +21,18 @@ describe('shell estático de index.html', () => {
     expect(html).toContain('<p>shell</p><div id="root"></div>')
     expect(() => injectStaticShell(`${indexHtml}<div id="root"></div>`, 'x')).toThrow()
     expect(() => injectStaticShell(indexHtml.replace('<div id="root"></div>', '<div id="root">x</div>'), 'x')).toThrow()
+  })
+
+  it('la portada prerenderizada va dentro de #root, marcada con su ruta, y app.html la quita entera', () => {
+    const withShell = injectStaticShell(indexHtml, '<p>shell</p>')
+    const html = injectPrerendered(withShell, '/', '<main>portada</main>')
+    expect(html).toContain('<p>shell</p><div id="root" data-prerendered="/"><main>portada</main></div>')
+    expect(stripPrerendered(html, '/', '<main>portada</main>')).toBe(withShell)
+    // Sin un único #root vacío, o si el build ha cambiado el HTML prerenderizado, el build falla.
+    expect(() => injectPrerendered(html, '/', 'x')).toThrow()
+    expect(() => stripPrerendered(html, '/', '<main>otra</main>')).toThrow()
+    // Los «$» del HTML no se interpretan como patrones de sustitución.
+    expect(injectPrerendered(indexHtml, '/', '<p>$&</p>')).toContain('<div id="root" data-prerendered="/"><p>$&</p></div>')
   })
 
   it('React no vuelve a pintarlo: la banda no sale dos veces', () => {

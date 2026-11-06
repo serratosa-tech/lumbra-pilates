@@ -1,5 +1,5 @@
 import { Clock, Mail, MapPin } from 'lucide-react'
-import type { ReactNode } from 'react'
+import { useSyncExternalStore, type ReactNode } from 'react'
 import { Link } from 'react-router'
 import { SLOGAN, STUDIO } from '../../lib/site.ts'
 import { LogoFull } from '../brand/Logo.tsx'
@@ -17,7 +17,17 @@ function FooterColumn({ title, children }: { title: string; children: ReactNode 
   )
 }
 
-const YEAR = new Date().getFullYear()
+const subscribeNever = () => () => {}
+const currentYear = () => new Date().getFullYear()
+const buildYear = () => __BUILD_YEAR__
+
+/**
+ * El año del copyright. La portada llega prerenderizada con el año del build: al hidratar se usa ese
+ * (si no, una visita en otro año rompería la hidratación) y justo después React pone el actual.
+ */
+function useYear(): number {
+  return useSyncExternalStore(subscribeNever, currentYear, buildYear)
+}
 
 const LEGAL_NAV = [
   { to: '/aviso-legal', label: 'Aviso legal' },
@@ -26,6 +36,7 @@ const LEGAL_NAV = [
 ]
 
 export function SiteFooter() {
+  const year = useYear()
   return (
     <footer className="on-dark bg-tinta text-arena-200">
       <div className="container-page grid grid-cols-1 gap-8 py-10 sm:grid-cols-2 sm:gap-10 sm:py-14 lg:grid-cols-[1.4fr_1fr_1fr_1fr]">
@@ -88,7 +99,7 @@ export function SiteFooter() {
 
       <div className="border-t border-arena-200/15">
         <div className="container-page flex flex-col gap-x-8 gap-y-1 py-4 text-sm md:flex-row md:items-center md:justify-between">
-          <p className="py-2">© {YEAR} Lumbra Pilates. Estudio ficticio: demo de portafolio de Helena Serratosa.</p>
+          <p className="py-2">© {year} Lumbra Pilates. Estudio ficticio: demo de portafolio de Helena Serratosa.</p>
           <nav aria-label="Legal">
             <ul className="flex flex-wrap gap-x-5">
               {LEGAL_NAV.map((item) => (

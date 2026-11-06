@@ -4,7 +4,14 @@ import tailwindcss from '@tailwindcss/vite'
 import react from '@vitejs/plugin-react'
 import { createServer, defineConfig, loadEnv, type Plugin } from 'vite'
 import { SITE_URL } from './src/lib/site.ts'
-import { cspConnectSources, injectStaticShell, robotsTxt, sitemapXml } from './src/lib/siteFiles.ts'
+import {
+  cspConnectSources,
+  injectPrerendered,
+  injectStaticShell,
+  robotsTxt,
+  sitemapXml,
+  stripPrerendered,
+} from './src/lib/siteFiles.ts'
 
 const PORT = 5176
 
@@ -77,21 +84,32 @@ function preloadFont(pattern: RegExp): Plugin {
   }
 }
 
+/** Año del build: el pie lo usa al hidratar la portada prerenderizada (ver SiteFooter.tsx). */
+const define = { __BUILD_YEAR__: JSON.stringify(new Date().getFullYear()) }
+
 /**
  * Escribe delante de #root el HTML del shell común (enlace de salto y banda de demo), renderizado con
- * react-dom/server desde sus componentes (src/app/StaticShell.tsx). La banda, que es el LCP, se pinta
- * con el HTML y el CSS, sin esperar al JavaScript, y React no la toca. En desarrollo usa el propio
- * servidor; en el build, uno efímero de Vite solo para SSR (sin puerto).
+ * react-dom/server desde sus componentes (src/app/StaticShell.tsx): se pinta con el HTML y el CSS, sin
+ * esperar al JavaScript, y React no lo toca.
+ *
+ * En el build, además, prerenderiza la portada dentro de #root (src/app/prerender.tsx), que main.tsx
+ * hidrata: el héroe, que es el LCP, sale con el HTML. Ese index.html solo se sirve en «/»; las demás
+ * rutas reciben app.html, el mismo HTML con #root vacío (public/_redirects). En desarrollo no se
+ * prerenderiza (el CSS lo inyecta el JavaScript y la portada se vería un instante sin estilos).
+ *
+ * En desarrollo usa el propio servidor; en el build, uno efímero de Vite solo para SSR (sin puerto).
  */
 function staticShell(): Plugin {
-  const MODULE = '/src/app/staticShellMarkup.tsx'
+  const SHELL = '/src/app/staticShellMarkup.tsx'
+  const PRERENDER = '/src/app/prerender.tsx'
+  let home: { path: string; markup: string } | null = null
   return {
     name: 'lumbra:static-shell',
     transformIndexHtml: {
       order: 'pre',
       async handler(html, ctx) {
         if (ctx.server) {
-          const { staticShellMarkup } = await ctx.server.ssrLoadModule(MODULE)
+          const { staticShellMarkup } = await ctx.server.ssrLoadModule(SHELL)
           return injectStaticShell(html, staticShellMarkup())
         }
         // Sin optimizador de dependencias y con caché propia: si no, al arrancar borra node_modules/.vite/deps
@@ -103,15 +121,27 @@ function staticShell(): Plugin {
           logLevel: 'error',
           appType: 'custom',
           plugins: [react()],
+          define,
           optimizeDeps: { noDiscovery: true, include: [] },
           server: { middlewareMode: true, hmr: false, ws: false },
         })
         try {
-          const { staticShellMarkup } = await server.ssrLoadModule(MODULE)
-          return injectStaticShell(html, staticShellMarkup())
+          const { staticShellMarkup } = await server.ssrLoadModule(SHELL)
+          const { homeMarkup, PRERENDERED_PATH } = await server.ssrLoadModule(PRERENDER)
+          home = { path: PRERENDERED_PATH, markup: homeMarkup() }
+          return injectPrerendered(injectStaticShell(html, staticShellMarkup()), home.path, home.markup)
         } finally {
           await server.close()
         }
+      },
+    },
+    generateBundle: {
+      order: 'post',
+      handler(_options, bundle) {
+        if (!home) return
+        const index = bundle['index.html']
+        if (index?.type !== 'asset' || typeof index.source !== 'string') throw new Error('Falta index.html en el build')
+        this.emitFile({ type: 'asset', fileName: 'app.html', source: stripPrerendered(index.source, home.path, home.markup) })
       },
     },
   }
@@ -129,6 +159,7 @@ export default defineConfig(({ mode }) => {
       preloadFont(/jost-latin-wght-normal-[\w-]+\.woff2$/),
       checkCsp(env.VITE_SUPABASE_URL),
     ],
+    define,
     server: { port: PORT, strictPort: true },
     preview: { port: PORT, strictPort: true },
     test: {

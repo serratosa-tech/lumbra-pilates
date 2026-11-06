@@ -25,44 +25,54 @@ function PageFallback({ label }: { label: string }) {
   )
 }
 
-export default function App() {
+/**
+ * Las rutas, sin router: App las monta con BrowserRouter y el prerenderizado de la portada
+ * (prerender.tsx) con StaticRouter, para que el HTML del build sea el mismo que pinta el navegador.
+ */
+export function AppRoutes() {
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route element={<RootLayout />}>
+    <Routes>
+      <Route element={<RootLayout />}>
+        <Route
+          path="estudio/*"
+          element={
+            <Suspense fallback={<PageFallback label="Cargando el panel…" />}>
+              <StudioApp />
+            </Suspense>
+          }
+        />
+        <Route element={<PublicLayout />}>
+          <Route index element={<HomePage />} />
+          <Route path="clases" element={<SchedulePage />} />
+          <Route path="mis-reservas" element={<MyBookingsPage />} />
           <Route
-            path="estudio/*"
+            path="privacidad"
             element={
-              <Suspense fallback={<PageFallback label="Cargando el panel…" />}>
-                <StudioApp />
+              <Suspense fallback={<PageFallback label="Cargando…" />}>
+                <PrivacyPage />
               </Suspense>
             }
           />
-          <Route element={<PublicLayout />}>
-            <Route index element={<HomePage />} />
-            <Route path="clases" element={<SchedulePage />} />
-            <Route path="mis-reservas" element={<MyBookingsPage />} />
-            <Route
-              path="privacidad"
-              element={
-                <Suspense fallback={<PageFallback label="Cargando…" />}>
-                  <PrivacyPage />
-                </Suspense>
-              }
-            />
-            <Route
-              path="aviso-legal"
-              element={
-                <Suspense fallback={<PageFallback label="Cargando…" />}>
-                  <LegalNoticePage />
-                </Suspense>
-              }
-            />
-            <Route path="sistema" element={<DesignSystemPage />} />
-            <Route path="*" element={<NotFoundPage />} />
-          </Route>
+          <Route
+            path="aviso-legal"
+            element={
+              <Suspense fallback={<PageFallback label="Cargando…" />}>
+                <LegalNoticePage />
+              </Suspense>
+            }
+          />
+          <Route path="sistema" element={<DesignSystemPage />} />
+          <Route path="*" element={<NotFoundPage />} />
         </Route>
-      </Routes>
+      </Route>
+    </Routes>
+  )
+}
+
+export default function App() {
+  return (
+    <BrowserRouter>
+      <AppRoutes />
     </BrowserRouter>
   )
 }

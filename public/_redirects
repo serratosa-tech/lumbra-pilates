@@ -1,3 +1,4 @@
-# Cloudflare Pages: las rutas de la app (BrowserRouter) devuelven index.html al recargar o al entrar
+# Cloudflare Pages: «/» es index.html, con la portada prerenderizada. Las demás rutas de la app
+# (BrowserRouter) devuelven app.html (el mismo HTML con #root vacío) al recargar o al entrar
 # directamente. Las rutas que no existen las resuelve la app con su página 404 (lleva noindex).
-/* /index.html 200
+/* /app 200

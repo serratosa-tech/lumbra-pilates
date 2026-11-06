@@ -95,6 +95,9 @@
   --animate-sheet-in: sheet-in var(--duration-base) var(--ease-out-soft) both;
   --animate-sheet-up: sheet-up var(--duration-base) var(--ease-out-soft) both;
   --animate-fade-in: fade-in var(--duration-base) var(--ease-out-soft) both;
+  /* Cambio de esqueleto a datos (y salida si no hay nada que mostrar), sin mover la caja. */
+  --animate-reveal: fade-in 200ms var(--ease-out-soft) both;
+  --animate-fade-out: fade-in 200ms var(--ease-out-soft) reverse both;
   --animate-toast-in: toast-in var(--duration-base) var(--ease-out-soft) both;
 
   @keyframes breathe {

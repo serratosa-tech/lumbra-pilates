@@ -1,83 +1,166 @@
 import { ArrowRight, Clock, Sparkles, UserRound } from 'lucide-react'
+import { useState, type ReactNode } from 'react'
 import { Link } from 'react-router'
 import { DemoTryButtons } from '../../../components/account/DemoTryButtons.tsx'
 import { spotsStatus } from '../../../components/schedule/labels.ts'
 import { Badge, ButtonLink, buttonClasses, Skeleton } from '../../../components/ui/index.ts'
-import { formatTime } from '../../../lib/dates.ts'
+import { cn } from '../../../lib/cn.ts'
+import { formatDate, formatTime } from '../../../lib/dates.ts'
 import { SLOGAN } from '../../../lib/site.ts'
-import { SEP } from '../../../lib/text.ts'
 import { useNow } from '../../../lib/useNow.ts'
 import { scheduleLink } from '../schedule/useScheduleParams.ts'
-import { dayHeading } from './upcoming.ts'
+import type { UpcomingDay } from './upcoming.ts'
 import type { HomeState } from './useHomeData.ts'
 
 const HIGHLIGHTS = ['Grupos reducidos de 8 a 12', 'Reserva sin crear cuenta', 'Lista de espera automática']
 
-function NextClassCard({ state }: { state: HomeState }) {
-  const now = useNow()
-  if (state.status === 'error') return null
+/** Primera clase de las próximas, si la hay. */
+function nextOf(state: HomeState) {
+  if (state.status !== 'ready') return undefined
+  const day = state.data.upcoming[0]
+  const session = day?.sessions[0]
+  return day && session ? { day, session } : undefined
+}
 
-  const firstDay = state.status === 'ready' ? state.data.upcoming[0] : undefined
-  const next = firstDay?.sessions[0]
-  if (state.status === 'ready' && !next) return null
-  const spots = next ? spotsStatus(next, now) : undefined
+/**
+ * «Próxima clase hoy», «… mañana» o «… el lunes 9»: corta para que quepa en una línea, como el texto de
+ * ejemplo del esqueleto (si no, la tarjeta crecería al llegar los datos). La fecha completa está en el horario.
+ */
+function nextLabel(day: UpcomingDay): string {
+  if (day.relation === 'hoy') return 'Próxima clase hoy'
+  if (day.relation === 'manana') return 'Próxima clase mañana'
+  return `Próxima clase el ${formatDate(day.sessions[0].startsAt, { month: false })}`
+}
+
+/**
+ * Texto de ejemplo invisible con una barra de esqueleto encima: ocupa exactamente lo que ocupará el
+ * texto real con las mismas clases, así que la tarjeta no cambia de tamaño al llegar los datos.
+ */
+function Ghost({ children, className, bar = 'inset-x-0 top-1/2 h-[0.8em] -translate-y-1/2' }: { children: ReactNode; className?: string; bar?: string }) {
+  return (
+    <span className={cn('relative', className)}>
+      <span className="invisible">{children}</span>
+      <Skeleton className={cn('absolute', bar)} />
+    </span>
+  )
+}
+
+/** El esqueleto de la tarjeta: las mismas filas y clases que NextClassContent, con texto de ejemplo. */
+function NextClassSkeleton() {
+  return (
+    <div role="status">
+      <span className="sr-only">Cargando la próxima clase…</span>
+      <div aria-hidden="true">
+        <p className="flex items-center gap-1.5 text-xs font-medium tracking-wide uppercase">
+          <Skeleton className="size-4 shrink-0 rounded-full" />
+          <Ghost>Próxima clase mañana</Ghost>
+        </p>
+        <p className="mt-3 flex flex-wrap items-baseline gap-x-3">
+          <Ghost className="text-3xl font-medium">18:00</Ghost>
+          <Ghost className="font-medium">Reformer Esencial</Ghost>
+        </p>
+        <p className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm">
+          <span className="inline-flex items-center gap-1.5">
+            <Skeleton className="size-4 rounded-full" />
+            <Ghost>Lucía Ferrer</Ghost>
+          </span>
+          <span className="inline-flex items-center gap-1.5">
+            <Skeleton className="size-4 rounded-full" />
+            <Ghost>50 min</Ghost>
+          </span>
+        </p>
+        <div className="mt-4 flex flex-wrap items-center justify-between gap-2">
+          <Ghost bar="inset-0 rounded-full">
+            <Badge>Últimas 3 plazas</Badge>
+          </Ghost>
+          <span className="inline-flex min-h-11 items-center gap-1 text-sm font-medium">
+            <Ghost>Reservar</Ghost>
+            <Skeleton className="size-4 rounded-full" />
+          </span>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function NextClassContent({ next }: { next: NonNullable<ReturnType<typeof nextOf>> }) {
+  const now = useNow()
+  const { day: firstDay, session } = next
+  const spots = spotsStatus(session, now)
+  return (
+    <>
+      <p className="flex items-center gap-1.5 text-xs font-medium tracking-wide text-terracota-700 uppercase">
+        <Sparkles aria-hidden="true" strokeWidth={1.75} className="size-4 shrink-0" />
+        {nextLabel(firstDay)}
+      </p>
+      <p className="mt-3 flex flex-wrap items-baseline gap-x-3">
+        <span className="text-3xl font-medium">{formatTime(session.startsAt)}</span>
+        <span className="font-medium">{session.name}</span>
+      </p>
+      <p className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-piedra">
+        <span className="inline-flex items-center gap-1.5">
+          <UserRound aria-hidden="true" strokeWidth={1.75} className="size-4" />
+          {session.instructor}
+        </span>
+        <span className="inline-flex items-center gap-1.5">
+          <Clock aria-hidden="true" strokeWidth={1.75} className="size-4" />
+          {session.durationMinutes} min
+        </span>
+      </p>
+      <div className="mt-4 flex flex-wrap items-center justify-between gap-2">
+        <Badge tone={spots.tone}>{spots.label}</Badge>
+        <Link
+          to={scheduleLink(session)}
+          className="inline-flex min-h-11 items-center gap-1 text-sm font-medium text-terracota-600 underline-offset-4 hover:underline"
+        >
+          Reservar
+          <span className="sr-only">
+            {' '}
+            {session.name} a las {formatTime(session.startsAt)}
+          </span>
+          <ArrowRight aria-hidden="true" strokeWidth={1.75} className="size-4" />
+        </Link>
+      </div>
+    </>
+  )
+}
+
+/**
+ * Tarjeta «Próxima clase» del héroe. Mientras carga, el esqueleto ocupa el mismo sitio con la misma
+ * forma; los datos entran con un fundido sin mover la caja. Si falla o no quedan clases, la tarjeta
+ * se desvanece y se retira (sin movimiento con prefers-reduced-motion: la regla global lo anula).
+ */
+function NextClassCard({ state }: { state: HomeState }) {
+  const next = nextOf(state)
+  // Lo último que se mostró con datos: si después no quedan clases, se desvanece eso y no un esqueleto.
+  const [lastShown, setLastShown] = useState<HomeState | null>(null)
+  // El estado (error o sin clases) cuyo fundido de salida ya terminó.
+  const [goneFor, setGoneFor] = useState<HomeState | null>(null)
+  if (next && lastShown !== state) setLastShown(state)
+
+  const leaving = state.status === 'error' || (state.status === 'ready' && !next)
+  if (leaving && goneFor === state) return null
+  const shown = next ?? (leaving && lastShown ? nextOf(lastShown) : undefined)
 
   return (
-    <div className="relative mx-auto -mt-16 w-[calc(100%-2rem)] max-w-xs rounded-lg border border-arena-200 bg-white/95 p-5 shadow-lg backdrop-blur lg:absolute lg:-bottom-8 lg:left-0 lg:mt-0 lg:w-80 lg:max-w-none animate-rise [animation-delay:200ms]">
-      {firstDay && next && spots ? (
-        <>
-          <p className="flex items-center gap-1.5 text-xs font-medium tracking-wide text-terracota-700 uppercase">
-            <Sparkles aria-hidden="true" strokeWidth={1.75} className="size-4 shrink-0" />
-            {firstDay.relation === 'hoy' ? 'Próxima clase hoy' : `Próxima clase${SEP}${dayHeading(firstDay)}`}
-          </p>
-          <p className="mt-3 flex flex-wrap items-baseline gap-x-3">
-            <span className="text-3xl font-medium">{formatTime(next.startsAt)}</span>
-            <span className="font-medium">{next.name}</span>
-          </p>
-          <p className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-piedra">
-            <span className="inline-flex items-center gap-1.5">
-              <UserRound aria-hidden="true" strokeWidth={1.75} className="size-4" />
-              {next.instructor}
-            </span>
-            <span className="inline-flex items-center gap-1.5">
-              <Clock aria-hidden="true" strokeWidth={1.75} className="size-4" />
-              {next.durationMinutes} min
-            </span>
-          </p>
-          <div className="mt-4 flex flex-wrap items-center justify-between gap-2">
-            <Badge tone={spots.tone}>{spots.label}</Badge>
-            <Link
-              to={scheduleLink(next)}
-              className="inline-flex min-h-11 items-center gap-1 text-sm font-medium text-terracota-600 underline-offset-4 hover:underline"
-            >
-              Reservar
-              <span className="sr-only">
-                {' '}
-                {next.name} a las {formatTime(next.startsAt)}
-              </span>
-              <ArrowRight aria-hidden="true" strokeWidth={1.75} className="size-4" />
-            </Link>
+    // Ancho: 2rem menos que la columna, pero nunca menos de 18rem (sin pasar de la columna). En 320 px y
+    // con el texto del navegador muy grande ocupa toda la columna: así no parte palabras y la hora y el
+    // nombre de la clase caben en una línea, igual que en el esqueleto.
+    <div className="relative mx-auto -mt-16 w-[min(100%,max(calc(100%-2rem),18rem))] max-w-xs lg:absolute lg:-bottom-8 lg:left-0 lg:mt-0 lg:w-80 lg:max-w-none animate-rise [animation-delay:200ms]">
+      <div
+        className={cn('rounded-lg border border-arena-200 bg-white/95 p-5 shadow-lg backdrop-blur', leaving && 'animate-fade-out')}
+        onAnimationEnd={(event) => {
+          if (leaving && event.target === event.currentTarget) setGoneFor(state)
+        }}
+      >
+        {shown ? (
+          <div className="animate-reveal">
+            <NextClassContent next={shown} />
           </div>
-        </>
-      ) : (
-        // Mismo ritmo que la tarjeta con datos (etiqueta, hora, datos y fila de 44 px) para que no salte al cargar.
-        <div role="status">
-          <span className="sr-only">Cargando la próxima clase…</span>
-          <div className="flex h-[1.1rem] items-center">
-            <Skeleton className="h-3.5 w-32" />
-          </div>
-          <div className="mt-3 flex h-[calc(var(--text-3xl)*1.18)] items-center">
-            <Skeleton className="h-8 w-44" />
-          </div>
-          <div className="mt-1 flex h-[1.45rem] items-center">
-            <Skeleton className="h-3.5 w-40" />
-          </div>
-          <div className="mt-4 flex h-11 items-center justify-between">
-            <Skeleton className="h-6 w-24 rounded-full" />
-            <Skeleton className="h-4 w-20" />
-          </div>
-        </div>
-      )}
+        ) : (
+          <NextClassSkeleton />
+        )}
+      </div>
     </div>
   )
 }

@@ -9,7 +9,7 @@ const csp = parseCsp(headerValue(rules, '/*', 'Content-Security-Policy') ?? '')
 describe('Cloudflare Pages', () => {
   it('las rutas de la app sin archivo propio devuelven app.html («/» es index.html, prerenderizado)', () => {
     const lines = redirectsText.split(/\r?\n/).filter((l) => l.trim() && !l.startsWith('#'))
-    expect(lines).toEqual(['/* /app 200'])
+    expect(lines).toEqual(['/ /index.html 200', '/* /app 200'])
   })
 
   it('la CSP solo permite la propia web y un proyecto de Supabase por https', () => {

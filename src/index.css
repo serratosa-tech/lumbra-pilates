@@ -8,6 +8,9 @@
     text-size-adjust: 100%;
     scroll-behavior: smooth;
     scroll-padding-top: 5rem;
+    /* Hueco de la barra de desplazamiento reservado desde el principio: con barras clásicas (Windows), al
+       pasar del shell estático (cabe sin barra) a la página completa, todo lo centrado se movía 8 px. */
+    scrollbar-gutter: stable;
   }
 
   body {

@@ -15,7 +15,8 @@
   Cache-Control: public, max-age=31536000, immutable
 
 # Páginas que no deben aparecer en buscadores. La app ya pone <meta name="robots" content="noindex">
-# en ellas, pero solo después de ejecutar JavaScript: el HTML inicial es el de la portada («index»).
+# en ellas, pero solo después de ejecutar JavaScript: el HTML inicial (app.html) lleva las etiquetas
+# de la portada («index»).
 # Esta cabecera llega en la propia respuesta. No se bloquean en robots.txt: Google tiene que poder
 # entrar para ver el noindex.
 /sistema

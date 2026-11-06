@@ -23,7 +23,7 @@ App de demostración de reservas para un estudio de pilates inventado en Valenci
 
 Las rutas del panel solo se muestran a miembros del estudio: sin sesión llevan al acceso y con una cuenta de cliente muestran un aviso, sin pedir ningún dato del estudio.
 
-**Indexación.** El sitemap solo tiene `/`, `/clases`, `/privacidad` y `/aviso-legal`. Las páginas `noindex` lo llevan dos veces: en `<meta name="robots">`, que la app pone al ejecutarse, y en la cabecera `X-Robots-Tag: noindex` de `public/_headers`, que Cloudflare Pages envía con la respuesta (el HTML inicial es el de la portada y dice «index»). `robots.txt` no bloquea nada: Google tiene que poder entrar para leer el `noindex`. `robots.txt` y `sitemap.xml` se generan en el build a partir de `SITE_URL` (ver «Cómo desplegarlo»).
+**Indexación.** El sitemap solo tiene `/`, `/clases`, `/privacidad` y `/aviso-legal`. Las páginas `noindex` lo llevan dos veces: en `<meta name="robots">`, que la app pone al ejecutarse, y en la cabecera `X-Robots-Tag: noindex` de `public/_headers`, que Cloudflare Pages envía con la respuesta (el HTML inicial lleva las etiquetas de la portada y dice «index»). `robots.txt` no bloquea nada: Google tiene que poder entrar para leer el `noindex`. `robots.txt` y `sitemap.xml` se generan en el build a partir de `SITE_URL` (ver «Cómo desplegarlo»).
 
 ## Probar la demo
 
@@ -63,11 +63,12 @@ Lighthouse 12.2.1 con su perfil móvil por defecto (Moto G Power y red lenta sim
 
 | Página | Rendimiento | Accesibilidad | Buenas prácticas | SEO | FCP | LCP | TBT | CLS |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| `/` | 98 (93–100) | 100 | 100 | 100 | 1,9 s | 2,1 s (1,4–3,0) | 21 ms | 0 |
+| `/` ² | 98 (98–98) | 100 | 100 | 100 | 1,8 s | 2,1 s (1,9–2,2) | 17 ms | 0 |
 | `/clases` | 100 (98–100) | 100 | 100 | 100 | 1,0 s | 1,5 s (1,4–2,1) | 11 ms | 0 |
 | `/mis-reservas` | 99 (98–100) | 100 | 100 | 66 ¹ | 1,5 s | 1,6 s (1,5–2,2) | 1 ms | 0 |
 
 ¹ A propósito: la página lleva `noindex` y Lighthouse lo cuenta como «no indexable».
+² Medida el 6 de noviembre de 2026, con la portada prerenderizada (ver abajo).
 
 **Por qué el LCP de la portada pasaba de 2,5 s y cómo se arregló.** Con la web ya publicada, la portada daba 95 de mediana y un LCP de 2,90 s (2,47–3,17 s). En carga real (Edge con Slow 4G y CPU 4×), el elemento LCP es el texto de la banda «Demo», y no el titular, que entra animado desde opacidad 0. Esa banda se pintaba junto con todo lo demás cuando el JavaScript terminaba de ejecutarse, porque `#root` llegaba vacío, y Lighthouse sumaba ese JavaScript al LCP simulado. Ahora el build renderiza con `react-dom/server` el enlace de salto y la banda a partir de sus componentes (`src/app/StaticShell.tsx`, plugin `lumbra:static-shell` de `vite.config.ts`) y los escribe en `index.html` delante de `#root`. Se pintan con el HTML y el CSS, y React no los toca. Un primer intento los ponía *dentro* de `#root`, y React los sustituía por un nodo igual: el navegador volvía a contar la banda como LCP al ejecutarse el JavaScript (mediana de 2,56 s). Con el shell fuera de `#root`, el LCP observado coincide con el primer pintado en todas las pasadas. Es igual en todas las rutas, así que no hay parpadeo: en `/`, `/clases`, `/estudio/resumen` y la 404, a 390 y 1280 px, la banda es el mismo nodo antes y después de arrancar la app, no se mueve y el CLS es 0.
 
@@ -75,7 +76,17 @@ Lighthouse 12.2.1 con su perfil móvil por defecto (Moto G Power y red lenta sim
 | --- | --- | --- |
 | Antes (sin shell) | 95 | 2,90 s |
 | Shell dentro de `#root` | 96 | 2,56 s |
-| Shell delante de `#root` (actual) | 98 | 2,14 s |
+| Shell delante de `#root` | 98 | 2,14 s |
+| Héroe fijo, sin animación de entrada, pintado por React | 95 | 2,61 s |
+| Portada prerenderizada e hidratada tras el primer pintado (actual) | 98 | 2,14 s |
+
+**Portada prerenderizada.** Al quitar la animación de entrada del héroe, el titular pasa a ser el LCP. Como lo pintaba React al terminar el JavaScript, la portada bajó a 95 (LCP 2,61 s). Ahora el build renderiza la portada en su estado de carga (`src/app/prerender.tsx`, con `StaticRouter` y el mismo árbol de rutas que la app) y la escribe dentro de `#root`, marcada con `data-prerendered="/"`. `src/main.tsx` la adopta con `hydrateRoot`, sin sustituir los nodos. El héroe y la tarjeta «Próxima clase», con su esqueleto, se pintan con el HTML y el CSS. Además:
+
+- **Se hidrata después del primer pintado** (Paint Timing, con un tope de 1 s). Si React hidratara antes, las primeras peticiones a Supabase salían antes del pintado y Lighthouse las sumaba al LCP simulado: mediana 93 y LCP de 3,1 s en la vista previa.
+- **Sin discrepancias al hidratar.** Todo lo que se pinta antes de los datos es fijo. El año del pie se hidrata con el del build (`__BUILD_YEAR__`) y se corrige justo después, para que una visita en otro año no rompa la hidratación. Lo comprueba `src/app/prerender.test.tsx`.
+- **Solo en `/`.** Las demás rutas reciben `app.html`, con `#root` vacío (ver `public/_redirects` en «Cómo desplegarlo»). En desarrollo no se prerenderiza.
+
+Comprobado en Edge contra producción, a 390 y 1280 px y con el texto al 200 %: React conserva el h1 y la caja de la tarjeta del HTML, el LCP observado es el primer pintado, el CLS es 0 y sin JavaScript se ve el héroe completo.
 
 - **supabase-js no se descarga** en la portada ni en el horario: comprobado en las peticiones de cada pasada y en Edge contra producción.
 - **Preconnect a Supabase: probado y descartado.** Lighthouse lo sugiere (unos 90 ms), pero en una comparación A/B de 5 pasadas no mejoró la portada (91 frente a 91–92) y empeoró `/clases` (LCP 2,82 s frente a 2,25 s; rendimiento 93 frente a 97). Con la red lenta simulada, la conexión anticipada compite con la descarga del JavaScript y de la fuente.
@@ -158,7 +169,7 @@ Cada push a `main` publica la web, y cada rama tiene su vista previa. El build *
 
 ### 3. Rutas, cabeceras y dominio
 
-- **`public/_redirects`** (`/* /index.html 200`): cualquier ruta devuelve la app, así que `/clases` o `/estudio/resumen` funcionan al recargar. Las rutas que no existen muestran la página 404 de la app, que lleva `noindex` (con estado HTTP 200, porque Cloudflare no permite reescribir con 404).
+- **`public/_redirects`**: `/` sirve `index.html`, con la portada prerenderizada, sin ninguna regla. Cada ruta de la app (`/clases`, `/mis-reservas`, `/privacidad`, `/aviso-legal`, `/sistema`, `/estudio` y `/estudio/*`) se reescribe a `app.html`, el mismo HTML con `#root` vacío, así que funcionan al recargar o al entrar directamente. No hay comodín `/*`: en una vista previa, `/* /app 200` reescribía también `/`, `/assets/*` y `robots.txt`. Las rutas que no existen reciben `404.html` (otra copia del mismo HTML) con estado HTTP 404, y la app pinta su página 404, que lleva `noindex`. El navegador anota esa respuesta 404 en la consola. Si se añade una ruta en `src/app/App.tsx`, hay que añadirla aquí; `deploy.test.ts` comprueba que cada página indexable y cada `noindex` de `_headers` tiene su regla.
 - **`public/_headers`**, en todas las rutas:
 
   | Cabecera | Valor y motivo |
@@ -191,7 +202,7 @@ Comprobado el 4 de noviembre de 2026 (fase 6), antes de publicar, y el 5 de novi
 
 ### Tests
 
-272 tests con Vitest y Testing Library, todos en verde, sin herramientas añadidas a `package.json`:
+290 tests con Vitest y Testing Library, todos en verde, sin herramientas añadidas a `package.json`:
 
 | Módulo | Tests | Qué cubren |
 | --- | --- | --- |
@@ -202,8 +213,9 @@ Comprobado el 4 de noviembre de 2026 (fase 6), antes de publicar, y el 5 de novi
 | Mis reservas | 13 | Consulta, demasiados intentos, sin conexión, cancelar y subir la lista, salir de la lista de espera, error al cancelar, cuenta de cliente |
 | Panel del estudio | 21 | Resumen (métricas, vacío, error, franjas «07–09 h», listas de espera con enlace a Asistentes, sin esperas y error con «Reintentar»), Clases (crear, cerrar con Esc, aforo por debajo de las reservas, error del servidor, cancelar clase), Asistentes (abrir clase, asistencia, reserva manual, subida de la lista, errores) y el formulario de clase |
 | Demo en memoria y datos de ejemplo | 36 | Persistencia en la clave única, semilla coherente en distintas fechas |
-| Componentes y utilidades | 35 | Diálogos con foco atrapado, menú de acciones con teclado, tarjetas de clase, pestañas de día, fechas en hora de Madrid, archivo `.ics`, refresco de datos y páginas legales |
-| Publicación (`src/app/deploy.test.ts`, `indexing.test.ts`, `StaticShell.test.tsx`) | 13 | `_redirects`, CSP sin `unsafe-*` y con un solo proyecto de Supabase, cabeceras de seguridad, caché solo en `/assets/*`, límites de Cloudflare, sitemap, robots, `noindex`, el dominio escrito solo en `SITE_URL` y el shell estático (delante de `#root`, una sola vez y sin que React lo repita) |
+| Componentes y utilidades | 30 | Diálogos con foco atrapado, menú de acciones con teclado, tarjetas de clase, pestañas de día, fechas en hora de Madrid, archivo `.ics`, refresco de datos y páginas legales |
+| Portada (`src/features/public/home`) | 19 | Héroe fijo (solo respiran el brillo del arco y el esqueleto), tarjeta «Próxima clase» con esqueleto de la misma forma y fundido de los datos sin mover la caja, salida si falla o no quedan clases, cargas independientes y próximas clases |
+| Publicación (`src/app/deploy.test.ts`, `indexing.test.ts`, `StaticShell.test.tsx`, `prerender.test.tsx`) | 17 | `_redirects` por ruta, CSP sin `unsafe-*` y con un solo proyecto de Supabase, cabeceras de seguridad, caché solo en `/assets/*`, límites de Cloudflare, sitemap, robots, `noindex`, el dominio escrito solo en `SITE_URL`, el shell estático (delante de `#root`, una sola vez y sin que React lo repita) y la portada prerenderizada (hidrata sin discrepancias, conserva el h1 y el año del pie de otro año) |
 | Aviso de Cloudflare (`keepalive-worker`) | 5 | Llamada a `health_check` solo con `apikey`, fallos si no responde ok, error HTTP o faltan variables, 404 desde fuera |
 
 Las pruebas SQL del backend (`supabase/tests/seguridad_y_reglas.sql`) y las reglas comprobadas desde el navegador están en [`supabase/README.md`](supabase/README.md), apartado 14.
@@ -259,7 +271,7 @@ Comprobado el 5 de noviembre de 2026 contra https://lumbra-pilates.pages.dev.
 
 ² La app muestra su 404 y pone `noindex` en la página; Cloudflare no permite reescribir con estado 404.
 
-**Rutas.** `/clases`, `/mis-reservas` y `/estudio/resumen` cargadas directamente dan 200 con la app, así que la regla de `_redirects` funciona. `robots.txt` apunta a `https://lumbra-pilates.pages.dev/sitemap.xml`, y el sitemap lista `/`, `/clases`, `/privacidad` y `/aviso-legal` con esa URL.
+**Rutas** (comprobado de nuevo el 6 de noviembre de 2026, con la portada prerenderizada). `/` devuelve la portada en el HTML. `/clases` (también con parámetros), `/mis-reservas`, `/privacidad`, `/aviso-legal`, `/sistema`, `/estudio` y `/estudio/resumen`, cargadas directamente, dan 200 con `app.html`; una ruta inexistente da 404 con la app; `/index.html` redirige a `/`. Los assets, `robots.txt`, `sitemap.xml` y el favicon llegan con su tipo, y la CSP en todas las respuestas. `robots.txt` apunta a `https://lumbra-pilates.pages.dev/sitemap.xml`, y el sitemap lista `/`, `/clases`, `/privacidad` y `/aviso-legal` con esa URL.
 
 **Recorrido en Edge** (una tanda a 1280 px y otra a 390 px, un inicio de sesión por cuenta demo y tanda, sin congelar la hora): portada, horario, detalle, reserva sin sesión, Mis reservas con su código y cancelación, cliente demo y estudio demo. **Ninguna violación de la CSP**, la consola sin errores ni avisos y supabase-js sin descargar en la portada. Las reservas de prueba usan emails `@lumbra-prueba.test` y quedaron canceladas.
 

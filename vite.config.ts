@@ -94,12 +94,16 @@ function staticShell(): Plugin {
           const { staticShellMarkup } = await ctx.server.ssrLoadModule(MODULE)
           return injectStaticShell(html, staticShellMarkup())
         }
+        // Sin optimizador de dependencias y con caché propia: si no, al arrancar borra node_modules/.vite/deps
+        // y el servidor de desarrollo que esté en marcha se queda sin ellas (504 «Outdated Optimize Dep»).
         const server = await createServer({
           configFile: false,
           root: process.cwd(),
+          cacheDir: 'node_modules/.vite-static-shell',
           logLevel: 'error',
           appType: 'custom',
           plugins: [react()],
+          optimizeDeps: { noDiscovery: true, include: [] },
           server: { middlewareMode: true, hmr: false, ws: false },
         })
         try {

@@ -1,15 +1,25 @@
 import { describe, expect, it } from 'vitest'
 import headersText from '../../public/_headers?raw'
 import redirectsText from '../../public/_redirects?raw'
-import { cspConnectSources, headerValue, parseCsp, parseHeaders } from '../lib/siteFiles.ts'
+import { cspConnectSources, headerValue, INDEXED_PAGES, parseCsp, parseHeaders } from '../lib/siteFiles.ts'
 
 const rules = parseHeaders(headersText)
 const csp = parseCsp(headerValue(rules, '/*', 'Content-Security-Policy') ?? '')
 
 describe('Cloudflare Pages', () => {
-  it('las rutas de la app sin archivo propio devuelven app.html («/» es index.html, prerenderizado)', () => {
-    const lines = redirectsText.split(/\r?\n/).filter((l) => l.trim() && !l.startsWith('#'))
-    expect(lines).toEqual(['/ /index.html 200', '/* /app 200'])
+  it('cada ruta de la app devuelve app.html, sin comodín general («/» es index.html, prerenderizado)', () => {
+    const redirects = redirectsText
+      .split(/\r?\n/)
+      .filter((l) => l.trim() && !l.startsWith('#'))
+      .map((l) => l.trim().split(/\s+/))
+    for (const [, target, status] of redirects) expect([target, status]).toEqual(['/app', '200'])
+    const sources = redirects.map(([source]) => source)
+    // Ni «/» (es index.html) ni un «/*», que Pages aplicaría también a /assets, robots.txt…
+    expect(sources).not.toContain('/')
+    expect(sources).not.toContain('/*')
+    // Las páginas indexables y las noindex de _headers son rutas de la app: todas tienen su regla.
+    const appPaths = [...INDEXED_PAGES.map((p) => p.path).filter((p) => p !== '/'), ...[...rules.keys()].filter((p) => p !== '/*' && p !== '/assets/*')]
+    expect(new Set(sources)).toEqual(new Set(appPaths))
   })
 
   it('la CSP solo permite la propia web y un proyecto de Supabase por https', () => {

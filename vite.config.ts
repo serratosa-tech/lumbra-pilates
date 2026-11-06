@@ -93,8 +93,9 @@ const define = { __BUILD_YEAR__: JSON.stringify(new Date().getFullYear()) }
  * esperar al JavaScript, y React no lo toca.
  *
  * En el build, además, prerenderiza la portada dentro de #root (src/app/prerender.tsx), que main.tsx
- * hidrata: el héroe, que es el LCP, sale con el HTML. Ese index.html solo se sirve en «/»; las demás
- * rutas reciben app.html, el mismo HTML con #root vacío (public/_redirects). En desarrollo no se
+ * hidrata: el héroe, que es el LCP, sale con el HTML. Ese index.html solo se sirve en «/»; las rutas de
+ * la app reciben app.html, el mismo HTML con #root vacío (public/_redirects), y las que no existen,
+ * 404.html, otra copia con la que Pages responde 404. En desarrollo no se
  * prerenderiza (el CSS lo inyecta el JavaScript y la portada se vería un instante sin estilos).
  *
  * En desarrollo usa el propio servidor; en el build, uno efímero de Vite solo para SSR (sin puerto).
@@ -141,7 +142,9 @@ function staticShell(): Plugin {
         if (!home) return
         const index = bundle['index.html']
         if (index?.type !== 'asset' || typeof index.source !== 'string') throw new Error('Falta index.html en el build')
-        this.emitFile({ type: 'asset', fileName: 'app.html', source: stripPrerendered(index.source, home.path, home.markup) })
+        const app = stripPrerendered(index.source, home.path, home.markup)
+        // app.html para las rutas de la app (public/_redirects) y 404.html, igual, para las que no existen.
+        for (const fileName of ['app.html', '404.html']) this.emitFile({ type: 'asset', fileName, source: app })
       },
     },
   }
